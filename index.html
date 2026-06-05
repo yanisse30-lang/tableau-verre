@@ -1,0 +1,2729 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manéo Opticiens — Outil de vente</title>
+<link rel="canonical" href="https://yanisse30-lang.github.io/tableau-verre/"/>
+<meta name="description" content="OptiConseil — Outil d'aide à la vente pour Manéo Opticiens"/>
+<meta property="og:title" content="Manéo Opticiens — OptiConseil"/>
+<meta property="og:description" content="Outil interne d'aide à la vente : mutuelles, verres, épaisseur, comparateur"/>
+<meta property="og:url" content="https://yanisse30-lang.github.io/tableau-verre/"/>
+<meta property="og:type" content="website"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue-50:#E6F1FB;--blue-100:#B5D4F4;--blue-400:#378ADD;--blue-600:#185FA5;--blue-800:#0C447C;
+  --green-50:#EAF3DE;--green-600:#3B6D11;--green-800:#27500A;
+  --amber-50:#FAEEDA;--amber-600:#854F0B;--amber-800:#633806;
+  --pink-50:#FBEAF0;--pink-600:#993556;--pink-800:#72243E;
+  --teal-50:#E1F5EE;--teal-600:#0F6E56;--teal-800:#085041;
+  --purple-600:#6B3FA0;--purple-800:#4A2070;
+  --radius-md:10px;--radius-lg:14px;--radius-xl:20px;
+  --font:'Segoe UI',system-ui,-apple-system,sans-serif;
+}
+html{zoom:1.25}
+body{font-family:var(--font);background:#111;min-height:100vh;color:#f0f0f0;padding:24px;font-size:17px}
+.app-wrapper{max-width:760px;margin:0 auto;padding-bottom:70px}
+
+/* APP LOGO */
+.app-logo{background:#1e1e1e;border-radius:16px;padding:14px 20px;margin-bottom:28px;display:flex;align-items:center;gap:14px}
+.app-logo-icon{width:46px;height:46px;border-radius:12px;background:var(--blue-600);display:flex;align-items:center;justify-content:center}
+.app-logo-icon i{font-size:24px;color:#fff}
+.app-logo h1{font-size:22px;font-weight:800;color:#f0f0f0;letter-spacing:-0.3px}
+.app-logo p{font-size:13px;color:#777}
+
+/* SCREENS */
+.screen{display:none}
+.screen.active{display:block;animation:fadeIn 0.2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+/* CARD */
+.card{background:#1e1e1e;border-radius:var(--radius-xl);border:1px solid #333;padding:28px;margin-bottom:16px}
+
+/* HEADER BLOCK */
+.header-block{border-radius:var(--radius-xl);padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px}
+.header-block.blue{background:var(--blue-600)}
+.header-block.purple{background:var(--purple-600)}
+.header-icon{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.header-icon i{font-size:24px;color:#fff}
+.header-block h2{font-size:20px;font-weight:600;color:#fff;margin-bottom:2px}
+.header-block p{font-size:13px;color:rgba(255,255,255,0.75)}
+
+/* STEP BAR */
+.step-bar{display:flex;gap:6px;margin-bottom:22px}
+.step-dot{height:5px;border-radius:3px;flex:1;background:#333;transition:background 0.3s}
+.step-dot.done{background:var(--blue-600)}
+
+/* SECTION LABEL */
+.section-label{font-size:12px;font-weight:700;letter-spacing:0.08em;color:var(--blue-400);text-transform:uppercase;margin:18px 0 12px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:#2a3a4a}
+
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:14px}
+.search-wrap i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#777;font-size:18px;pointer-events:none}
+.search-wrap input{padding-left:38px!important}
+
+/* INPUTS */
+input[type="text"],input[type="number"],select{width:100%;padding:11px 13px;border-radius:var(--radius-md);border:1.5px solid #3a3a3a;font-family:var(--font);font-size:15px;color:#f0f0f0;background:#252525;outline:none;transition:border-color 0.15s,box-shadow 0.15s}
+input:focus,select:focus{border-color:var(--blue-400);box-shadow:0 0 0 3px rgba(55,138,221,0.2)}
+select option{background:#252525;color:#f0f0f0}
+
+/* MUTUELLE GRID */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.mut-card{background:#252525;border:1.5px solid #3a3a3a;border-radius:var(--radius-lg);padding:14px 10px;cursor:pointer;text-align:center;transition:border-color 0.15s,background 0.15s,transform 0.1s}
+.mut-card:hover{border-color:var(--blue-400);background:#2a3a50;transform:translateY(-1px)}
+.mut-card .label{font-size:14px;font-weight:700;color:#f0f0f0;margin:8px 0 3px}
+.mut-card .sub{font-size:11px;color:#aaa;line-height:1.4}
+
+/* VISION CARDS */
+.grid-4{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vis-card{border-radius:var(--radius-lg);padding:20px 14px;cursor:pointer;text-align:center;border:2px solid transparent;transition:0.15s}
+.vis-card:hover{transform:translateY(-2px)}
+.vis-card .icon-wrap{width:52px;height:52px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
+.vis-card i{font-size:24px;color:#fff}
+.vis-card .label{font-size:15px;font-weight:700;margin-bottom:4px}
+.vis-card .sub{font-size:13px;line-height:1.4}
+.vis-loin{background:#0f1e30}.vis-loin .icon-wrap{background:var(--blue-600)}.vis-loin .label{color:#8bbfe8}.vis-loin .sub{color:#5a8ab8}.vis-loin:hover{border-color:var(--blue-400)}
+.vis-pres{background:#2a0f1a}.vis-pres .icon-wrap{background:var(--pink-600)}.vis-pres .label{color:#e88baa}.vis-pres .sub{color:#a05070}.vis-pres:hover{border-color:var(--pink-600)}
+.vis-prog{background:#0a1e16}.vis-prog .icon-wrap{background:var(--teal-600)}.vis-prog .label{color:#70c8a0}.vis-prog .sub{color:#3a8060}.vis-prog:hover{border-color:var(--teal-600)}
+.vis-inter{background:#2a1a08}.vis-inter .icon-wrap{background:var(--amber-600)}.vis-inter .label{color:#e8b870}.vis-inter .sub{color:#a07030}.vis-inter:hover{border-color:var(--amber-600)}
+
+/* EYE BLOCKS */
+.eye-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.eye-block{border-radius:var(--radius-lg);padding:16px;border:1.5px solid}
+.eye-od{background:#0f1e30;border-color:#1a3a5c}
+.eye-og{background:#2a0f1a;border-color:#5c1a2a}
+.eye-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.eye-od .eye-title{color:#8bbfe8}
+.eye-og .eye-title{color:#e88baa}
+.field-row{margin-bottom:10px}
+.field-row label{font-size:13px;color:#aaa;display:block;margin-bottom:4px;font-weight:500}
+
+/* BUTTONS */
+.btn-primary{background:var(--blue-600);color:#fff;border:none;border-radius:var(--radius-lg);padding:14px 20px;font-size:16px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s;font-family:var(--font)}
+.btn-primary:hover{background:var(--blue-800)}
+.btn-back{background:none;border:none;cursor:pointer;color:var(--blue-400);font-size:15px;font-weight:500;margin-bottom:16px;display:flex;align-items:center;gap:5px;padding:6px 0;font-family:var(--font)}
+.btn-back:hover{color:#8bbfe8}
+
+/* SUMMARY */
+.summary-box{background:#162030;border:1.5px solid #1e3a5a;border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:20px}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:14px;border-bottom:1px solid #1e3a5a}
+.summary-row:last-child{border-bottom:none}
+.summary-row .key{color:#8bbfe8;display:flex;align-items:center;gap:5px}
+.summary-row .val{font-weight:600;color:#60aaee}
+
+/* GAMME HEADERS */
+.gamme-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-lg);margin:20px 0 10px;font-weight:700;font-size:14px}
+.gamme-haut{background:linear-gradient(135deg,#2C1654,#6B3FA0);color:#fff}
+.gamme-milieu{background:linear-gradient(135deg,#0C447C,#185FA5);color:#fff}
+.gamme-entree{background:linear-gradient(135deg,#1a5c3a,#2E8B57);color:#fff}
+.gamme-header i{font-size:20px}
+.gamme-header .gamme-desc{font-size:12px;font-weight:400;opacity:0.85;margin-left:auto}
+
+/* VERRE CARDS */
+.verre-card{background:#1e1e1e;border:1.5px solid #333;border-radius:var(--radius-xl);margin-bottom:12px;overflow:hidden;transition:border-color 0.15s,box-shadow 0.15s}
+.verre-card:hover{box-shadow:0 2px 16px rgba(55,138,221,0.18)}
+.verre-card.top{border:2px solid var(--blue-400);background:#162030}
+.verre-card.haut-gamme{border-left:4px solid var(--purple-600)}
+.verre-card.milieu-gamme{border-left:4px solid var(--blue-600)}
+.verre-card.entree-gamme{border-left:4px solid var(--green-600)}
+.verre-card-header{padding:16px 18px;cursor:pointer;display:flex;align-items:flex-start;gap:12px}
+.verre-card-header:hover{background:#2a2a2a}
+.verre-info{flex:1}
+.verre-name{font-size:16px;font-weight:700;color:#f0f0f0;margin-bottom:3px}
+.verre-brand{font-size:13px;color:#aaa;margin-bottom:8px}
+.verre-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:13px;padding:4px 12px;border-radius:20px;border:1px solid #3a3a3a;color:#ccc;background:#2a2a2a}
+.chip strong{color:#f0f0f0}
+.chip.rac{background:#162030;border-color:#1e3a5a;color:#8bbfe8}
+.chip.rac strong{color:#60aaee}
+.chip.indice{background:#1a1a2a;border-color:#3a3a6a;color:#a0a0f0}
+.verre-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.badge{font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap}
+.badge-green{background:#1a3010;color:#80d040}
+.badge-amber{background:#301800;color:#d09040}
+.badge-purple{background:#1e0a30;color:#c080f0}
+.marge-mini{font-size:17px;font-weight:700;color:#60aaee}
+.expand-icon{font-size:18px;color:#666;transition:transform 0.2s;margin-top:2px}
+.verre-card.open .expand-icon{transform:rotate(180deg)}
+
+/* DROPDOWN */
+.verre-dropdown{display:none;border-top:1px solid #2a2a2a}
+.verre-card.open .verre-dropdown{display:block;animation:slideDown 0.2s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.dropdown-inner{padding:16px 18px;background:#1a1a1a}
+.traitements-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+.trait-item{background:#252525;border-radius:var(--radius-md);padding:14px;border:1px solid #3a3a3a}
+.trait-name{font-size:13px;font-weight:700;color:#e0e0e0;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.trait-name i{font-size:15px;color:var(--blue-400)}
+.trait-desc{font-size:12px;color:#aaa;line-height:1.6}
+.marge-line{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid #333;margin-top:4px}
+.marge-label{font-size:13px;color:#aaa;display:flex;align-items:center;gap:5px}
+.marge-val{font-size:24px;font-weight:700;color:#60aaee}
+.badge-top{background:var(--blue-600);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:0 0 12px 0;display:inline-flex;align-items:center;gap:5px}
+.btn-choisir{background:var(--blue-600);color:#fff;border:none;border-radius:var(--radius-lg);padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;font-family:var(--font);transition:background 0.15s}
+.btn-choisir:hover{background:var(--blue-800)}
+
+/* CONSEIL BOX */
+.conseil-box{background:#1a1e10;border:1px solid #3a4a20;border-radius:12px;padding:14px 16px;margin-bottom:18px}
+.conseil-title{font-size:12px;font-weight:700;color:#a0c060;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.conseil-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:13px;color:#c0d8a0}
+.conseil-item i{font-size:15px;color:#78c040;flex-shrink:0;margin-top:1px}
+
+/* PAIRE 1 RECAP */
+.paire1-recap{background:linear-gradient(135deg,#0f1e30,#1a0f2a);border:1.5px solid #1e3a5a;border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.paire1-recap i{font-size:24px;color:#60aaee}
+.paire1-recap .pr-label{font-size:13px;color:#8bbfe8}
+.paire1-recap .pr-name{font-size:16px;font-weight:700;color:#f0f0f0}
+
+/* FOOTER */
+.footer-note{text-align:center;font-size:12px;color:#444;margin-top:24px;padding-top:16px;border-top:1px solid #2a2a2a}
+
+/* LOGIN */
+#login-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;display:flex;align-items:center;justify-content:center;z-index:9999}
+.login-box{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:24px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.login-title{text-align:center;font-size:22px;font-weight:800;color:#f0f0f0;margin-bottom:4px}
+.login-sub{text-align:center;font-size:14px;color:#777;margin-bottom:28px}
+.login-field{margin-bottom:16px}
+.login-field label{display:block;font-size:13px;font-weight:600;color:#aaa;margin-bottom:6px;letter-spacing:0.04em;text-transform:uppercase}
+.login-field input{width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid #333;background:#252525;color:#f0f0f0;font-size:15px;font-family:inherit;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+.login-field input:focus{border-color:#378ADD;box-shadow:0 0 0 3px rgba(55,138,221,0.2)}
+.btn-login{width:100%;padding:14px;background:var(--blue-600);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-login:hover{background:var(--blue-800)}
+.login-error{background:#2a1010;border:1px solid #5c2020;color:#ff8080;border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:14px;display:none;text-align:center}
+.login-footer{text-align:center;font-size:12px;color:#444;margin-top:20px}
+
+@media(max-width:540px){body{padding:14px}.eye-grid{grid-template-columns:1fr}.grid-4{grid-template-columns:1fr 1fr}.card{padding:18px}.traitements-grid{grid-template-columns:1fr}}
+
+/* ─── MODERN UI ─────────────────────────────────────────────── */
+.home-card{position:relative;overflow:hidden}
+.hc-blue{background:linear-gradient(145deg,#101b2c,#1a1a1a)!important}
+.hc-blue:hover{background:linear-gradient(145deg,#16243c,#162030)!important;transform:translateY(-3px);border-color:#378ADD!important}
+.hc-purple{background:linear-gradient(145deg,#16102a,#1a1a1a)!important}
+.hc-purple:hover{background:linear-gradient(145deg,#1e1438,#1e0f38)!important;transform:translateY(-3px);border-color:#9060e0!important}
+.header-block.blue{background:linear-gradient(135deg,#0e3a6a,#185FA5)}
+.header-block.purple{background:linear-gradient(135deg,#3a1a6a,#6B3FA0)}
+.verre-card{transition:transform 0.15s,box-shadow 0.15s,border-color 0.15s}
+.verre-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,0.4)}
+.app-logo{background:linear-gradient(135deg,#101a28,#1e1e1e)!important;border:1px solid #1e3a5a!important}
+.gamme-haut{background:linear-gradient(135deg,#23124a,#6B3FA0)!important}
+.gamme-milieu{background:linear-gradient(135deg,#082045,#185FA5)!important}
+.gamme-entree{background:linear-gradient(135deg,#0f2a18,#2E8B57)!important}
+.step-dot.done{background:linear-gradient(90deg,var(--blue-600),var(--blue-400))}
+.badge{border-radius:8px}
+.card{border-color:#2a2a2a}
+.summary-box{background:linear-gradient(135deg,#0d1828,#162030)}
+
+/* Tool cards */
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.tool-card{background:linear-gradient(145deg,#161616,#1e1e1e);border:1.5px solid #2a2a2a;border-radius:var(--radius-lg);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:0.18s}
+.tool-card:hover{border-color:#378ADD;background:linear-gradient(145deg,#0d1828,#162030);transform:translateY(-1px);box-shadow:0 4px 16px rgba(55,138,221,0.2)}
+.tool-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tool-icon i{font-size:21px;color:#fff}
+.tool-name{font-size:14px;font-weight:700;color:#f0f0f0;margin-bottom:2px}
+.tool-sub{font-size:11px;color:#666;line-height:1.4}
+
+/* Thickness modal */
+#thick-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10001;display:none;align-items:center;justify-content:center;padding:16px}
+#thick-modal.open{display:flex;animation:fadeIn .2s ease}
+.thick-box{background:#161616;border:1px solid #2a2a2a;border-radius:22px;padding:24px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto}
+.thick-vis{display:flex;align-items:flex-end;justify-content:center;gap:16px;padding:20px 10px;background:#0a0a0a;border-radius:14px;margin:14px 0;min-height:140px;border:1px solid #1a1a1a}
+.lens-col{display:flex;flex-direction:column;align-items:center;gap:6px}
+.lens-label{font-size:11px;font-weight:700;text-align:center;line-height:1.3}
+.thick-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;margin-bottom:8px;border:1px solid #222;background:#1a1a1a;transition:0.15s}
+.thick-row:hover{background:#202020}
+.thick-row.best{background:linear-gradient(135deg,#0a2218,#0f2a1e);border-color:#2a5a3a}
+.thick-row.worst{background:linear-gradient(135deg,#1e1010,#2a1414);border-color:#4a2020}
+
+/* Compare floating bar */
+#compare-bar{position:fixed;bottom:62px;left:50%;transform:translateX(-50%);background:#0b1828;border:2px solid #2a5a8a;border-radius:18px;padding:10px 14px;display:none;align-items:center;gap:10px;z-index:980;box-shadow:0 4px 28px rgba(55,138,221,0.35);max-width:740px;width:calc(100% - 32px)}
+#compare-bar.visible{display:flex;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(16px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.cbar-slot{background:#122030;border:1px solid #1e3a5a;border-radius:10px;padding:7px 11px;font-size:12px;flex:1;min-width:0;overflow:hidden}
+.cbar-slot-empty{color:#3a5a7a;font-size:11px}
+.cbar-slot-filled{color:#e0e8f0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Compare modal */
+#compare-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10002;display:none;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto}
+#compare-modal.open{display:flex;animation:fadeIn .2s ease}
+.compare-box{background:#161616;border:1px solid #2a2a2a;border-radius:22px;padding:24px;width:100%;max-width:720px;margin:auto}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.compare-col{background:#1e1e1e;border:1.5px solid #2a2a2a;border-radius:16px;padding:16px}
+.compare-col.winner{background:linear-gradient(145deg,#0d1e30,#162030);border-color:#378ADD}
+.compare-col-header{text-align:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #2a2a2a}
+.compare-col-name{font-size:14px;font-weight:700;color:#f0f0f0;margin-bottom:3px;line-height:1.4}
+.compare-col-brand{font-size:11px;color:#666}
+.compare-winner-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--blue-600);color:#fff;display:inline-block;margin-top:6px}
+.compare-metric{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1e1e1e;font-size:13px}
+.compare-metric:last-child{border-bottom:none}
+.compare-metric-key{color:#777;display:flex;align-items:center;gap:5px}
+.compare-metric-val{font-weight:700;color:#f0f0f0;font-size:14px}
+.compare-metric-val.better{color:#70c8a0}
+.compare-metric-val.worse{color:#e07070}
+.btn-comparer{background:#18162a;border:1px solid #302a50;color:#8080c0;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;transition:0.15s;white-space:nowrap}
+.btn-comparer:hover{background:#20183a;border-color:#8060c0;color:#a080e0}
+.btn-comparer.active{background:#1e0f38;border-color:#c080f0;color:#d090ff}
+
+  /* ADMIN PANEL */
+  #admin-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;display:none;align-items:flex-start;justify-content:center;z-index:9998;overflow-y:auto;padding:24px}
+  #admin-screen.open{display:flex}
+  .admin-box{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:24px;padding:32px;width:100%;max-width:500px;margin:auto}
+  .admin-title{font-size:20px;font-weight:800;color:#f0f0f0;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+  .admin-sub{font-size:13px;color:#777;margin-bottom:24px}
+  .admin-field{margin-bottom:14px}
+  .admin-field label{display:block;font-size:12px;font-weight:600;color:#aaa;margin-bottom:5px;letter-spacing:0.04em;text-transform:uppercase}
+  .admin-field input{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid #333;background:#252525;color:#f0f0f0;font-size:14px;font-family:inherit;outline:none}
+  .admin-field input:focus{border-color:#378ADD;box-shadow:0 0 0 3px rgba(55,138,221,0.2)}
+  .btn-admin-add{background:#185FA5;color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;margin-top:4px}
+  .btn-admin-add:hover{background:#0C447C}
+  .admin-list{margin-top:20px}
+  .admin-list-title{font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+  .admin-compte{background:#252525;border:1px solid #333;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+  .admin-compte-info{font-size:14px;color:#f0f0f0;font-weight:600}
+  .admin-compte-role{font-size:12px;color:#aaa;margin-top:2px}
+  .btn-del{background:#3a1010;border:1px solid #5c2020;color:#ff8080;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .btn-del:hover{background:#5c1010}
+  .btn-del:disabled{opacity:0.4;cursor:not-allowed}
+  .admin-msg{font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:14px;display:none;text-align:center}
+  .admin-msg.ok{background:#1a3010;border:1px solid #3a5020;color:#80d040;display:block}
+  .admin-msg.err{background:#2a1010;border:1px solid #5c2020;color:#ff8080;display:block}
+  .btn-admin-close{background:#252525;border:1px solid #333;color:#aaa;border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:16px;font-family:inherit}
+  .btn-admin-close:hover{background:#333}
+  .admin-btn-top{background:#252525;border:1px solid #333;color:#aaa;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;position:absolute;top:16px;right:16px}
+  .admin-btn-top:hover{background:#333;color:#f0f0f0}
+
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+  /* VERRES ADMIN */
+  #verres-admin-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0a;display:none;align-items:flex-start;justify-content:center;z-index:9997;overflow-y:auto;padding:24px}
+  #verres-admin-screen.open{display:flex}
+  .vadmin-box{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:24px;padding:28px;width:100%;max-width:700px;margin:auto}
+  .vadmin-tabs{display:flex;gap:8px;margin-bottom:22px}
+  .vadmin-tab{flex:1;padding:10px;border-radius:10px;border:1.5px solid #333;background:#252525;color:#aaa;font-size:14px;font-weight:600;cursor:pointer;text-align:center;font-family:inherit;transition:0.15s}
+  .vadmin-tab.active{background:#185FA5;border-color:#185FA5;color:#fff}
+  .vadmin-panel{display:none}
+  .vadmin-panel.active{display:block}
+  .verre-edit-row{background:#252525;border:1px solid #333;border-radius:12px;padding:14px 16px;margin-bottom:10px}
+  .verre-edit-name{font-size:14px;font-weight:700;color:#f0f0f0;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .verre-edit-name .gamme-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .dot-haut{background:#9060e0}
+  .dot-milieu{background:#185FA5}
+  .dot-entree{background:#3B6D11}
+  .indice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+  .indice-edit{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:10px 12px}
+  .indice-edit-label{font-size:11px;color:#777;margin-bottom:6px;font-weight:600;text-transform:uppercase}
+  .indice-price-row{display:flex;gap:6px;align-items:center}
+  .indice-price-row span{font-size:11px;color:#aaa;white-space:nowrap}
+  .indice-price-row input{flex:1;padding:6px 8px;border-radius:6px;border:1px solid #333;background:#252525;color:#f0f0f0;font-size:13px;font-family:inherit;width:70px}
+  .indice-price-row input:focus{border-color:#378ADD;outline:none}
+  .btn-save-prix{background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit;display:flex;align-items:center;gap:5px}
+  .btn-save-prix:hover{background:#0C447C}
+  .saved-badge{font-size:12px;color:#80d040;margin-top:8px;display:none}
+  /* PDF IMPORT */
+  .pdf-drop{border:2px dashed #3a3a3a;border-radius:16px;padding:40px 20px;text-align:center;cursor:pointer;transition:0.15s;margin-bottom:16px}
+  .pdf-drop:hover,.pdf-drop.drag{border-color:#378ADD;background:#0f1e30}
+  .pdf-drop i{font-size:40px;color:#378ADD;display:block;margin-bottom:12px}
+  .pdf-drop p{font-size:14px;color:#aaa}
+  .pdf-drop p strong{color:#f0f0f0}
+  .pdf-result{background:#252525;border:1px solid #333;border-radius:12px;padding:16px;margin-top:14px;display:none}
+  .pdf-result-title{font-size:14px;font-weight:700;color:#f0f0f0;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+  .pdf-verre-found{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px}
+  .pdf-verre-nom{font-weight:700;color:#f0f0f0;margin-bottom:4px}
+  .pdf-verre-prix{color:#60aaee}
+  .pdf-verre-new{color:#80d040;font-size:12px;margin-top:3px}
+  .btn-apply-pdf{background:#3B6D11;color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:12px;font-family:inherit}
+  .btn-apply-pdf:hover{background:#27500A}
+  .admin-btn-verres{background:#252525;border:1px solid #378ADD;color:#378ADD;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:none;align-items:center;gap:6px}
+  .admin-btn-verres:hover{background:#0f1e30}
+
+
+  .logout-bar{position:fixed;bottom:0;left:0;width:100%;background:#111;border-top:1px solid #2a2a2a;padding:10px 20px;display:none;align-items:center;justify-content:space-between;z-index:999;gap:10px}
+  .logout-bar .user-info{font-size:13px;color:#777;display:flex;align-items:center;gap:7px}
+  .logout-bar .user-info strong{color:#f0f0f0}
+  .btn-logout{background:#2a1010;border:1px solid #5c2020;color:#ff8080;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .btn-logout:hover{background:#3a1010;color:#fff}
+
+
+  /* TRAITEMENTS SCREEN */
+  .trait-choix-card{border-radius:var(--radius-xl);padding:20px 16px;cursor:pointer;border:2px solid transparent;transition:0.15s;margin-bottom:12px;display:flex;align-items:center;gap:16px}
+  .trait-choix-card:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+  .trait-choix-card.selected{border-width:2px}
+  .trait-choix-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .trait-choix-icon i{font-size:26px;color:#fff}
+  .trait-choix-info{flex:1}
+  .trait-choix-name{font-size:16px;font-weight:700;margin-bottom:4px}
+  .trait-choix-desc{font-size:13px;line-height:1.5;opacity:0.85}
+  .trait-choix-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:6px;display:inline-block}
+  /* Anti-reflet */
+  .tc-ar{background:#0f1e30;border-color:#1a3a5c}
+  .tc-ar .trait-choix-icon{background:var(--blue-600)}
+  .tc-ar .trait-choix-name{color:#8bbfe8}
+  .tc-ar .trait-choix-desc{color:#5a8ab8}
+  .tc-ar.selected{border-color:#378ADD;background:#162030}
+  /* Lumière bleue */
+  .tc-lb{background:#1a0f30;border-color:#3a1a6a}
+  .tc-lb .trait-choix-icon{background:#6B3FA0}
+  .tc-lb .trait-choix-name{color:#c080f0}
+  .tc-lb .trait-choix-desc{color:#8050b0}
+  .tc-lb.selected{border-color:#9060e0;background:#1e0f38}
+  /* Transition */
+  .tc-tr{background:#0a1e16;border-color:#1a4a2a}
+  .tc-tr .trait-choix-icon{background:var(--teal-600)}
+  .tc-tr .trait-choix-name{color:#70c8a0}
+  .tc-tr .trait-choix-desc{color:#3a8060}
+  .tc-tr.selected{border-color:#0F6E56;background:#0f2a1e}
+  /* Combo */
+  .tc-combo{background:#2a1800;border-color:#5a3000}
+  .tc-combo .trait-choix-icon{background:#854F0B}
+  .tc-combo .trait-choix-name{color:#e8b870}
+  .tc-combo .trait-choix-desc{color:#a07030}
+  .tc-combo.selected{border-color:#d09040;background:#301a00}
+  /* Sans traitement */
+  .tc-none{background:#1e1e1e;border-color:#333}
+  .tc-none .trait-choix-icon{background:#444}
+  .tc-none .trait-choix-name{color:#ccc}
+  .tc-none .trait-choix-desc{color:#777}
+  .tc-none.selected{border-color:#666;background:#252525}
+  .multi-hint{font-size:12px;color:#777;text-align:center;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:6px}
+
+
+  /* MONTURE SCREEN */
+  .monture-card{border-radius:var(--radius-xl);padding:22px 18px;cursor:pointer;border:2px solid transparent;transition:0.15s;margin-bottom:14px;display:flex;align-items:center;gap:18px}
+  .monture-card:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+  .monture-card.selected{border-width:2px}
+  .monture-icon{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .monture-icon i{font-size:30px;color:#fff}
+  .monture-info{flex:1}
+  .monture-name{font-size:17px;font-weight:800;margin-bottom:5px}
+  .monture-desc{font-size:13px;line-height:1.6;opacity:0.85}
+  .monture-rule{font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-top:8px;display:inline-flex;align-items:center;gap:5px}
+  /* Cerclée */
+  .mc-cercle{background:#0f1e30;border-color:#1a3a5c}
+  .mc-cercle .monture-icon{background:var(--blue-600)}
+  .mc-cercle .monture-name{color:#8bbfe8}
+  .mc-cercle .monture-desc{color:#5a8ab8}
+  .mc-cercle .monture-rule{background:#1a3a5c;color:#60aaee}
+  .mc-cercle:hover,.mc-cercle.selected{border-color:#378ADD}
+  .mc-cercle.selected{background:#162030}
+  /* Nylor */
+  .mc-nylor{background:#1a0f30;border-color:#3a1a6a}
+  .mc-nylor .monture-icon{background:#6B3FA0}
+  .mc-nylor .monture-name{color:#c080f0}
+  .mc-nylor .monture-desc{color:#8050b0}
+  .mc-nylor .monture-rule{background:#2a1a4a;color:#c080f0}
+  .mc-nylor:hover,.mc-nylor.selected{border-color:#9060e0}
+  .mc-nylor.selected{background:#1e0f38}
+  /* Percée */
+  .mc-percee{background:#2a1800;border-color:#5a3000}
+  .mc-percee .monture-icon{background:#854F0B}
+  .mc-percee .monture-name{color:#e8b870}
+  .mc-percee .monture-desc{color:#a07030}
+  .mc-percee .monture-rule{background:#3a1a00;color:#e8b870}
+  .mc-percee:hover,.mc-percee.selected{border-color:#d09040}
+  .mc-percee.selected{background:#301a00}
+
+
+  /* SIMULATEUR MODAL */
+  #sim-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:none;align-items:center;justify-content:center;padding:16px}
+  #sim-modal.open{display:flex}
+  .sim-modal-box{background:#1a1a1a;border-radius:20px;border:1px solid #333;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;padding:24px}
+  .sim-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .sim-modal-title{font-size:18px;font-weight:800;color:#f0f0f0;display:flex;align-items:center;gap:10px}
+  .sim-close{background:#252525;border:1px solid #333;color:#aaa;border-radius:10px;padding:8px 14px;cursor:pointer;font-family:inherit;font-size:13px}
+  .sim-close:hover{background:#333}
+  .sim-tabs-m{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .sim-tab-m{padding:9px 14px;border-radius:12px;border:1.5px solid #333;background:#252525;color:#aaa;font-size:14px;font-weight:600;cursor:pointer;transition:0.15s;display:flex;align-items:center;gap:6px;font-family:inherit}
+  .sim-tab-m.active{border-color:#378ADD;background:#0f1e30;color:#60aaee}
+  .sim-canvas-wrap{border-radius:14px;overflow:hidden;border:1px solid #333;margin-bottom:14px}
+  .sim-canvas-m{width:100%;display:block;height:220px}
+  .sim-info-m{background:#252525;border-radius:12px;padding:14px;margin-bottom:14px}
+  .sim-info-title-m{font-size:15px;font-weight:700;color:#f0f0f0;margin-bottom:6px}
+  .sim-info-desc-m{font-size:13px;color:#aaa;line-height:1.6}
+  .sim-slider-m{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .sim-slider-m label{font-size:13px;color:#aaa;min-width:110px}
+  .sim-slider-m input{flex:1}
+  .sim-slider-m span{font-size:13px;font-weight:600;color:#f0f0f0;min-width:50px;text-align:right}
+  .sim-compare-m{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sim-cmp-card{border-radius:10px;overflow:hidden;border:1px solid #333}
+  .sim-cmp-label{font-size:11px;font-weight:600;text-align:center;padding:5px;background:#252525;color:#aaa}
+  .sim-cmp-canvas{width:100%;height:100px;display:block}
+
+
+  .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:0}
+  .home-card{background:#1e1e1e;border:1.5px solid #333;border-radius:var(--radius-xl);padding:28px 24px;cursor:pointer;transition:0.15s;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px}
+  .home-card:hover{border-color:#378ADD;background:#162030;transform:translateY(-2px)}
+  .home-card-icon{width:70px;height:70px;border-radius:20px;display:flex;align-items:center;justify-content:center}
+  .home-card-icon i{font-size:34px;color:#fff}
+  .home-card-title{font-size:20px;font-weight:800;color:#f0f0f0}
+  .home-card-sub{font-size:13px;color:#777;line-height:1.5}
+  .hc-blue .home-card-icon{background:#185FA5}
+  .hc-blue:hover{border-color:#185FA5}
+  .hc-purple .home-card-icon{background:#6B3FA0}
+  .hc-purple:hover{border-color:#9060e0}
+
+  /* MUTUELLE SELECTOR */
+  .mut-selector{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+  .mut-sel-item{background:#252525;border:1.5px solid #333;border-radius:var(--radius-lg);padding:14px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:0.15s}
+  .mut-sel-item:hover{border-color:#378ADD;background:#0f1e30}
+  .mut-sel-logo{width:48px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
+  .mut-sel-name{font-size:16px;font-weight:700;color:#f0f0f0}
+  .mut-sel-sub{font-size:12px;color:#777}
+
+  /* 100% SANTE / TARIF LIBRE */
+  .panier-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .panier-card{background:#1e1e1e;border:1.5px solid #333;border-radius:var(--radius-xl);padding:20px;display:flex;flex-direction:column;gap:10px}
+  .panier-card.sante{border-color:#1a4a2a}
+  .panier-card.libre{border-color:#1a3a5c}
+  .panier-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .panier-badge{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px}
+  .badge-sante{background:#0a2a1a;color:#70c8a0}
+  .badge-libre{background:#0f1e30;color:#60aaee}
+  .panier-title{font-size:17px;font-weight:800;color:#f0f0f0}
+  .panier-sub{font-size:12px;color:#777;margin-bottom:8px;line-height:1.5}
+  .verre-panier{background:#252525;border:1px solid #333;border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:8px}
+  .verre-panier-nom{font-size:14px;font-weight:700;color:#f0f0f0;margin-bottom:4px}
+  .verre-panier-marque{font-size:12px;color:#777;margin-bottom:8px}
+  .verre-panier-prices{display:flex;flex-wrap:wrap;gap:6px}
+  .price-pill{font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600}
+  .pp-vente{background:#1a3a5c;color:#60aaee}
+  .pp-achat{background:#1a2a10;color:#80c060}
+  .pp-remb{background:#2a1a00;color:#e8b870}
+  .panier-sep{height:1px;background:#2a2a2a;margin:6px 0}
+
+  /* DEMO VERRE SCREEN */
+  .demo-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .demo-tab{padding:10px 18px;border-radius:var(--radius-lg);border:1.5px solid #333;background:#252525;color:#aaa;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:0.15s;display:flex;align-items:center;gap:7px}
+  .demo-tab.active{background:#0f1e30;border-color:#378ADD;color:#60aaee}
+  .demo-scene{border-radius:var(--radius-xl);overflow:hidden;border:1px solid #333;position:relative;margin-bottom:14px}
+  .demo-canvas{width:100%;display:block;height:280px}
+  .demo-info{background:#252525;border-radius:var(--radius-lg);padding:16px;margin-bottom:14px}
+  .demo-info-title{font-size:16px;font-weight:700;color:#f0f0f0;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .demo-info-desc{font-size:13px;color:#aaa;line-height:1.6}
+  .demo-avs{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .demo-av{font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600}
+  .demo-slider{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .demo-slider label{font-size:13px;color:#aaa;min-width:110px}
+  .demo-slider input{flex:1}
+  .demo-slider span{font-size:13px;font-weight:700;color:#f0f0f0;min-width:50px;text-align:right}
+  .demo-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .demo-cmp{border-radius:var(--radius-lg);overflow:hidden;border:1px solid #333}
+  .demo-cmp-lbl{font-size:11px;font-weight:600;text-align:center;padding:6px;background:#252525;color:#aaa;text-transform:uppercase;letter-spacing:0.05em}
+  .demo-cmp-canvas{width:100%;height:110px;display:block}
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-title">Manéo Opticiens</div>
+    <div class="login-sub">Espace réservé au personnel</div>
+    <div class="login-error" id="login-error"><i class="ti ti-alert-circle"></i> Identifiant ou mot de passe incorrect</div>
+    <div class="login-field">
+      <label><i class="ti ti-user" style="font-size:12px"></i> Identifiant</label>
+      <input type="text" id="login-user" placeholder="Votre identifiant" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div class="login-field">
+      <label><i class="ti ti-lock" style="font-size:12px"></i> Mot de passe</label>
+      <input type="password" id="login-pass" placeholder="Votre mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="btn-login" onclick="doLogin()"><i class="ti ti-login"></i> Se connecter</button>
+    <div class="login-footer">Manéo Opticiens · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#555;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
+  </div>
+</div>
+
+<div class="app-wrapper">
+
+  <div class="app-logo" style="position:relative;cursor:pointer" onclick="go('0')">
+    <div class="app-logo-icon"><i class="ti ti-eye"></i></div>
+    <div>
+      <h1>Manéo Opticiens</h1>
+      <p>Outil d'aide à la vente</p>
+    </div>
+    <button class="admin-btn-top" id="admin-btn" style="display:none" onclick="openAdmin()"><i class="ti ti-settings"></i> Comptes</button>
+    <button class="admin-btn-verres" id="verres-admin-btn" style="display:none" onclick="openVerresAdmin()"><i class="ti ti-pencil"></i> Verres</button>
+
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="admin-screen">
+    <div class="admin-box">
+      <div class="admin-title"><i class="ti ti-users" style="color:#378ADD"></i> Gestion des comptes</div>
+      <div class="admin-sub">Créez et supprimez des accès opticien</div>
+      <div class="admin-msg" id="admin-msg"></div>
+      <div class="admin-field"><label><i class="ti ti-user" style="font-size:11px"></i> Identifiant</label><input type="text" id="new-user" placeholder="ex: opticien3" autocomplete="off"/></div>
+      <div class="admin-field"><label><i class="ti ti-id-badge" style="font-size:11px"></i> Prénom / Nom affiché</label><input type="text" id="new-nom" placeholder="ex: Marie Dupont" autocomplete="off"/></div>
+      <div class="admin-field"><label><i class="ti ti-lock" style="font-size:11px"></i> Mot de passe</label><input type="password" id="new-pass" placeholder="Minimum 6 caractères" autocomplete="off"/></div>
+      <button class="btn-admin-add" onclick="addCompte()"><i class="ti ti-plus"></i> Créer le compte</button>
+      <div class="admin-list">
+        <div class="admin-list-title">Comptes existants</div>
+        <div id="admin-liste"></div>
+      </div>
+      <button class="btn-admin-close" onclick="closeAdmin()"><i class="ti ti-x"></i> Fermer</button>
+    </div>
+  </div>
+
+  <!-- VERRES ADMIN -->
+  <div id="verres-admin-screen">
+    <div class="vadmin-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:20px;font-weight:800;color:#f0f0f0;display:flex;align-items:center;gap:10px"><i class="ti ti-pencil" style="color:#378ADD"></i> Gestion des verres</div>
+        <button onclick="closeVerresAdmin()" style="background:#252525;border:1px solid #333;color:#aaa;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:inherit;font-size:13px"><i class="ti ti-x"></i></button>
+      </div>
+      <div style="font-size:13px;color:#777;margin-bottom:20px">Modifiez les prix ou importez votre catalogue PDF</div>
+      <div class="vadmin-tabs">
+        <button class="vadmin-tab active" onclick="switchVTab('prix')"><i class="ti ti-coin"></i> Modifier les prix</button>
+        <button class="vadmin-tab" onclick="switchVTab('pdf')"><i class="ti ti-file-text"></i> Importer PDF catalogue</button>
+      </div>
+      <!-- PANEL PRIX -->
+      <div class="vadmin-panel active" id="vtab-prix">
+        <div style="font-size:12px;color:#777;margin-bottom:14px">Cliquez sur <strong style="color:#f0f0f0">Enregistrer</strong> après chaque modification — les nouveaux prix s'appliquent immédiatement.</div>
+        <div id="verres-edit-list"></div>
+      </div>
+      <!-- PANEL PDF -->
+      <div class="vadmin-panel" id="vtab-pdf">
+        <div style="font-size:13px;color:#aaa;margin-bottom:14px;line-height:1.6">
+          Glissez le <strong style="color:#f0f0f0">PDF tarif de votre fournisseur</strong> (Essilor, Zeiss, Hoya, etc.) — l'app détecte automatiquement les noms de verres et les prix.
+        </div>
+        <div class="pdf-drop" id="pdf-drop" onclick="document.getElementById('pdf-file-input').click()"
+             ondragover="event.preventDefault();this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="handlePdfDrop(event)">
+          <i class="ti ti-file-upload"></i>
+          <p><strong>Cliquez ou glissez votre PDF ici</strong></p>
+          <p style="font-size:12px;margin-top:6px">Tarifs fournisseur, catalogue verres, grille de prix</p>
+        </div>
+        <input type="file" id="pdf-file-input" accept=".pdf" style="display:none" onchange="handlePdfFile(this.files[0])"/>
+        <div style="font-size:12px;color:#555;margin-top:10px;text-align:center">Format accepté : PDF · Taille max : 10 Mo</div>
+        <div class="pdf-result" id="pdf-result">
+          <div class="pdf-result-title"><i class="ti ti-check-circle" style="color:#80d040"></i> Verres détectés dans le PDF</div>
+          <div id="pdf-verres-found"></div>
+          <button class="btn-apply-pdf" onclick="applyPdfPrix()"><i class="ti ti-check"></i> Appliquer ces prix au catalogue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S0 ACCUEIL -->
+  <div id="s0" class="screen active">
+    <div class="header-block blue">
+      <div class="header-icon"><i class="ti ti-eye"></i></div>
+      <div><h2>Bienvenue</h2><p id="s0-welcome">Choisissez une option pour commencer</p></div>
+    </div>
+    <div class="home-grid">
+      <div class="home-card hc-blue" onclick="go('0mut')">
+        <div class="home-card-icon"><i class="ti ti-shield-check"></i></div>
+        <div class="home-card-title">Mutuelle</div>
+        <div class="home-card-sub">Consultez les verres 100% Santé et tarif libre selon la mutuelle du patient</div>
+      </div>
+      <div class="home-card hc-purple" onclick="go('0demo')">
+        <div class="home-card-icon"><i class="ti ti-eye-check"></i></div>
+        <div class="home-card-title">Démonstration verres</div>
+        <div class="home-card-sub">Montrez au patient la différence visuelle entre les traitements</div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn-primary" onclick="go(1)" style="background:#252525;border:1.5px solid #333;color:#aaa;font-size:14px;font-weight:600">
+        <i class="ti ti-eyeglass"></i> Commencer une vente (sélection complète)
+      </button>
+    </div>
+    <div style="margin-top:16px">
+      <div class="section-label" style="margin-top:0;margin-bottom:10px"><i class="ti ti-tool"></i> Outils patient</div>
+      <div class="tool-grid">
+        <div class="tool-card" onclick="openThick()">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#0e3a6a,#185FA5)"><i class="ti ti-ruler-measure"></i></div>
+          <div>
+            <div class="tool-name">Épaisseur verres</div>
+            <div class="tool-sub">Visualiser l'épaisseur selon l'indice pour justifier la montée en gamme</div>
+          </div>
+        </div>
+        <div class="tool-card" onclick="showComparatorIntro()">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#3a1a6a,#6B3FA0)"><i class="ti ti-layout-columns"></i></div>
+          <div>
+            <div class="tool-name">Comparer 2 verres</div>
+            <div class="tool-sub">Côte à côte pour que le patient choisisse en connaissance de cause</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S0-MUT CHOIX MUTUELLE -->
+  <div id="s0mut" class="screen">
+    <div class="header-block blue">
+      <div class="header-icon"><i class="ti ti-shield-check"></i></div>
+      <div><h2>Choisir la mutuelle</h2><p>Sélectionnez la mutuelle du patient</p></div>
+    </div>
+    <div class="card">
+      <button class="btn-back" onclick="go('0')"><i class="ti ti-arrow-left"></i> Retour</button>
+      <div class="mut-selector">
+        <div class="mut-sel-item" onclick="selectMutuelleDevis('seveane')">
+          <div class="mut-sel-logo" style="background:#0055A4">SEV</div>
+          <div><div class="mut-sel-name">Sévéane</div><div class="mut-sel-sub">Réseau de soins optique</div></div>
+          <i class="ti ti-chevron-right" style="margin-left:auto;color:#555"></i>
+        </div>
+        <div class="mut-sel-item" onclick="selectMutuelleDevis('itelis')">
+          <div class="mut-sel-logo" style="background:#E2001A">ITE</div>
+          <div><div class="mut-sel-name">Itelis</div><div class="mut-sel-sub">Réseau de soins optique</div></div>
+          <i class="ti ti-chevron-right" style="margin-left:auto;color:#555"></i>
+        </div>
+        <div class="mut-sel-item" onclick="selectMutuelleDevis('santeclaire')">
+          <div class="mut-sel-logo" style="background:#00923F">SAN</div>
+          <div><div class="mut-sel-name">Santéclair</div><div class="mut-sel-sub">Réseau de soins optique</div></div>
+          <i class="ti ti-chevron-right" style="margin-left:auto;color:#555"></i>
+        </div>
+        <div class="mut-sel-item" onclick="selectMutuelleDevis('kalixia')">
+          <div class="mut-sel-logo" style="background:#6B3FA0">KAL</div>
+          <div><div class="mut-sel-name">Kalixia</div><div class="mut-sel-sub">Réseau de soins optique</div></div>
+          <i class="ti ti-chevron-right" style="margin-left:auto;color:#555"></i>
+        </div>
+        <div class="mut-sel-item" onclick="selectMutuelleDevis('carteblanche')">
+          <div class="mut-sel-logo" style="background:#7B2D8B">CB</div>
+          <div><div class="mut-sel-name">Carte Blanche</div><div class="mut-sel-sub">Partenaires</div></div>
+          <i class="ti ti-chevron-right" style="margin-left:auto;color:#555"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S0-PANIER VERRES 100% SANTE ET TARIF LIBRE -->
+  <div id="s0panier" class="screen">
+    <div class="header-block blue" id="panier-header">
+      <div class="header-icon"><i class="ti ti-shield-check"></i></div>
+      <div><h2 id="panier-mut-label">Mutuelle</h2><p>Choisissez le type de prise en charge</p></div>
+    </div>
+    <div class="card">
+      <button class="btn-back" onclick="go('0mut')"><i class="ti ti-arrow-left"></i> Retour</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px">
+
+        <!-- 100% SANTE -->
+        <div onclick="selectPrise('sante')" style="background:#0a2a1a;border:2px solid #1a5a2a;border-radius:20px;padding:32px 20px;cursor:pointer;text-align:center;transition:0.15s;display:flex;flex-direction:column;align-items:center;gap:14px;min-height:200px;justify-content:center" onmouseover="this.style.background='#0f3a22'" onmouseout="this.style.background='#0a2a1a'">
+          <div style="width:64px;height:64px;border-radius:18px;background:#0F6E56;display:flex;align-items:center;justify-content:center">
+            <i class="ti ti-shield-check" style="font-size:30px;color:#fff"></i>
+          </div>
+          <div style="font-size:19px;font-weight:800;color:#70c8a0">100% Santé</div>
+          <div style="font-size:13px;color:#3a8060;line-height:1.5">Verres Classe A<br>Remboursés intégralement<br>Sécu + Mutuelle</div>
+        </div>
+
+        <!-- TARIF LIBRE -->
+        <div onclick="selectPrise('libre')" style="background:#0f1e30;border:2px solid #1a3a5c;border-radius:20px;padding:32px 20px;cursor:pointer;text-align:center;transition:0.15s;display:flex;flex-direction:column;align-items:center;gap:14px;min-height:200px;justify-content:center" onmouseover="this.style.background='#162840'" onmouseout="this.style.background='#0f1e30'">
+          <div style="width:64px;height:64px;border-radius:18px;background:#185FA5;display:flex;align-items:center;justify-content:center">
+            <i class="ti ti-star" style="font-size:30px;color:#fff"></i>
+          </div>
+          <div style="font-size:19px;font-weight:800;color:#60aaee">Tarif Libre</div>
+          <div style="font-size:13px;color:#3a6a9a;line-height:1.5">Verres premium<br>Hors 100% Santé<br>Remboursement partiel</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- S0-DEMO DEMONSTRATION VERRES -->
+  <div id="s0demo" class="screen">
+    <div class="header-block purple">
+      <div class="header-icon"><i class="ti ti-eye-check"></i></div>
+      <div><h2>Démonstration verres</h2><p>Visualisez la différence en situation réelle</p></div>
+    </div>
+    <div class="card">
+      <button class="btn-back" onclick="go('0')"><i class="ti ti-arrow-left"></i> Retour</button>
+
+      <!-- SCENE SELECTOR -->
+      <div style="font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Choisir une scène</div>
+      <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap" id="scene-tabs">
+        <button class="demo-tab active" onclick="setScene('nuit')" id="stab-nuit"><i class="ti ti-moon"></i> Conduite de nuit</button>
+        <button class="demo-tab" onclick="setScene('ecran')" id="stab-ecran"><i class="ti ti-device-desktop"></i> Écran / bureau</button>
+        <button class="demo-tab" onclick="setScene('soleil')" id="stab-soleil"><i class="ti ti-sun"></i> Plein soleil</button>
+        <button class="demo-tab" onclick="setScene('ville')" id="stab-ville"><i class="ti ti-building"></i> Ville / rue</button>
+      </div>
+
+      <!-- TREATMENT SELECTOR -->
+      <div style="font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Traitement du verre</div>
+      <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap" id="trait-tabs">
+        <button class="demo-tab active" onclick="setTrait('normal')" id="ttab-normal"><i class="ti ti-eye"></i> Sans traitement</button>
+        <button class="demo-tab" onclick="setTrait('ar')" id="ttab-ar"><i class="ti ti-sparkles"></i> Anti-reflet</button>
+        <button class="demo-tab" onclick="setTrait('lb')" id="ttab-lb"><i class="ti ti-device-desktop"></i> Lumière bleue</button>
+        <button class="demo-tab" onclick="setTrait('tr')" id="ttab-tr"><i class="ti ti-sun-moon"></i> Transitions</button>
+      </div>
+
+      <!-- SLIDER FOR TRANSITIONS -->
+      <div id="demo-tr-slider" style="display:none;margin-bottom:14px">
+        <div class="demo-slider">
+          <label><i class="ti ti-sun" style="font-size:14px"></i> Exposition soleil</label>
+          <input type="range" min="0" max="100" value="0" step="1" id="tr-slider-val"
+            oninput="trSun=+this.value;document.getElementById('tr-slider-out').textContent=this.value+'%';applyFilter()"/>
+          <span id="tr-slider-out" style="min-width:40px;text-align:right;font-size:13px;font-weight:700;color:#f0f0f0">0%</span>
+        </div>
+      </div>
+
+      <!-- IMAGE VIEWER with CSS filter -->
+      <div style="position:relative;border-radius:16px;overflow:hidden;border:1px solid #333;margin-bottom:14px">
+        <img id="demo-photo" src="" alt="Simulation verre" 
+          style="width:100%;height:300px;object-fit:cover;display:block;transition:filter 0.4s ease"/>
+        <!-- Glare overlay for no-AR mode -->
+        <div id="demo-glare" style="position:absolute;inset:0;pointer-events:none;transition:opacity 0.4s"></div>
+        <!-- Label -->
+        <div id="demo-photo-label" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:#fff;font-size:13px;font-weight:600;padding:6px 16px;border-radius:20px;white-space:nowrap;backdrop-filter:blur(4px)"></div>
+      </div>
+
+      <!-- BEFORE/AFTER COMPARISON -->
+      <div style="font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Comparaison</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="border-radius:12px;overflow:hidden;border:1px solid #333;position:relative">
+          <img id="demo-before" src="" alt="Avant" style="width:100%;height:150px;object-fit:cover;display:block"/>
+          <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(180,40,40,0.85);color:#fff;font-size:12px;font-weight:700;text-align:center;padding:5px">Sans traitement</div>
+        </div>
+        <div style="border-radius:12px;overflow:hidden;border:1px solid #333;position:relative">
+          <img id="demo-after" src="" alt="Après" style="width:100%;height:150px;object-fit:cover;display:block;transition:filter 0.4s"/>
+          <div id="demo-after-label" style="position:absolute;bottom:0;left:0;right:0;background:rgba(20,100,50,0.85);color:#fff;font-size:12px;font-weight:700;text-align:center;padding:5px">Anti-reflet</div>
+        </div>
+      </div>
+
+      <!-- INFO CARD -->
+      <div class="demo-info" id="demo-info-card">
+        <div class="demo-info-title" id="demo-info-title"><i class="ti ti-eye"></i> Sans traitement</div>
+        <div class="demo-info-desc" id="demo-info-desc">Vision naturelle sans traitement. Reflets parasites visibles sur le verre, éblouissements en conduite nocturne.</div>
+        <div class="demo-avs" id="demo-info-avs"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S1 MUTUELLE -->
+  <div id="s1" class="screen">
+    <div class="header-block blue">
+      <div class="header-icon"><i class="ti ti-shield-check"></i></div>
+      <div><h2>Réseau mutuelle</h2><p>Sélectionnez la mutuelle du patient</p></div>
+    </div>
+    <div class="step-bar"><div class="step-dot done"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+    <div class="card">
+      <div class="search-wrap"><i class="ti ti-search"></i><input type="text" id="mut-search" placeholder="Rechercher une mutuelle..." oninput="filterMut()"/></div>
+      <div class="section-label"><i class="ti ti-building-community"></i> Réseaux conventionnés</div>
+      <div class="grid-2" id="mut-grid"></div>
+    </div>
+  </div>
+
+  <!-- S2 VISION -->
+  <div id="s2" class="screen">
+    <div class="header-block blue">
+      <div class="header-icon"><i class="ti ti-eye"></i></div>
+      <div><h2>Type de vision</h2><p id="mut-label-h">Mutuelle sélectionnée</p></div>
+    </div>
+    <div class="step-bar"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+    <div class="card">
+      <button class="btn-back" onclick="go(_backFrom2)"><i class="ti ti-arrow-left"></i> Retour</button>
+      <div class="section-label"><i class="ti ti-eye-check"></i> Choisir le type de vision</div>
+      <div class="grid-4">
+        <div class="vis-card vis-loin" onclick="selectVision('loin','Vision de loin')"><div class="icon-wrap"><i class="ti ti-sun"></i></div><div class="label">Vision de loin</div><div class="sub">Myopie · Hypermétropie</div></div>
+        <div class="vis-card vis-pres" onclick="selectVision('pres','Vision de près')"><div class="icon-wrap"><i class="ti ti-book"></i></div><div class="label">Vision de près</div><div class="sub">Presbytie légère</div></div>
+        <div class="vis-card vis-prog" onclick="selectVision('progressif','Progressif')"><div class="icon-wrap"><i class="ti ti-adjustments"></i></div><div class="label">Progressif</div><div class="sub">Loin + près + intermédiaire</div></div>
+        <div class="vis-card vis-inter" onclick="selectVision('intermediaire','Intermédiaire')"><div class="icon-wrap"><i class="ti ti-device-desktop"></i></div><div class="label">Intermédiaire</div><div class="sub">Écran · Bureau</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 CORRECTION -->
+  <div id="s3" class="screen">
+    <div class="header-block blue">
+      <div class="header-icon"><i class="ti ti-clipboard-text"></i></div>
+      <div><h2>Correction du patient</h2><p id="vision-label-h">Type de vision</p></div>
+    </div>
+    <div class="step-bar"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+    <div class="card">
+      <button class="btn-back" onclick="go(2)"><i class="ti ti-arrow-left"></i> Retour</button>
+      <div class="section-label"><i class="ti ti-forms"></i> Ordonnance</div>
+      <div class="eye-grid">
+        <div class="eye-block eye-od">
+          <div class="eye-title"><i class="ti ti-circle-dotted"></i> Œil droit (OD)</div>
+          <div class="field-row"><label>Sphère</label><select id="od-sph"></select></div>
+          <div class="field-row"><label>Cylindre</label><select id="od-cyl"></select></div>
+          <div class="field-row"><label>Axe (°)</label><input type="number" id="od-axe" min="0" max="180" placeholder="0 – 180"/></div>
+          <div class="field-row" id="od-add-row" style="display:none"><label>Addition</label><select id="od-add"></select></div>
+        </div>
+        <div class="eye-block eye-og">
+          <div class="eye-title"><i class="ti ti-circle-dotted"></i> Œil gauche (OG)</div>
+          <div class="field-row"><label>Sphère</label><select id="og-sph"></select></div>
+          <div class="field-row"><label>Cylindre</label><select id="og-cyl"></select></div>
+          <div class="field-row"><label>Axe (°)</label><input type="number" id="og-axe" min="0" max="180" placeholder="0 – 180"/></div>
+          <div class="field-row" id="og-add-row" style="display:none"><label>Addition</label><select id="og-add"></select></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="goMonture()"><i class="ti ti-eyeglass"></i> Choisir la monture</button>
+    </div>
+  </div>
+
+  <!-- S3a MONTURE -->
+  <div id="s3a" class="screen">
+    <div class="header-block blue">
+      <div class="header-icon"><i class="ti ti-eyeglass"></i></div>
+      <div><h2>Type de monture</h2><p id="monture-vision-label">Sélectionnez le type de monture</p></div>
+    </div>
+    <div class="step-bar"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot"></div></div>
+    <div class="card">
+      <button class="btn-back" onclick="go(3)"><i class="ti ti-arrow-left"></i> Retour</button>
+      <div class="section-label"><i class="ti ti-eyeglass"></i> Choisir le type de monture</div>
+
+      <div class="monture-card mc-cercle" id="mc-cercle" onclick="selectMonture('cercle')">
+        <div class="monture-icon"><i class="ti ti-circle"></i></div>
+        <div class="monture-info">
+          <div class="monture-name">Cerclée</div>
+          <div class="monture-desc">Monture classique avec cercle complet autour du verre. Compatible avec tous les indices et tous les types de verres. Aucune contrainte technique.</div>
+          <span class="monture-rule"><i class="ti ti-check"></i> Tous indices disponibles · Pas de précalibrage obligatoire</span>
+        </div>
+      </div>
+
+      <div class="monture-card mc-nylor" id="mc-nylor" onclick="selectMonture('nylor')">
+        <div class="monture-icon"><i class="ti ti-minus"></i></div>
+        <div class="monture-info">
+          <div class="monture-name">Nylor (semi-percée)</div>
+          <div class="monture-desc">Monture avec fil nylon en bas du verre. Le verre doit être suffisamment résistant pour supporter la tension du fil sans se fissurer.</div>
+          <span class="monture-rule"><i class="ti ti-alert-triangle"></i> Indice minimum 1.60 · Précalibrage obligatoire</span>
+        </div>
+      </div>
+
+      <div class="monture-card mc-percee" id="mc-percee" onclick="selectMonture('percee')">
+        <div class="monture-icon"><i class="ti ti-point"></i></div>
+        <div class="monture-info">
+          <div class="monture-name">Percée (sans cercle)</div>
+          <div class="monture-desc">Monture vissée directement dans le verre. Nécessite un verre épais et résistant aux contraintes mécaniques. Le verre est exposé sans protection.</div>
+          <span class="monture-rule"><i class="ti ti-alert-triangle"></i> Indice minimum 1.60 · Précalibrage obligatoire</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- S3b TRAITEMENTS -->
+  <div id="s3b" class="screen">
+    <div class="header-block blue">
+      <div class="header-icon"><i class="ti ti-sparkles"></i></div>
+      <div><h2>Type de traitement</h2><p id="trait-vision-label">Sélectionnez un ou plusieurs traitements</p></div>
+    </div>
+    <div class="step-bar"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot"></div></div>
+    <div class="card">
+      <button class="btn-back" onclick="go(_backFrom3b)"><i class="ti ti-arrow-left"></i> Retour</button>
+      <div class="multi-hint"><i class="ti ti-hand-click" style="font-size:15px"></i> <span id="multi-hint-text">Sélectionnez un ou plusieurs traitements</span></div>
+      <div class="tc-ar trait-choix-card" id="tc-ar" onclick="toggleTrait('ar')">
+        <div class="trait-choix-icon"><i class="ti ti-eye"></i></div>
+        <div class="trait-choix-info">
+          <div class="trait-choix-name">Anti-reflet</div>
+          <div class="trait-choix-desc">Élimine les reflets parasites, améliore le confort visuel en lumière artificielle et la conduite de nuit. Traitement incontournable.</div>
+          <span class="trait-choix-badge" style="background:#1a3a5c;color:#60aaee">Recommandé pour tous</span>
+        </div>
+        <i class="ti ti-circle" id="tc-ar-check" style="font-size:24px;color:#333;flex-shrink:0"></i>
+      </div>
+      <div class="tc-lb trait-choix-card" id="tc-lb" onclick="toggleTrait('lb')">
+        <div class="trait-choix-icon"><i class="ti ti-device-desktop"></i></div>
+        <div class="trait-choix-info">
+          <div class="trait-choix-name">Filtre lumière bleue</div>
+          <div class="trait-choix-desc">Protège contre la lumière bleue nocive des écrans LED/OLED. Réduit la fatigue visuelle, améliore le sommeil. Idéal pour les utilisateurs d'écrans intensifs.</div>
+          <span class="trait-choix-badge" style="background:#2a1a4a;color:#c080f0">Idéal écrans</span>
+        </div>
+        <i class="ti ti-circle" id="tc-lb-check" style="font-size:24px;color:#333;flex-shrink:0"></i>
+      </div>
+      <div class="tc-tr trait-choix-card" id="tc-tr" onclick="toggleTrait('tr')">
+        <div class="trait-choix-icon"><i class="ti ti-sun-moon"></i></div>
+        <div class="trait-choix-info">
+          <div class="trait-choix-name">Verres Transitions</div>
+          <div class="trait-choix-desc">S'assombrissent automatiquement à l'extérieur en 30 secondes, redeviennent transparents en intérieur. Remplace les lunettes de soleil. Disponible en 8 couleurs.</div>
+          <span class="trait-choix-badge" style="background:#0a2a1a;color:#70c8a0">Confort soleil</span>
+        </div>
+        <i class="ti ti-circle" id="tc-tr-check" style="font-size:24px;color:#333;flex-shrink:0"></i>
+      </div>
+
+      <button onclick="openSimulateur()" style="width:100%;padding:12px;border-radius:var(--radius-lg);border:1.5px solid #378ADD;background:#0f1e30;color:#60aaee;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px">
+        <i class="ti ti-eye"></i> Démonstration visuelle — montrer au patient
+      </button>
+      <button class="btn-primary" style="margin-top:8px" onclick="showVerresFromTrait()">
+        <i class="ti ti-eye-check"></i> Voir les verres correspondants
+      </button>
+    </div>
+  </div>
+
+  <!-- S4 VERRES 1ERE PAIRE -->
+  <div id="s4" class="screen">
+    <div class="header-block blue">
+      <div class="header-icon"><i class="ti ti-chart-bar"></i></div>
+      <div><h2>Verres — 1ère paire</h2><p>Cliquez sur un verre pour voir les détails</p></div>
+    </div>
+    <div class="step-bar"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div></div>
+    <div class="card">
+      <button class="btn-back" onclick="go('3b')"><i class="ti ti-arrow-left"></i> Retour — Traitements</button>
+      <div class="summary-box" id="recap"></div>
+      <div id="verres-list"></div>
+    </div>
+    <div class="footer-note">Manéo Opticiens · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#378ADD;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
+  </div>
+
+  <!-- S5 VERRES 2EME PAIRE -->
+  <div id="s5" class="screen">
+    <div class="header-block purple">
+      <div class="header-icon"><i class="ti ti-copy"></i></div>
+      <div><h2>2ème paire</h2><p>Verres les plus rentables pour votre magasin</p></div>
+    </div>
+    <div class="step-bar"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div></div>
+    <div class="card">
+      <button class="btn-back" onclick="go(4)"><i class="ti ti-arrow-left"></i> Retour — 1ère paire</button>
+      <div class="paire1-recap" id="paire1-recap"></div>
+      <div class="section-label"><i class="ti ti-trophy"></i> Verres 2e paire recommandés</div>
+      <div id="verres-list-2"></div>
+    </div>
+    <div class="footer-note">Manéo Opticiens · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#378ADD;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
+  </div>
+
+<script>
+// ─── MUTUELLES ───────────────────────────────────────────────
+const mutuelles = [
+  {id:'cb',label:'Carte Blanche',plafond_monture:150,plafond_verre:250,bg:'#7B2D8B',fg:'#fff'},
+  {id:'sc',label:'Santéclair',plafond_monture:120,plafond_verre:220,bg:'#00923F',fg:'#fff'},
+  {id:'klesia',label:'Klesia',plafond_monture:130,plafond_verre:200,bg:'#003C8F',fg:'#fff'},
+  {id:'mgen',label:'MGEN',plafond_monture:200,plafond_verre:300,bg:'#E2001A',fg:'#fff'},
+  {id:'malakoff',label:'Malakoff Humanis',plafond_monture:160,plafond_verre:280,bg:'#0055A4',fg:'#fff'},
+  {id:'harmonie',label:'Harmonie Mutuelle',plafond_monture:140,plafond_verre:230,bg:'#78BE20',fg:'#fff'},
+  {id:'ag2r',label:'AG2R La Mondiale',plafond_monture:180,plafond_verre:260,bg:'#C8002B',fg:'#fff'},
+  {id:'apicil',label:'Apicil',plafond_monture:150,plafond_verre:210,bg:'#009BB4',fg:'#fff'},
+  {id:'swisslife',label:'Swiss Life',plafond_monture:170,plafond_verre:290,bg:'#E30613',fg:'#fff'},
+  {id:'inter',label:'Intériale',plafond_monture:130,plafond_verre:220,bg:'#004F9F',fg:'#fff'},
+];
+
+// ─── CATALOGUE VERRES ────────────────────────────────────────
+// indices: prix de vente par indice (null = non dispo)
+// achats:  prix d'achat par indice
+// sphMax:  sphère max supportée (valeur absolue)
+// cylMax:  cylindre max supporté (valeur absolue)
+const catalogue = [
+
+  // ══ HAUT DE GAMME — PROGRESSIFS ══
+  {id:'h1',nom:'Essilor Varilux XR series',marque:'Essilor',gamme:'haut',
+   compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.60':280,'1.67':340,'1.74':420},achats:{'1.60':90,'1.67':115,'1.74':130},
+   traitements:[
+    {nom:'Crizal Rock UV',icon:'ti-shield',desc:`Antireflet ultra-résistant, 3× plus dur qu'un verre standard. Hydrophobe, oléophobe, antistatique. Durée de vie 2× supérieure.`},
+    {nom:'Eyezen+ Technology',icon:'ti-device-mobile',desc:`Filtre lumière bleue nocive et soulage les muscles ciliaires lors de l'utilisation prolongée des écrans numériques.`},
+    {nom:'W.A.V.E. Technology 3',icon:'ti-wave-sine',desc:`2 millions de points de calcul individualisés. Réduction maximale des aberrations en vision périphérique.`},
+    {nom:'Optifog Activate',icon:'ti-droplets',desc:`Anti-buée activé par essuyage, efficace 200 jours. Idéal porteurs de masques et lunettes de sport.`}
+   ]},
+  {id:'h2',nom:'Zeiss Individual 2 Plus',marque:'Zeiss',gamme:'haut',
+   compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.60':290,'1.67':360,'1.74':450},achats:{'1.60':100,'1.67':125,'1.74':140},
+   traitements:[
+    {nom:'DuraVision Platinum UV',icon:'ti-shield',desc:`Le traitement antireflet le plus résistant de Zeiss. Couche hydrophobe et oléophobe intégrée, résistance 3×.`},
+    {nom:'BlueGuard Technology',icon:'ti-device-desktop',desc:`Protection lumière bleue-violette intégrée dans la masse du verre — permanente et inaltérable.`},
+    {nom:'Digital Inside Technology',icon:'ti-cpu',desc:`Personnalisation sur 5 données biométriques individuelles pour une vision parfaite dans toutes directions du regard.`},
+    {nom:'LotuTec UV',icon:'ti-droplets',desc:`Effet lotus : eau et poussières glissent. Nettoyage facilité, vision nette beaucoup plus longtemps.`}
+   ]},
+  {id:'h3',nom:'Shamir Autograph Intelligence',marque:'Shamir',gamme:'haut',
+   compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.60':260,'1.67':320,'1.74':400},achats:{'1.60':85,'1.67':105,'1.74':125},
+   traitements:[
+    {nom:'Glacier Plus UV',icon:'ti-shield',desc:`Antireflet premium 7 couches. UV complet, antistatique, résistance aux rayures et aux taches.`},
+    {nom:'IntelliCorridor AI',icon:'ti-brain',desc:`IA adapte les corridors progressifs selon données biométriques et comportements visuels du porteur.`},
+    {nom:'StarBrite Anti-Fatigue',icon:'ti-eye',desc:`Sur-correction intermédiaire intégrée pour réduire la fatigue liée à l'utilisation intensive des écrans.`},
+    {nom:'ThinMax Freeform',icon:'ti-maximize',desc:`Surfaçage numérique point par point. Épaisseur réduite de 45 % pour les fortes corrections.`}
+   ]},
+  {id:'h4',nom:'Hoya Hoyalux iD MySelf',marque:'Hoya',gamme:'haut',
+   compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.60':250,'1.67':310,'1.74':390},achats:{'1.60':80,'1.67':100,'1.74':120},
+   traitements:[
+    {nom:'Recharge UV Blue Control',icon:'ti-sun',desc:`Bloque 100 % des UV + filtre 25 % de la lumière bleue nocive. Double protection optimale.`},
+    {nom:'HiVision Aqua',icon:'ti-droplets',desc:`Hydrophile haute performance. Résistance à l'eau, aux corps gras et aux empreintes digitales.`},
+    {nom:'SumitechV+ Freeform',icon:'ti-vector-bezier',desc:`2 millions de points de calcul. Vision périphérique sans déformation, adaptation immédiate.`},
+    {nom:'Tact Anti-Statique',icon:'ti-bolt',desc:`Repousse activement les particules de poussière. Entretien réduit, traitement longue durée.`}
+   ]},
+
+  // ══ HAUT DE GAMME — UNIFOCAUX ══
+  {id:'h5',nom:'Zeiss Single Vision Superb',marque:'Zeiss',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.50':160,'1.60':200,'1.67':260,'1.74':340},achats:{'1.50':38,'1.60':52,'1.67':72,'1.74':105},
+   traitements:[
+    {nom:'DuraVision Platinum UV',icon:'ti-shield',desc:`Antireflet le plus résistant de Zeiss, couche hydrophobe et oléophobe intégrée.`},
+    {nom:'BlueGuard Integrated',icon:'ti-device-desktop',desc:`Filtre lumière bleue dans la masse. Permanent, inaltérable, sans reflet jaune.`},
+    {nom:'UVProtect 400',icon:'ti-sun',desc:`UV 400 transparent en masse, efficace même sur les tranches du verre.`},
+    {nom:'Asphérique personnalisé',icon:'ti-maximize',desc:`Calcul asphérique adapté à la correction pour un verre fin, plat et léger.`}
+   ]},
+  {id:'h6',nom:'Essilor Crizal Forte UV',marque:'Essilor',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.50':165,'1.60':205,'1.67':265,'1.74':345},achats:{'1.50':40,'1.60':55,'1.67':75,'1.74':108},
+   traitements:[
+    {nom:'Crizal Forte',icon:'ti-shield',desc:`Antireflet premium : résistance aux rayures, à l'eau et aux taches. Nettoyage ultra-facilité.`},
+    {nom:'UV 400 Protection',icon:'ti-sun',desc:`Filtre 100 % UV jusqu'à 400 nm. Protection de la cornée et du cristallin.`},
+    {nom:'E-SPF 35',icon:'ti-sun-moon',desc:`Indice de protection solaire du verre le plus élevé de la gamme Crizal.`},
+    {nom:'Asphérique biface',icon:'ti-maximize',desc:`Surfaces asphériques avant et arrière pour vision nette du centre en périphérie.`}
+   ]},
+
+  // ══ MILIEU DE GAMME — PROGRESSIFS ══
+  {id:'m1',nom:'Essilor Varilux Comfort Max',marque:'Essilor',gamme:'milieu',
+   compatible:['progressif'],sphMax:12,cylMax:4,aspherique:true,precalibrage:true,
+   indices:{'1.50':160,'1.60':210,'1.67':260},achats:{'1.50':45,'1.60':65,'1.67':85},
+   traitements:[
+    {nom:'Crizal Prevencia',icon:'ti-shield',desc:`Antireflet sélectif : filtre la lumière bleue nocive, laisse passer la bénéfique. Protection unique.`},
+    {nom:'W.A.V.E. Technology 2',icon:'ti-wave-sine',desc:`Réduit les aberrations en vision intermédiaire de 30 %. Adaptation rapide au progressif.`},
+    {nom:'Nanoptix Anti-Balancement',icon:'ti-arrows-left-right',desc:`Réduit effets de balancement et distorsion en vision latérale pour un confort immédiat.`},
+    {nom:'Transitions Signature',icon:'ti-sun-moon',desc:`Photochromisme réactif : transparent en intérieur, teinté en extérieur en 30 secondes.`}
+   ]},
+  {id:'m2',nom:'Zeiss Progressive Plus 2',marque:'Zeiss',gamme:'milieu',
+   compatible:['progressif'],sphMax:12,cylMax:4,aspherique:true,precalibrage:true,
+   indices:{'1.50':170,'1.60':215,'1.67':270},achats:{'1.50':48,'1.60':68,'1.67':88},
+   traitements:[
+    {nom:'DuraVision BlueProtect',icon:'ti-device-desktop',desc:`Filtre anti-lumière bleue en couche antireflet. Réduit éblouissement des écrans LED.`},
+    {nom:'UVProtect Technology',icon:'ti-sun',desc:`UV 400 intégré en masse. Transparent et permanent, aucun entretien.`},
+    {nom:'Digital Lens Technology',icon:'ti-device-laptop',desc:`Zone intermédiaire élargie pour les utilisateurs d'écrans. Passage fluide loin/écran/lecture.`},
+    {nom:'EasyClean Coating',icon:'ti-droplets',desc:`Surface hydrophobe et oléophobe. Les taches s'essuient en un seul geste.`}
+   ]},
+  {id:'m3',nom:'Nikon Presio Power',marque:'Nikon',gamme:'milieu',
+   compatible:['progressif'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
+   indices:{'1.50':155,'1.60':195,'1.67':245},achats:{'1.50':42,'1.60':60,'1.67':78},
+   traitements:[
+    {nom:'SeeCoat Blue UV',icon:'ti-device-desktop',desc:`Antireflet avec filtre lumière bleue intégré. Réduction de 30 % entre 380-500 nm.`},
+    {nom:'ECC Technology',icon:'ti-eye',desc:`Eye-Correction Compensation : corrige les aberrations propres à l'œil du porteur.`},
+    {nom:'Balanced View',icon:'ti-adjustments-horizontal',desc:`Équilibre la vision binoculaire, réduit la fatigue au passage entre zones de vision.`},
+    {nom:'HardShield Treatment',icon:'ti-shield',desc:`Résistance aux rayures 2× supérieure aux verres durcis classiques.`}
+   ]},
+  {id:'m4',nom:'Hoya Lifestyle 3',marque:'Hoya',gamme:'milieu',
+   compatible:['progressif'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
+   indices:{'1.50':150,'1.60':190,'1.67':240},achats:{'1.50':40,'1.60':58,'1.67':75},
+   traitements:[
+    {nom:'iD Technology',icon:'ti-cpu',desc:`Personnalisation numérique selon monture et position de port. 1 million de points de calcul.`},
+    {nom:'Recharge UV',icon:'ti-sun',desc:`Bloque 100 % UV. Maintient ses propriétés filtrantes toute la durée de vie du verre.`},
+    {nom:'HiVision LongLife',icon:'ti-clock',desc:`Résistance accrue à l'abrasion et aux agents chimiques (crèmes solaires, solvants).`},
+    {nom:'Hard Multi-coat',icon:'ti-layers',desc:`4 couches : antistatique, anti-rayures, antireflet et déperlant en une seule opération.`}
+   ]},
+
+  // ══ MILIEU DE GAMME — UNIFOCAUX ══
+  {id:'m5',nom:'Hoya Hilux BlueControl',marque:'Hoya',gamme:'milieu',
+   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
+   indices:{'1.50':110,'1.60':140,'1.67':180},achats:{'1.50':28,'1.60':38,'1.67':52},
+   traitements:[
+    {nom:'BlueControl UV',icon:'ti-device-desktop',desc:`Filtre lumière bleue à 420 nm. Réduit reflets bleutés des écrans, moins de fatigue visuelle.`},
+    {nom:'HiVision Aqua',icon:'ti-droplets',desc:`Hydrophobe et oléophobe haute performance. Empreintes glissent facilement.`},
+    {nom:'Asphérique bi-face',icon:'ti-maximize',desc:`Avant et arrière asphériques pour vision nette du centre à la périphérie.`},
+    {nom:'Hard Coat LongLife',icon:'ti-shield',desc:`Durcissement longue durée résistant aux solvants et aux crèmes solaires.`}
+   ]},
+  {id:'m6',nom:'Essilor Eyezen Start',marque:'Essilor',gamme:'milieu',
+   compatible:['loin','pres','intermediaire'],sphMax:8,cylMax:4,aspherique:true,precalibrage:true,
+   indices:{'1.50':105,'1.60':135,'1.67':170},achats:{'1.50':26,'1.60':35,'1.67':50},
+   traitements:[
+    {nom:'Eyezen+ Focus',icon:'ti-eye',desc:`Légère sur-correction en bas du verre pour soulager les muscles ciliaires lors de la lecture sur écran.`},
+    {nom:'Crizal Easy UV',icon:'ti-shield',desc:`Antireflet avec protection UV, antistatique et résistance basique aux rayures.`},
+    {nom:'Light Scan Blue',icon:'ti-sun',desc:`Filtre sélectif des longueurs d'onde bleues nocives tout en laissant passer la lumière bénéfique.`},
+    {nom:'Asphérique',icon:'ti-maximize',desc:`Surface asphérique pour un verre plus plat, plus léger et une meilleure vision périphérique.`}
+   ]},
+
+  // ══ ENTRÉE DE GAMME ══
+  {id:'e1',nom:'BBGR Inov Access Progressif',marque:'BBGR',gamme:'entree',
+   compatible:['progressif'],sphMax:8,cylMax:3,aspherique:false,precalibrage:true,
+   indices:{'1.50':100,'1.60':135,'1.67':175},achats:{'1.50':28,'1.60':38,'1.67':52},
+   traitements:[
+    {nom:'AR Premium BBGR',icon:'ti-shield',desc:`Antireflet multicouches avec déperlant. Bonne performance pour usage quotidien standard.`},
+    {nom:'UV 380 intégré',icon:'ti-sun',desc:`Protection UV 380 en masse. Filtre les UV proches du visible.`},
+    {nom:'Durcissement Class A',icon:'ti-tool',desc:`Traitement antirayures pour usage quotidien soigneux.`},
+    {nom:'Hydrophobe Basic',icon:'ti-droplets',desc:`Légère couche hydrophobe réduisant l'accroche des taches d'eau.`}
+   ]},
+  {id:'e2',nom:'Indo Innova Access',marque:'Indo',gamme:'entree',
+   compatible:['progressif'],sphMax:8,cylMax:3,aspherique:false,precalibrage:true,
+   indices:{'1.50':95,'1.60':125,'1.67':165},achats:{'1.50':25,'1.60':35,'1.67':50},
+   traitements:[
+    {nom:'Xtreme Coat',icon:'ti-shield',desc:`Antireflet résistant aux rayures avec couche déperlante intégrée.`},
+    {nom:'UV 400',icon:'ti-sun',desc:`Bloque 100 % des UV jusqu'à 400 nm. Protection optimale.`},
+    {nom:'Easy Clean',icon:'ti-droplets',desc:`Surface oléophobe facilitant l'élimination des empreintes digitales.`},
+    {nom:'Design Soft',icon:'ti-adjustments',desc:`Corridor souple pour une adaptation rapide et confortable au progressif.`}
+   ]},
+  {id:'e3',nom:'Essilor Airwear Polycarbonate',marque:'Essilor',gamme:'entree',
+   compatible:['loin','pres','intermediaire'],sphMax:6,cylMax:2,aspherique:false,precalibrage:true,
+   indices:{'1.59':75,'1.60':85},achats:{'1.59':18,'1.60':22},
+   traitements:[
+    {nom:'Crizal Easy UV',icon:'ti-shield',desc:`Antireflet d'entrée de gamme avec protection UV basique et réduction des reflets.`},
+    {nom:'Polycarbonate IK10',icon:'ti-shield-check',desc:`10× plus résistant aux chocs que le verre minéral. Idéal enfants, sportifs, professions à risque.`},
+    {nom:'Durcissement Standard',icon:'ti-tool',desc:`Résistance basique aux rayures du quotidien.`},
+    {nom:'UV 380 intégré',icon:'ti-sun',desc:`Filtre UV intégré dans la masse du polycarbonate.`}
+   ]},
+  {id:'e4',nom:'BBGR Orma 1.5 Confort',marque:'BBGR',gamme:'entree',
+   compatible:['loin','pres','intermediaire'],sphMax:4,cylMax:2,aspherique:false,precalibrage:true,
+   indices:{'1.50':60},achats:{'1.50':15},
+   traitements:[
+    {nom:'Ormix AR Standard',icon:'ti-shield',desc:`Antireflet multicouches basique. Réduit les reflets parasites en lumière artificielle.`},
+    {nom:'Durcissement Class A',icon:'ti-tool',desc:`Protection antirayures pour usage quotidien soigneux.`},
+    {nom:'UV 380 de série',icon:'ti-sun',desc:`Protection UV 380 incluse de série dans tous les verres BBGR Orma.`},
+    {nom:'Hydrophobe Basic',icon:'ti-droplets',desc:`Légère couche hydrophobe réduisant l'accroche des taches d'eau.`}
+   ]},
+];
+
+// Verres 2e paire
+const catalogue2e = [
+  {id:'p1',nom:'Hoya Sync III',marque:'Hoya',gamme:'milieu',
+   compatible:['loin','pres','intermediaire','progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.60':160,'1.67':200},achats:{'1.60':38,'1.67':52},
+   traitements:[
+    {nom:'Boost Zone',icon:'ti-zoom-in',desc:`+0.58 D en vision de près pour réduire la fatigue des personnes travaillant sur écran toute la journée.`},
+    {nom:'HiVision Aqua UV',icon:'ti-droplets',desc:`Traitement hydrophobe et oléophobe de haute performance. Résistance à l'eau et aux corps gras.`},
+    {nom:'BlueControl UV',icon:'ti-device-desktop',desc:`Filtre lumière bleue 420 nm. Réduit les reflets bleutés des écrans numériques.`},
+    {nom:'Tac Hard Coat',icon:'ti-shield',desc:`Durcissement par immersion TAC, couverture totale et uniforme des deux faces.`}
+   ]},
+  {id:'p2',nom:'Zeiss Digital Lens',marque:'Zeiss',gamme:'milieu',
+   compatible:['loin','pres','intermediaire','progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.60':170,'1.67':215},achats:{'1.60':42,'1.67':58},
+   traitements:[
+    {nom:'Digital Inside 2.0',icon:'ti-cpu',desc:`Optimise les zones de vision intermédiaire et de près pour les utilisateurs numériques intensifs.`},
+    {nom:'BlueGuard Integrated',icon:'ti-device-desktop',desc:`Protection lumière bleue dans la masse du verre. Permanente, inaltérable.`},
+    {nom:'DuraVision BlueProtect UV',icon:'ti-shield',desc:`Antireflet avec couche antistatique, déperlante et filtrante lumière bleue. 5 ans de garantie.`},
+    {nom:'UVProtect 400',icon:'ti-sun',desc:`UV 400 transparent en masse, efficace sur toute la surface y compris les tranches.`}
+   ]},
+  {id:'p3',nom:'BBGR Inov Blue Light',marque:'BBGR',gamme:'entree',
+   compatible:['loin','pres','intermediaire','progressif'],sphMax:20,cylMax:6,aspherique:false,precalibrage:true,
+   indices:{'1.50':90,'1.60':115},achats:{'1.50':20,'1.60':28},
+   traitements:[
+    {nom:'Blue Light Filter 35%',icon:'ti-device-desktop',desc:`Filtre 35 % de la lumière bleue nocive. Idéal patients utilisateurs d'écrans toute la journée.`},
+    {nom:'Antireflet Premium',icon:'ti-shield',desc:`Antireflet multicouches renforcé avec couche déperlante et oléophobe.`},
+    {nom:'Durcissement renforcé',icon:'ti-tool',desc:`Surface durcie 2× plus résistante aux rayures qu'un traitement standard.`},
+    {nom:'UV 400 intégré',icon:'ti-sun',desc:`Protection UV complète jusqu'à 400 nm intégrée dans la masse du verre.`}
+   ]},
+  {id:'p4',nom:'Essilor Eyezen Sun',marque:'Essilor',gamme:'milieu',
+   compatible:['loin','pres','intermediaire','progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:false,
+   indices:{'1.60':155,'1.67':195},achats:{'1.60':36,'1.67':50},
+   traitements:[
+    {nom:'Eyezen+ Focus',icon:'ti-eye',desc:`Sur-correction de base pour soulager la fatigue lors de l'utilisation intensive des écrans.`},
+    {nom:'Crizal Sun UV',icon:'ti-sun',desc:`Antireflet spécial soleil avec protection UV renforcée E-SPF 25.`},
+    {nom:'Xperio Sun',icon:'ti-sun-moon',desc:`Traitement photochromique solaire : s'adapte aux conditions lumineuses extérieures.`},
+    {nom:'Light Scan',icon:'ti-brightness',desc:`Filtre sélectif des longueurs d'onde bleues nocives.`}
+   ]},
+];
+
+// ─── LOGIQUE OPTIQUE ─────────────────────────────────────────
+
+function getSphMax(od,og){return Math.max(Math.abs(parseFloat(od)||0),Math.abs(parseFloat(og)||0))}
+function getCylMax(od,og){return Math.max(Math.abs(parseFloat(od)||0),Math.abs(parseFloat(og)||0))}
+
+function getIndiceRec(sphMax,cylMax){
+  const eq=sphMax+cylMax/2;
+  if(eq<=2.5) return '1.50';
+  if(eq<=4.5) return '1.60';
+  if(eq<=7.0) return '1.67';
+  return '1.74';
+}
+
+function getIndiceLabel(i){
+  return {'1.50':'1.50 — Standard','1.59':'1.59 — Polycarbonate','1.60':'1.60 — Aminci','1.67':'1.67 — Très aminci','1.74':'1.74 — Ultra-mince'}[i]||i;
+}
+
+function getConseils(sphMax,cylMax,vision){
+  const eq=sphMax+cylMax/2;
+  const c=[];
+  if(eq>7) c.push({icon:'ti-stack-2',t:`Correction très forte (éq. > 7 D) : verre ultra-mince 1.74 indispensable. Réduction d'épaisseur de bord de 40 % vs 1.60.`});
+  else if(eq>4.5) c.push({icon:'ti-stack-2',t:`Correction forte (éq. > 4.5 D) : indice 1.67 recommandé. Verre plus fin, plus léger, meilleure esthétique de face.`});
+  else if(eq>2.5) c.push({icon:'ti-stack-2',t:`Correction modérée : indice 1.60 aminci recommandé. Bon équilibre épaisseur / prix / esthétique.`});
+  else c.push({icon:'ti-check',t:`Correction faible : indice 1.50 standard suffisant. Un 1.60 asphérique reste conseillé pour l'esthétique en monture fine.`});
+  if(cylMax>=1.25) c.push({icon:'ti-refresh',t:`Astigmatisme ≥ 1.25 D : verre torique obligatoire. Précalibrage recommandé pour un centrage optimal et éviter les aberrations résiduelles.`});
+  if(cylMax>=2.0) c.push({icon:'ti-alert-triangle',t:`Fort astigmatisme (cyl ≥ 2 D) : surfaçage numérique Freeform conseillé pour corriger les aberrations de l'astigmatisme élevé.`});
+  if(vision==='progressif' && eq>5) c.push({icon:'ti-adjustments',t:`Progressif forte correction : verre avec précalibrage monture recommandé pour maximiser les zones utiles de vision.`});
+  if(sphMax>=5 && !cylMax) c.push({icon:'ti-maximize',t:`Verre asphérique conseillé : réduit les déformations périphériques typiques des fortes sphères et améliore le champ visuel net.`});
+  if(selectedMonture === 'nylor' || selectedMonture === 'percee'){
+    c.push({icon:'ti-alert-triangle',t:'Monture '+(selectedMonture==='nylor'?'Nylor':'Percée')+' : indice minimum 1.60 appliqué. Précalibrage obligatoire pour garantir la solidité du verre dans la monture.'});
+  }
+  return c;
+}
+
+function getBestIndice(v,rec){
+  const order=['1.50','1.59','1.60','1.67','1.74'];
+  const ri=order.indexOf(rec);
+  for(let i=ri;i<order.length;i++) if(v.indices[order[i]]!=null) return order[i];
+  for(let i=ri-1;i>=0;i--) if(v.indices[order[i]]!=null) return order[i];
+  return null;
+}
+
+// ─── STATE & SELECT GENERATORS ───────────────────────────────
+let state={mutuelle:null,vision:null,verre1:null};
+let _backFrom2 = 1;
+let _backFrom3b = '3a';
+
+function genSph(){let o='';for(let v=-20;v<=20;v+=0.25) o+=`<option value="${v}" ${v===0?'selected':''}>${v>0?'+':''}${v.toFixed(2)}</option>`;return o}
+function genCyl(){let o='';for(let v=-6;v<=6;v+=0.25) o+=`<option value="${v}" ${v===0?'selected':''}>${v>0?'+':''}${v.toFixed(2)}</option>`;return o}
+function genAdd(){let o='<option value="">--</option>';for(let v=0.75;v<=3.5;v+=0.25) o+=`<option value="${v}">+${v.toFixed(2)}</option>`;return o}
+
+// ─── MUTUELLE LOGOS ──────────────────────────────────────────
+const mutLogos={
+  cb:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#7B2D8B"/><text x="40" y="13" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="Arial">CARTE</text><text x="40" y="24" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="Arial">BLANCHE</text><text x="40" y="33" text-anchor="middle" fill="#dbb0f0" font-size="6.5" font-family="Arial">PARTENAIRES</text></svg>`,
+  sc:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#00923F"/><text x="40" y="15" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial">SANTÉCLAIR</text><line x1="10" y1="20" x2="70" y2="20" stroke="white" stroke-width="0.8" opacity="0.5"/><text x="40" y="30" text-anchor="middle" fill="#a0e8c0" font-size="7.5" font-family="Arial">réseau de soins</text></svg>`,
+  klesia:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#003C8F"/><text x="40" y="16" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial">klesia</text><rect x="10" y="20" width="60" height="2" rx="1" fill="#F5A800"/><text x="40" y="31" text-anchor="middle" fill="#a0b8e8" font-size="7" font-family="Arial">prévoyance · santé</text></svg>`,
+  mgen:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#E2001A"/><text x="40" y="20" text-anchor="middle" fill="white" font-size="15" font-weight="bold" font-family="Arial">MGEN</text><text x="40" y="31" text-anchor="middle" fill="#ffaaaa" font-size="7" font-family="Arial">mutuelle générale</text></svg>`,
+  malakoff:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#0055A4"/><text x="40" y="13" text-anchor="middle" fill="white" font-size="7.5" font-weight="bold" font-family="Arial">MALAKOFF</text><text x="40" y="23" text-anchor="middle" fill="#F5A800" font-size="7.5" font-weight="bold" font-family="Arial">HUMANIS</text><text x="40" y="32" text-anchor="middle" fill="#a0c0e8" font-size="6.5" font-family="Arial">groupe de protection</text></svg>`,
+  harmonie:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#78BE20"/><text x="40" y="14" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">HARMONIE</text><text x="40" y="24" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">MUTUELLE</text><text x="40" y="33" text-anchor="middle" fill="#d0f0a0" font-size="6.5" font-family="Arial">groupe mutualiste</text></svg>`,
+  ag2r:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#C8002B"/><text x="40" y="15" text-anchor="middle" fill="white" font-size="10.5" font-weight="bold" font-family="Arial">AG2R</text><text x="40" y="25" text-anchor="middle" fill="white" font-size="7" font-family="Arial">LA MONDIALE</text><text x="40" y="33" text-anchor="middle" fill="#f0a0b0" font-size="6" font-family="Arial">groupe de protection</text></svg>`,
+  apicil:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#009BB4"/><text x="40" y="20" text-anchor="middle" fill="white" font-size="13" font-weight="bold" font-family="Arial">APICIL</text><text x="40" y="31" text-anchor="middle" fill="#a0e0f0" font-size="7" font-family="Arial">groupe de protection</text></svg>`,
+  swisslife:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#E30613"/><rect x="34" y="4" width="12" height="5" rx="1" fill="white"/><rect x="29" y="7" width="22" height="5" rx="1" fill="white"/><text x="40" y="23" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">SWISS LIFE</text><text x="40" y="32" text-anchor="middle" fill="#f0a0a0" font-size="6.5" font-family="Arial">assurance · épargne</text></svg>`,
+  inter:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#004F9F"/><text x="40" y="15" text-anchor="middle" fill="white" font-size="9.5" font-weight="bold" font-family="Arial">INTÉRIALE</text><line x1="15" y1="19" x2="65" y2="19" stroke="#F5A800" stroke-width="1.5"/><text x="40" y="30" text-anchor="middle" fill="#a0c0e8" font-size="7" font-family="Arial">mutuelle fonctionnaires</text></svg>`,
+};
+
+function filterMut(){renderMutuelles(document.getElementById('mut-search').value.toLowerCase())}
+function renderMutuelles(f=''){
+  const list=f?mutuelles.filter(m=>m.label.toLowerCase().includes(f)):mutuelles;
+  const grid=document.getElementById('mut-grid');
+  if(!grid) return;
+  grid.innerHTML=list.map(m=>`
+    <div class="mut-card" onclick="selectMut('${m.id}')">
+      <div style="display:flex;justify-content:center">${mutLogos[m.id]||''}</div>
+      <div class="label">${m.label}</div>
+      <div class="sub">Monture ${m.plafond_monture} €<br>Verre ${m.plafond_verre} €</div>
+    </div>`).join('');
+}
+
+function selectMut(id){
+  state.mutuelle=mutuelles.find(m=>m.id===id);
+  window._priseType = null;
+  _backFrom2 = 1;
+  document.getElementById('mut-label-h').textContent=`Mutuelle : ${state.mutuelle.label}`;
+  go(2);
+}
+
+function selectVision(id,label){
+  state.vision={id,label};
+  document.getElementById('vision-label-h').textContent='Vision : '+label;
+  const needAdd=id==='progressif'||id==='pres';
+  document.getElementById('od-add-row').style.display=needAdd?'block':'none';
+  document.getElementById('og-add-row').style.display=needAdd?'block':'none';
+  go(3);
+}
+
+// ─── RENDER VERRE CARD ───────────────────────────────────────
+function renderVerreCard(v,i,showTop,paire2=false){
+  const marge=v.vente-v.achat;
+  const taux=Math.round(marge/v.vente*100);
+  const rac=state.mutuelle?Math.max(0,v.vente*2-state.mutuelle.plafond_verre*2):v.vente*2;
+  const gc=v.gamme==='haut'?'haut-gamme':v.gamme==='milieu'?'milieu-gamme':'entree-gamme';
+  const traitKw = getTraitKeywords ? getTraitKeywords() : new Set();
+  const trHTML=v.traitements.map(t=>{
+    const nom = t.nom.toLowerCase();
+    const highlight = [...traitKw].some(k=>nom.includes(k));
+    return `<div class="trait-item" style="${highlight?'border-color:#378ADD;background:#0f1e30;':''}">
+      <div class="trait-name"><i class="ti ${t.icon}"></i>${t.nom}${highlight?'<span style="font-size:10px;background:#185FA5;color:#fff;padding:2px 7px;border-radius:20px;margin-left:6px">✓ Sélectionné</span>':''}</div>
+      <div class="trait-desc">${t.desc}</div>
+    </div>`;
+  }).join('');
+  const btnP2=paire2?'':`<button class="btn-choisir" onclick="event.stopPropagation();choisirPaire2('${v.id}')"><i class="ti ti-copy"></i> Choisir & voir la 2ème paire</button>`;
+  const btnCompare=`<button class="btn-comparer" id="cmp-${v.id}" onclick="event.stopPropagation();toggleCompareBtn(this,'${v.id}')"><i class="ti ti-layout-columns"></i> Comparer</button>`;
+  const indiceChip=v.indiceChoisi?`<span class="chip indice"><strong>${getIndiceLabel(v.indiceChoisi)}</strong></span>`:'';
+  const aspChip=v.aspherique?`<span class="chip" style="background:#1a2a1a;border-color:#2a4a2a;color:#80c060"><strong>Asphérique</strong></span>`:'';
+  const preChip=v.precalibrage?`<span class="chip" style="background:#1a1a2a;border-color:#3a3a6a;color:#8080e0"><strong>Précalibrage</strong></span>`:'';
+  return `
+    <div class="verre-card ${gc} ${showTop&&i===0?'top':''}" id="vc-${v.id}">
+      ${showTop&&i===0?'<div class="badge-top"><i class="ti ti-trophy"></i> Meilleure marge</div>':''}
+      <div class="verre-card-header" onclick="toggleVC('${v.id}')">
+        <div class="verre-info">
+          <div class="verre-name">${v.nom}</div>
+          <div class="verre-brand">${v.marque}</div>
+          <div class="verre-chips">
+            ${indiceChip}${aspChip}${preChip}
+            ${currentUser && currentUser.admin ? `<span class="chip">Achat : <strong>${v.achat} €</strong></span>` : ''}
+            <span class="chip">Vente : <strong>${v.vente} €</strong></span>
+            ${!paire2?`<span class="chip rac">RAC : <strong>${rac} €</strong></span>`:''}
+          </div>
+        </div>
+        <div class="verre-right">
+          <span class="badge ${taux>=45?'badge-purple':taux>=35?'badge-green':'badge-amber'}">${taux} % marge</span>
+          <span class="marge-mini">${currentUser && currentUser.admin ? '+' + (marge*2) + ' €' : taux + ' %'}</span>
+          <i class="ti ti-chevron-down expand-icon"></i>
+        </div>
+      </div>
+      <div class="verre-dropdown">
+        <div class="dropdown-inner">
+          <div style="font-size:13px;font-weight:700;color:#e0e0e0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-info-circle" style="color:var(--blue-400)"></i> Traitements inclus
+          </div>
+          <div class="traitements-grid">${trHTML}</div>
+          <div class="marge-line">
+            <span class="marge-label"><i class="ti ti-trending-up" style="font-size:14px"></i> ${currentUser && currentUser.admin ? 'Bénéfice par paire' : 'Marge générée'}</span>
+            <span class="marge-val">${currentUser && currentUser.admin ? '+ '+(marge*2)+' €' : taux+' %'}</span>
+          </div>
+          ${currentUser && currentUser.admin ? '' : `<div style="font-size:12px;color:#aaa;margin-top:6px;display:flex;align-items:center;gap:5px"><i class="ti ti-info-circle" style="color:#378ADD"></i> Verre recommandé — marge optimisée pour le magasin</div>`}
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+            ${btnCompare}
+            ${btnP2}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleVC(id){document.getElementById('vc-'+id).classList.toggle('open')}
+
+// ─── SHOW VERRES ─────────────────────────────────────────────
+// ─── MONTURE ─────────────────────────────────────────────────
+let selectedMonture = null;
+
+function goMonture(){
+  // For 100% Sante - no monture choice needed (cerclée forced)
+  if(window._priseType === 'sante'){
+    selectedMonture = 'cercle';
+    goTraitements();
+    return;
+  }
+  // Check vision is selected
+  if(!state.vision){
+    showToast('Veuillez d abord choisir le type de vision');
+    go(2);
+    return;
+  }
+  selectedMonture = null;
+  ['cercle','nylor','percee'].forEach(m => {
+    document.getElementById('mc-'+m).classList.remove('selected');
+  });
+  document.getElementById('monture-vision-label').textContent = 'Vision : '+state.vision.label;
+  go('3a');
+}
+
+function selectMonture(type){
+  selectedMonture = type;
+  ['cercle','nylor','percee'].forEach(m => {
+    document.getElementById('mc-'+m).classList.remove('selected');
+  });
+  document.getElementById('mc-'+type).classList.add('selected');
+
+  // Show alert for nylor/percee
+  if(type === 'nylor' || type === 'percee'){
+    showToast('⚠️ Indice min. 1.60 + précalibrage obligatoire');
+  }
+
+  // Go to traitements after short delay
+  setTimeout(() => goTraitements(), 300);
+}
+
+// ─── TRAITEMENTS ─────────────────────────────────────────────
+let selectedTraits = new Set();
+
+function goTraitements(){
+  selectedTraits = new Set();
+  ['ar','lb','tr'].forEach(t => {
+    document.getElementById('tc-'+t).classList.remove('selected');
+    document.getElementById('tc-'+t+'-check').className='ti ti-circle';
+    document.getElementById('tc-'+t+'-check').style.color='#333';
+  });
+  const montureLabel = selectedMonture==='cercle'?'Cerclée':selectedMonture==='nylor'?'Nylor':selectedMonture==='percee'?'Percée':'—';
+  document.getElementById('trait-vision-label').textContent = 'Vision : '+state.vision.label+' · Monture : '+montureLabel;
+
+  // For 100% Santé: only anti-reflet available
+  const isSante = window._priseType === 'sante';
+  document.getElementById('tc-lb').style.display = isSante ? 'none' : 'flex';
+  document.getElementById('tc-tr').style.display = isSante ? 'none' : 'flex';
+  _backFrom3b = isSante ? '3' : '3a';
+  if(isSante){
+    document.getElementById('multi-hint-text').textContent = `100% Santé : traitement anti-reflet inclus obligatoirement`;
+    toggleTrait('ar');
+  } else {
+    document.getElementById('multi-hint-text').textContent = `Sélectionnez un ou plusieurs traitements`;
+  }
+  go('3b');
+}
+
+function toggleTrait(t){
+  if(selectedTraits.has(t)){
+    selectedTraits.delete(t);
+    document.getElementById('tc-'+t).classList.remove('selected');
+    document.getElementById('tc-'+t+'-check').className='ti ti-circle';
+    document.getElementById('tc-'+t+'-check').style.color='#333';
+  } else {
+    selectedTraits.add(t);
+    document.getElementById('tc-'+t).classList.add('selected');
+    document.getElementById('tc-'+t+'-check').className='ti ti-circle-check';
+    const colors = {ar:'#60aaee',lb:'#c080f0',tr:'#70c8a0',combo:'#e8b870'};
+    document.getElementById('tc-'+t+'-check').style.color=colors[t];
+  }
+}
+
+function showVerresFromTrait(){
+  if(selectedTraits.size === 0 && window._priseType !== 'sante'){
+    showToast(`Sélectionnez au moins un traitement !`);
+    return;
+  }
+  try {
+    showVerres();
+  } catch(e) {
+    console.error('showVerres error:', e);
+    showToast('Erreur: ' + e.message);
+  }
+}
+
+// Map traits to treatment keywords for filtering
+function getTraitKeywords(){
+  const map = {
+    ar: ['antireflet','crizal','dura','hivision','seecoat','glacier','xtreme','ormix','ar'],
+    lb: ['blue','bleu','lumière','blueguard','blueprotect','bluecontrol','light scan','prevencia'],
+    tr: ['transitions','photochrom','xperio','sun','soleil'],
+
+  };
+  const keywords = new Set();
+  selectedTraits.forEach(t => {
+    if(map[t]) map[t].forEach(k => keywords.add(k));
+  });
+  return keywords;
+}
+
+function showVerres(){
+  // Safety checks
+  if(!state.mutuelle){ showToast('Erreur: mutuelle non sélectionnée'); go(1); return; }
+  if(!state.vision){ showToast('Erreur: vision non sélectionnée'); go(2); return; }
+  const odSph=document.getElementById('od-sph').value;
+  const ogSph=document.getElementById('og-sph').value;
+  const odCyl=document.getElementById('od-cyl').value;
+  const ogCyl=document.getElementById('og-cyl').value;
+  const odAxe=document.getElementById('od-axe').value;
+  const ogAxe=document.getElementById('og-axe').value;
+  const odAdd=document.getElementById('od-add').value;
+  const ogAdd=document.getElementById('og-add').value;
+
+  const sphMax=getSphMax(odSph,ogSph);
+  const cylMax=getCylMax(odCyl,ogCyl);
+  let indiceRec=getIndiceRec(sphMax,cylMax);
+  let forcePrecalibrage = false;
+
+  // Monture rules
+  if(selectedMonture === 'nylor' || selectedMonture === 'percee'){
+    // Force minimum 1.60
+    if(indiceRec === '1.50' || indiceRec === '1.59') indiceRec = '1.60';
+    forcePrecalibrage = true;
+  }
+
+  // Recap
+  const montureLabel = selectedMonture==='cercle'?'Cerclée':selectedMonture==='nylor'?'Nylor (semi-percée)':selectedMonture==='percee'?'Percée':'-';
+  document.getElementById('recap').innerHTML=`
+    <div class="summary-row"><span class="key"><i class="ti ti-shield" style="font-size:14px"></i> Mutuelle</span><span class="val">${state.mutuelle.label}</span></div>
+    <div class="summary-row"><span class="key"><i class="ti ti-eye" style="font-size:14px"></i> Vision</span><span class="val">${state.vision.label}</span></div>
+    <div class="summary-row"><span class="key"><i class="ti ti-eyeglass" style="font-size:14px"></i> Monture</span><span class="val">${montureLabel}${forcePrecalibrage?" · <span style='color:#c080f0'>Précalibrage ✓</span>":""}</span></div>
+    <div class="summary-row"><span class="key">OD</span><span class="val">${odSph||'—'} / ${odCyl||'0'} / ${odAxe||'—'}°${odAdd?' add +'+odAdd:''}</span></div>
+    <div class="summary-row"><span class="key">OG</span><span class="val">${ogSph||'—'} / ${ogCyl||'0'} / ${ogAxe||'—'}°${ogAdd?' add +'+ogAdd:''}</span></div>
+    <div class="summary-row"><span class="key"><i class="ti ti-stack-2" style="font-size:14px"></i> Indice recommandé</span><span class="val" style="color:#f0c040" id="indice-recap-val">${getIndiceLabel(indiceRec)}</span></div>
+    <div class="summary-row"><span class="key"><i class="ti ti-coin" style="font-size:14px"></i> Remb. / verre</span><span class="val">${state.mutuelle.plafond_verre} €</span></div>`;
+
+  // Conseils
+  const conseils=getConseils(sphMax,cylMax,state.vision.id);
+  let conseilHTML='';
+  if(conseils.length){
+    conseilHTML=`<div class="conseil-box">
+      <div class="conseil-title"><i class="ti ti-bulb" style="font-size:15px"></i> Conseils optiques</div>
+      ${conseils.map(c=>`<div class="conseil-item"><i class="ti ${c.icon}"></i>${c.t}</div>`).join('')}
+    </div>`;
+  }
+
+  // Filter + best indice
+  // Choose catalogue based on prise type
+  const activeCatalogue = (window._priseType === 'sante') ? verresClasseA : catalogue;
+
+  const compat=activeCatalogue.filter(v=>{
+    if(!v.compatible.includes(state.vision.id)) return false;
+    if(sphMax>v.sphMax) return false;
+    if(cylMax>v.cylMax) return false;
+    if(forcePrecalibrage && !v.precalibrage) return false;
+    return true;
+  }).map(v=>{
+    const ind=getBestIndice(v,indiceRec);
+    if(!ind) return null;
+    const vente=v.indices[ind],achat=v.achats[ind];
+    if(!vente||!achat) return null;
+    return{...v,indiceChoisi:ind,vente,achat,marge:vente-achat,taux:Math.round((vente-achat)/vente*100)};
+  }).filter(Boolean).sort((a,b)=>b.marge-a.marge);
+
+  const haut=compat.filter(v=>v.gamme==='haut');
+  const mil=compat.filter(v=>v.gamme==='milieu');
+  const ent=compat.filter(v=>v.gamme==='entree');
+
+  // Update recap to show actual indice used (from best verre)
+  if(compat.length > 0){
+    const actualIndice = compat[0].indiceChoisi;
+    const recapEl = document.getElementById('indice-recap-val');
+    if(recapEl){
+      if(actualIndice !== indiceRec){
+        recapEl.innerHTML = getIndiceLabel(indiceRec) + ' <span style="font-size:11px;color:#aaa">→ ' + getIndiceLabel(actualIndice) + ' (selon dispo)</span>';
+      } else {
+        recapEl.textContent = getIndiceLabel(actualIndice);
+      }
+    }
+  }
+
+  let html=conseilHTML;
+  if(haut.length){html+=`<div class="gamme-header gamme-haut"><i class="ti ti-diamond"></i> Haut de gamme <span class="gamme-desc">Technologie premium · Marges maximales</span></div>`;haut.forEach((v,i)=>html+=renderVerreCard(v,i,true));}
+  if(mil.length){html+=`<div class="gamme-header gamme-milieu"><i class="ti ti-star"></i> Milieu de gamme <span class="gamme-desc">Excellent rapport qualité / prix</span></div>`;mil.forEach((v,i)=>html+=renderVerreCard(v,i,true));}
+  if(ent.length){html+=`<div class="gamme-header gamme-entree"><i class="ti ti-leaf"></i> Entrée de gamme <span class="gamme-desc">Accessibles · Bonne protection</span></div>`;ent.forEach((v,i)=>html+=renderVerreCard(v,i,true));}
+  if(!compat.length) html+=`<div style="text-align:center;padding:30px;color:#aaa"><i class="ti ti-alert-circle" style="font-size:32px;display:block;margin-bottom:10px"></i>Aucun verre compatible avec cette correction.</div>`;
+
+  // Add trait info to recap
+  const traitLabels = {ar:'Anti-reflet',lb:'Filtre lumière bleue',tr:'Transitions'};
+  const traitStr = [...selectedTraits].map(t=>traitLabels[t]).join(' + ');
+  document.getElementById('recap').innerHTML += `<div class="summary-row"><span class="key"><i class="ti ti-sparkles" style="font-size:14px"></i> Traitement</span><span class="val">${traitStr}</span></div>`;
+
+  document.getElementById('verres-list').innerHTML=html;
+  go(4);
+}
+
+// ─── 2EME PAIRE ──────────────────────────────────────────────
+function choisirPaire2(vid){
+  state.verre1 = catalogue.find(v=>v.id===vid) || verresClasseA.find(v=>v.id===vid);
+  document.getElementById('paire1-recap').innerHTML=`
+    <i class="ti ti-check-circle"></i>
+    <div><div class="pr-label">1ère paire choisie</div><div class="pr-name">${state.verre1.nom} — ${state.verre1.marque}</div></div>`;
+
+  const sphMax=getSphMax(document.getElementById('od-sph').value,document.getElementById('og-sph').value);
+  const cylMax=getCylMax(document.getElementById('od-cyl').value,document.getElementById('og-cyl').value);
+  let indiceRec=getIndiceRec(sphMax,cylMax);
+  let forcePrecalibrage = false;
+
+  // Monture rules
+  if(selectedMonture === 'nylor' || selectedMonture === 'percee'){
+    // Force minimum 1.60
+    if(indiceRec === '1.50' || indiceRec === '1.59') indiceRec = '1.60';
+    forcePrecalibrage = true;
+  }
+
+  const sorted=(window._priseType==='sante'?[]:catalogue2e).map(v=>{
+    const ind=getBestIndice(v,indiceRec);
+    if(!ind) return null;
+    const vente=v.indices[ind],achat=v.achats[ind];
+    if(!vente||!achat) return null;
+    return{...v,indiceChoisi:ind,vente,achat,marge:vente-achat,taux:Math.round((vente-achat)/vente*100)};
+  }).filter(Boolean).sort((a,b)=>b.marge-a.marge);
+
+  document.getElementById('verres-list-2').innerHTML=sorted.map((v,i)=>renderVerreCard(v,i,true,true)).join('');
+  go(5);
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────
+function go(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('s'+n);
+  if(el) el.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(n==='0demo'){
+    setTimeout(()=>{
+      initDemo();
+    },50);
+  }
+}
+
+// ─── LOGIN ───────────────────────────────────────────────────
+// ─── SUPABASE CONFIG ─────────────────────────────────────────
+const SB_URL = 'https://uvslxsmjzmyaoxxugjtn.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2c2x4c21qem15YW94eHVnanRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODQ1OTEsImV4cCI6MjA5NjE2MDU5MX0.f2A-am6gw1XK5Qm9IF6H7fW--T60x88XfhaH8w1bMks';
+
+async function sbFetch(path, options={}){
+  const res = await fetch(SB_URL + path, {
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...( options.headers || {})
+    },
+    ...options
+  });
+  if(!res.ok){
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+let currentUser = null;
+
+async function doLogin(){
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  const btn = document.querySelector('.btn-login');
+
+  if(!u || !p){ err.style.display='block'; err.textContent='Remplissez tous les champs.'; return; }
+
+  btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Connexion...';
+  btn.disabled = true;
+
+  try {
+    const data = await sbFetch(`/rest/v1/comptes?username=eq.${encodeURIComponent(u)}&password=eq.${encodeURIComponent(p)}&select=*`);
+    if(data && data.length > 0){
+      currentUser = data[0];
+      document.getElementById('login-screen').style.display='none';
+      err.style.display='none';
+      document.getElementById('logout-bar').style.display='flex';
+      document.getElementById('user-display-name').textContent=currentUser.nom;
+      document.getElementById('user-role-badge').textContent=currentUser.admin?'👑 Admin':'Opticien';
+      if(currentUser.admin){ document.getElementById('admin-btn').style.display='flex'; document.getElementById('verres-admin-btn').style.display='flex'; }
+      showToast('Bienvenue, ' + currentUser.nom + ' !');
+    } else {
+      err.style.display='block';
+      err.innerHTML='<i class="ti ti-alert-circle"></i> Identifiant ou mot de passe incorrect';
+      document.getElementById('login-pass').value='';
+      document.getElementById('login-pass').focus();
+      document.querySelector('.login-box').style.animation='shake 0.4s ease';
+      setTimeout(()=>document.querySelector('.login-box').style.animation='',400);
+    }
+  } catch(e) {
+    err.style.display='block';
+    if(e.message.includes('POLICY_ERROR')){
+      err.innerHTML='<i class="ti ti-lock"></i> Configuration Supabase incomplète. Exécutez les policies RLS.';
+      console.error(e.message);
+    } else {
+      err.innerHTML='<i class="ti ti-wifi-off"></i> Erreur de connexion. Vérifiez votre connexion internet.';
+    }
+  } finally {
+    btn.innerHTML='<i class="ti ti-login"></i> Se connecter';
+    btn.disabled=false;
+  }
+}
+
+function openAdmin(){
+  document.getElementById('admin-screen').classList.add('open');
+  renderAdminListe();
+}
+function closeAdmin(){
+  document.getElementById('admin-screen').classList.remove('open');
+  document.getElementById('admin-msg').className='admin-msg';
+}
+
+async function renderAdminListe(){
+  const liste = document.getElementById('admin-liste');
+  liste.innerHTML='<div style="text-align:center;padding:16px;color:#aaa"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite;font-size:20px"></i></div>';
+  try{
+    const comptes = await sbFetch('/rest/v1/comptes?select=*&order=created_at.asc');
+    liste.innerHTML = comptes.map(c=>`
+      <div class="admin-compte">
+        <div>
+          <div class="admin-compte-info"><i class="ti ti-user" style="font-size:13px;margin-right:4px"></i>${c.nom} <span style="color:#aaa;font-weight:400">(${c.username})</span></div>
+          <div class="admin-compte-role">${c.admin?'<span style="color:#60aaee">👑 Administrateur</span>':'Opticien'}</div>
+        </div>
+        <button class="btn-del" onclick="delCompte('${c.id}','${c.username}')" ${c.admin?'disabled':''} title="${c.admin?'Compte admin non supprimable':'Supprimer'}">
+          <i class="ti ti-trash"></i> ${c.admin?'Admin':'Supprimer'}
+        </button>
+      </div>`).join('');
+  } catch(e) {
+    liste.innerHTML='<div style="color:#ff8080;font-size:13px;padding:10px">Erreur de chargement.</div>';
+  }
+}
+
+async function addCompte(){
+  const u = document.getElementById('new-user').value.trim().toLowerCase();
+  const n = document.getElementById('new-nom').value.trim();
+  const p = document.getElementById('new-pass').value;
+  if(!u||!n||!p){ showAdminMsg('Remplissez tous les champs.','err'); return; }
+  if(p.length<6){ showAdminMsg('Mot de passe trop court (6 caractères min).','err'); return; }
+  const btn = document.querySelector('.btn-admin-add');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Création...';
+  try{
+    await sbFetch('/rest/v1/comptes', {
+      method:'POST',
+      body: JSON.stringify({username:u, password:p, nom:n, admin:false})
+    });
+    document.getElementById('new-user').value='';
+    document.getElementById('new-nom').value='';
+    document.getElementById('new-pass').value='';
+    await renderAdminListe();
+    showAdminMsg('Compte "'+n+'" créé avec succès !','ok');
+  } catch(e){
+    if(e.message.includes('duplicate')) showAdminMsg('Cet identifiant existe déjà.','err');
+    else showAdminMsg('Erreur : '+e.message,'err');
+  } finally{
+    btn.disabled=false;
+    btn.innerHTML='<i class="ti ti-plus"></i> Créer le compte';
+  }
+}
+
+async function delCompte(id, username){
+  if(!confirm('Supprimer le compte "'+username+'" ?')) return;
+  try{
+    await sbFetch('/rest/v1/comptes?id=eq.'+id, {method:'DELETE'});
+    await renderAdminListe();
+    showAdminMsg('Compte supprimé.','ok');
+  } catch(e){
+    showAdminMsg('Erreur lors de la suppression.','err');
+  }
+}
+
+function showAdminMsg(txt,type){
+  const m=document.getElementById('admin-msg');
+  m.textContent=txt;
+  m.className='admin-msg '+type;
+  setTimeout(()=>m.className='admin-msg',4000);
+}
+
+function doLogout(){
+  if(!confirm('Se déconnecter ?')) return;
+  currentUser = null;
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('admin-btn').style.display='none';
+  document.getElementById('verres-admin-btn').style.display='none';
+  document.getElementById('logout-bar').style.display='none';
+  go('0');
+  showToast('Déconnecté avec succès.');
+}
+
+// ─── VERRES ADMIN ────────────────────────────────────────────
+let pdfPrixDetectes = [];
+
+function openVerresAdmin(){
+  document.getElementById('verres-admin-screen').classList.add('open');
+  renderVerresEdit();
+}
+function closeVerresAdmin(){
+  document.getElementById('verres-admin-screen').classList.remove('open');
+}
+function switchVTab(tab){
+  document.querySelectorAll('.vadmin-tab').forEach((t,i)=>{
+    t.classList.toggle('active', (i===0&&tab==='prix')||(i===1&&tab==='pdf'));
+  });
+  document.getElementById('vtab-prix').classList.toggle('active', tab==='prix');
+  document.getElementById('vtab-pdf').classList.toggle('active', tab==='pdf');
+}
+
+function renderVerresEdit(){
+  const all = [...catalogue, ...catalogue2e];
+  const list = document.getElementById('verres-edit-list');
+  list.innerHTML = all.map(v => {
+    const dotClass = v.gamme==='haut'?'dot-haut':v.gamme==='milieu'?'dot-milieu':'dot-entree';
+    const indicesHTML = Object.keys(v.indices).map(ind => {
+      if(v.indices[ind]==null) return '';
+      return `<div class="indice-edit">
+        <div class="indice-edit-label">Indice ${ind}</div>
+        <div class="indice-price-row">
+          <span>Achat</span>
+          <input type="number" id="achat-${v.id}-${ind.replace('.','_')}" value="${v.achats[ind]||0}" min="0" step="0.50"/>
+          <span>Vente</span>
+          <input type="number" id="vente-${v.id}-${ind.replace('.','_')}" value="${v.indices[ind]}" min="0" step="0.50"/>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="verre-edit-row">
+      <div class="verre-edit-name">
+        <div class="gamme-dot ${dotClass}"></div>
+        ${v.nom} <span style="color:#777;font-weight:400;font-size:12px">${v.marque}</span>
+      </div>
+      <div class="indice-grid">${indicesHTML}</div>
+      <button class="btn-save-prix" onclick="savePrixVerre('${v.id}')">
+        <i class="ti ti-device-floppy"></i> Enregistrer
+      </button>
+      <div class="saved-badge" id="saved-${v.id}"><i class="ti ti-check"></i> Prix enregistrés !</div>
+    </div>`;
+  }).join('');
+}
+
+function savePrixVerre(vid){
+  const all = [...catalogue, ...catalogue2e];
+  const v = all.find(x=>x.id===vid);
+  if(!v) return;
+  Object.keys(v.indices).forEach(ind => {
+    if(v.indices[ind]==null) return;
+    const key = ind.replace('.','_');
+    const achatEl = document.getElementById('achat-'+vid+'-'+key);
+    const venteEl = document.getElementById('vente-'+vid+'-'+key);
+    if(achatEl && venteEl){
+      v.achats[ind] = parseFloat(achatEl.value)||0;
+      v.indices[ind] = parseFloat(venteEl.value)||0;
+    }
+  });
+  // Save to localStorage for persistence
+  try{
+    const saved = JSON.parse(localStorage.getItem('maneo_prix')||'{}');
+    saved[vid] = {indices:{...v.indices}, achats:{...v.achats}};
+    localStorage.setItem('maneo_prix', JSON.stringify(saved));
+  }catch(e){}
+  const badge = document.getElementById('saved-'+vid);
+  badge.style.display='flex';
+  setTimeout(()=>badge.style.display='none', 2500);
+}
+
+function loadSavedPrix(){
+  try{
+    const saved = JSON.parse(localStorage.getItem('maneo_prix')||'{}');
+    const all = [...catalogue, ...catalogue2e];
+    all.forEach(v => {
+      if(saved[v.id]){
+        v.indices = {...v.indices, ...saved[v.id].indices};
+        v.achats  = {...v.achats,  ...saved[v.id].achats};
+      }
+    });
+  }catch(e){}
+}
+
+// ─── PDF IMPORT ───────────────────────────────────────────────
+function handlePdfDrop(e){
+  e.preventDefault();
+  document.getElementById('pdf-drop').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file && file.type==='application/pdf') handlePdfFile(file);
+  else showToast('Veuillez déposer un fichier PDF.');
+}
+
+function handlePdfFile(file){
+  if(!file) return;
+  const drop = document.getElementById('pdf-drop');
+  drop.innerHTML = '<i class="ti ti-loader-2" style="font-size:36px;color:#378ADD;animation:spin 1s linear infinite;display:block;margin-bottom:10px"></i><p style="color:#aaa">Analyse du PDF en cours...</p>';
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    // Use PDF.js CDN to extract text
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    script.onload = () => extractPdfText(e.target.result);
+    script.onerror = () => fallbackPdfAnalysis(file);
+    document.head.appendChild(script);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function extractPdfText(arrayBuffer){
+  try{
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+    let fullText = '';
+    for(let i=1; i<=Math.min(pdf.numPages,20); i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(s=>s.str).join(' ') + '\n';
+    }
+    analyzePdfText(fullText);
+  }catch(err){
+    resetPdfDrop();
+    showToast('Erreur lecture PDF : '+err.message);
+  }
+}
+
+function fallbackPdfAnalysis(file){
+  resetPdfDrop();
+  showToast('Impossible de lire ce PDF. Essayez un PDF non scanné.');
+}
+
+function analyzePdfText(text){
+  resetPdfDrop();
+  pdfPrixDetectes = [];
+  const all = [...catalogue, ...catalogue2e];
+  const indices = ['1.74','1.67','1.60','1.59','1.50'];
+
+  all.forEach(v => {
+    // Check if verre name or brand appears in PDF
+    const nomWords = v.nom.toLowerCase().split(' ').filter(w=>w.length>3);
+    const found = nomWords.filter(w=>text.toLowerCase().includes(w)).length >= 2;
+    if(!found) return;
+
+    const detected = {id:v.id, nom:v.nom, marque:v.marque, prix:{}};
+    indices.forEach(ind => {
+      if(v.indices[ind]==null) return;
+      // Look for price patterns near index mention
+      const indReg = new RegExp(ind.replace('.','\\.')+'[^0-9]{0,30}([0-9]+[,.]?[0-9]*)\\s*€?','i');
+      const m = text.match(indReg);
+      if(m){
+        const prix = parseFloat(m[1].replace(',','.'));
+        if(prix > 10 && prix < 1000) detected.prix[ind] = prix;
+      }
+    });
+
+    // Also look for generic prices near brand name
+    if(Object.keys(detected.prix).length === 0){
+      const brandReg = new RegExp(v.marque+'[^0-9]{0,50}([0-9]+[,.]?[0-9]*)','i');
+      const m2 = text.match(brandReg);
+      if(m2){
+        const prix = parseFloat(m2[1].replace(',','.'));
+        if(prix > 10 && prix < 1000){
+          // Apply to most common index
+          const mainInd = Object.keys(v.indices).find(i=>v.indices[i]!=null);
+          if(mainInd) detected.prix[mainInd] = prix;
+        }
+      }
+    }
+
+    if(Object.keys(detected.prix).length > 0) pdfPrixDetectes.push(detected);
+  });
+
+  const result = document.getElementById('pdf-result');
+  const found = document.getElementById('pdf-verres-found');
+
+  if(pdfPrixDetectes.length === 0){
+    found.innerHTML = '<div style="color:#ff8080;font-size:13px;padding:10px;text-align:center"><i class="ti ti-search-off"></i> Aucun verre de votre catalogue détecté dans ce PDF.<br><span style="font-size:12px;color:#777">Vérifiez que le PDF contient les noms des verres et des prix.</span></div>';
+    document.querySelector('.btn-apply-pdf').style.display='none';
+    result.style.display='block';
+    return;
+  }
+
+  found.innerHTML = pdfPrixDetectes.map(v=>`
+    <div class="pdf-verre-found">
+      <div class="pdf-verre-nom">${v.nom} <span style="color:#777;font-weight:400">${v.marque}</span></div>
+      <div class="pdf-verre-prix">${Object.entries(v.prix).map(([ind,p])=>`Indice ${ind} : <strong>${p} €</strong>`).join(' · ')}</div>
+      <div class="pdf-verre-new">✓ Ces prix remplaceront les prix actuels</div>
+    </div>`).join('');
+  document.querySelector('.btn-apply-pdf').style.display='flex';
+  result.style.display='block';
+}
+
+function resetPdfDrop(){
+  document.getElementById('pdf-drop').innerHTML = '<i class="ti ti-file-upload"></i><p><strong>Cliquez ou glissez votre PDF ici</strong></p><p style="font-size:12px;margin-top:6px">Tarifs fournisseur, catalogue verres, grille de prix</p>';
+}
+
+function applyPdfPrix(){
+  if(!pdfPrixDetectes.length) return;
+  const all = [...catalogue, ...catalogue2e];
+  let count = 0;
+  pdfPrixDetectes.forEach(det => {
+    const v = all.find(x=>x.id===det.id);
+    if(!v) return;
+    Object.entries(det.prix).forEach(([ind,prix]) => {
+      if(v.indices[ind]!=null){
+        v.indices[ind] = prix;
+        count++;
+      }
+    });
+  });
+  // Save all
+  try{
+    const saved = JSON.parse(localStorage.getItem('maneo_prix')||'{}');
+    all.forEach(v => { saved[v.id]={indices:{...v.indices},achats:{...v.achats}}; });
+    localStorage.setItem('maneo_prix', JSON.stringify(saved));
+  }catch(e){}
+  document.getElementById('pdf-result').style.display='none';
+  renderVerresEdit();
+  showToast(count+' prix mis à jour depuis le PDF !');
+}
+
+
+// ─── SIMULATEUR ───────────────────────────────────────────────
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    this.beginPath();this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.arcTo(x+w,y,x+w,y+r,r);
+    this.lineTo(x+w,y+h-r);this.arcTo(x+w,y+h,x+w-r,y+h,r);
+    this.lineTo(x+r,y+h);this.arcTo(x,y+h,x,y+h-r,r);
+    this.lineTo(x,y+r);this.arcTo(x,y,x+r,y,r);this.closePath();
+  };
+}
+let simMode = 'normal';
+let simVals = {'lb-intensity':60,'tr-sun':0};
+const simModes = {
+  normal:{title:'Sans traitement',desc:`Vision standard sans traitement de surface. Reflets et éblouissements visibles, notamment la nuit ou sous éclairage artificiel.`},
+  ar:{title:'Anti-reflet',desc:`Élimine 99% des reflets parasites. Vision nette et contrastée, idéal pour la conduite de nuit et le travail sur écran.`},
+  lb:{title:'Filtre lumière bleue',desc:`Bloque les longueurs d'onde nocives des ecrans LED. Reduit la fatigue visuelle et ameliore le sommeil. Teinte legerement ambree.`},
+  tr:{title:'Verres Transitions',desc:`S'assombrissent automatiquement à l'extérieur selon l'exposition UV. Utilisez le curseur pour simuler différentes conditions lumineuses.`}
+};
+
+function openSimulateur(){
+  document.getElementById('sim-modal').classList.add('open');
+  simDrawAll();
+}
+function closeSimulateur(){
+  document.getElementById('sim-modal').classList.remove('open');
+}
+
+function simSetMode(m){
+  simMode = m;
+  document.querySelectorAll('.sim-tab-m').forEach(t=>t.classList.remove('active'));
+  document.getElementById('stab-'+m).classList.add('active');
+  document.getElementById('sim-info-title-m').textContent = simModes[m].title;
+  document.getElementById('sim-info-desc-m').textContent = simModes[m].desc;
+  simRenderSliders(m);
+  simDrawAll();
+}
+
+function simRenderSliders(m){
+  const z = document.getElementById('sim-sliders-m');
+  if(m==='lb'){
+    z.innerHTML = `<div class="sim-slider-m"><label>Intensité filtre</label><input type="range" min="0" max="100" value="${simVals['lb-intensity']}" step="1" oninput="simVals['lb-intensity']=+this.value;document.getElementById('sv-lb').textContent=this.value+' %';simDrawAll()"/><span id="sv-lb">${simVals['lb-intensity']} %</span></div>`;
+  } else if(m==='tr'){
+    z.innerHTML = `<div class="sim-slider-m"><label>Exposition soleil</label><input type="range" min="0" max="100" value="${simVals['tr-sun']}" step="1" oninput="simVals['tr-sun']=+this.value;document.getElementById('sv-tr').textContent=this.value+' %';simDrawAll()"/><span id="sv-tr">${simVals['tr-sun']} %</span></div>`;
+  } else {
+    z.innerHTML = '';
+  }
+}
+
+function simDrawAll(){
+  simDraw(document.getElementById('simMainCanvas'), simMode, 600, 220, false, 'main');
+  simDraw(document.getElementById('simCmpNuit'), simMode, 280, 100, true, 'nuit');
+  simDraw(document.getElementById('simCmpEcran'), simMode, 280, 100, true, 'ecran');
+}
+
+function simDraw(canvas, mode, w, h, small, type){
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,w,h);
+  if(type==='nuit') { simDrawNuit(ctx,w,h,mode,small); return; }
+  if(type==='ecran') { simDrawEcran(ctx,w,h,mode,small); return; }
+  simDrawMain(ctx,w,h,mode,small);
+}
+
+function simLerp(a,b,t){
+  const ah=a.replace('#',''),bh=b.replace('#','');
+  const r=(h)=>[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];
+  const [ar,ag,ab]=r(ah),[br,bg,bb]=r(bh);
+  return '#'+[ar+(br-ar)*t,ag+(bg-ag)*t,ab+(bb-ab)*t].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+}
+
+function simOverlay(ctx,w,h,mode){
+  if(mode==='ar'){ctx.fillStyle='rgba(0,255,100,0.04)';ctx.fillRect(0,0,w,h);}
+  if(mode==='lb'){const i=(simVals['lb-intensity']||60)/100;ctx.fillStyle=`rgba(180,130,50,${i*0.22})`;ctx.fillRect(0,0,w,h);}
+  if(mode==='tr'){const s=(simVals['tr-sun']||0)/100;const g=Math.round(s*160);ctx.fillStyle=`rgba(${g},${Math.round(g*0.8)},${Math.round(g*0.5)},${s*0.7})`;ctx.fillRect(0,0,w,h);}
+  if(mode==='normal'){ctx.fillStyle='rgba(255,255,255,0.07)';ctx.beginPath();ctx.ellipse(w*0.3,h*0.3,w*0.14,h*0.1,-0.5,0,Math.PI*2);ctx.fill();}
+}
+
+function simDrawMain(ctx,w,h,mode,small){
+  const sky = mode==='tr'?simLerp('#87CEEB','#FF8C00',(simVals['tr-sun']||0)/100):'#87CEEB';
+  ctx.fillStyle=sky;ctx.fillRect(0,0,w,h*0.55);
+  ctx.fillStyle='#4a7c3f';ctx.fillRect(0,h*0.55,w,h*0.45);
+  ctx.fillStyle='#555';ctx.beginPath();ctx.moveTo(w*0.2,h);ctx.lineTo(w*0.8,h);ctx.lineTo(w*0.55,h*0.55);ctx.lineTo(w*0.45,h*0.55);ctx.fill();
+  ctx.fillStyle='#fff';for(let i=0;i<4;i++){const y=h*0.6+i*h*0.1;ctx.fillRect(w*0.5-2,y,4,h*0.06);}
+  if(mode!=='tr'||(simVals['tr-sun']||0)<80){ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(w*0.8,h*0.15,small?10:18,0,Math.PI*2);ctx.fill();}
+  ['#8B7355','#6B8E6B','#7B68EE'].forEach((col,i)=>{ctx.fillStyle=col;const bx=(i+0.5)*w/3-w*0.07;const bh2=h*(0.18+i*0.05);ctx.fillRect(bx,h*0.55-bh2,w*0.12,bh2);});
+  simOverlay(ctx,w,h,mode);
+}
+
+function simDrawNuit(ctx,w,h,mode,small){
+  ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,w,h);
+  for(let i=0;i<20;i++){ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.7})`;ctx.beginPath();ctx.arc(Math.random()*w,Math.random()*h*0.6,Math.random()*1.2,0,Math.PI*2);ctx.fill();}
+  ctx.fillStyle='#1a1a2e';ctx.fillRect(0,h*0.55,w,h*0.45);
+  const reflets=mode==='normal'?1:mode==='ar'?0.08:0.45;
+  [[w*0.3,h*0.5],[w*0.7,h*0.5]].forEach(([lx,ly])=>{
+    const g=ctx.createRadialGradient(lx,ly,0,lx,ly,small?25:45);
+    g.addColorStop(0,'rgba(255,240,150,0.9)');g.addColorStop(0.3,`rgba(255,240,100,${reflets*0.6})`);g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(lx,ly,small?35:60,0,Math.PI*2);ctx.fill();
+  });
+  if(mode==='normal'){const g=ctx.createRadialGradient(w*0.5,h*0.5,0,w*0.5,h*0.5,w*0.4);g.addColorStop(0,'rgba(255,255,200,0.12)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);}
+  simOverlay(ctx,w,h,mode);
+}
+
+function simDrawEcran(ctx,w,h,mode,small){
+  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,w,h);
+  const mx=w*0.05,my=h*0.05,mw=w*0.9,mh=h*0.75;
+  ctx.fillStyle='#1e1e1e';ctx.beginPath();ctx.rect(mx,my,mw,mh);ctx.fill();
+  ['#569cd6','#4ec9b0','#ce9178','#dcdcaa','#9cdcfe','#569cd6','#4ec9b0','#dcdcaa'].forEach((col,i)=>{
+    ctx.fillStyle=col;ctx.fillRect(mx+10,my+8+i*(mh*0.1),(0.3+Math.random()*0.5)*mw*0.8,4);
+  });
+  if(mode==='normal'){const g=ctx.createRadialGradient(w*0.5,h*0.4,0,w*0.5,h*0.4,w*0.35);g.addColorStop(0,'rgba(100,150,255,0.22)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);}
+  simOverlay(ctx,w,h,mode);
+}
+
+
+
+// ─── VERRES 100% SANTE (Panier A) ────────────────────────────
+// Prix de vente selon réforme 100% Santé 2021
+const verres100Sante = [
+  {
+    nom:'Verre unifocal sphérique', marque:'Panier A',
+    indices:[
+      {ind:'du +6 à -6',vente_od:107.51,vente_og:107.51,remb_secu:23.73},
+    ],
+    desc:`Verre simple foyer sphérique — correction de la myopie ou hypermétropie sans astigmatisme`
+  },
+  {
+    nom:'Verre unifocal torique', marque:'Panier A',
+    indices:[
+      {ind:'sphère ±6, cylindre ±4',vente_od:132.83,vente_og:132.83,remb_secu:28.49},
+    ],
+    desc:`Verre simple foyer avec correction astigmatisme — sphère entre ±6, cylindre entre ±4`
+  },
+  {
+    nom:'Verre progressif (add. 0.75 à 3.50)', marque:'Panier A',
+    indices:[
+      {ind:'sphère ±8, cylindre ±4',vente_od:235.00,vente_og:235.00,remb_secu:62.44},
+    ],
+    desc:`Verre progressif remboursé — correction presbytie avec sphère entre ±8 et cylindre ±4`
+  },
+];
+
+// ─── VERRES CLASSE A (100% Sante) ────────────────────────────
+// Conformes à la réforme 100% Santé - liste officielle
+const verresClasseA = [
+  // UNIFOCAUX SPHERIQUES
+  {id:'ca1',nom:'Unifocal sphérique Classe A',marque:'Panier 100% Santé',gamme:'entree',
+   compatible:['loin','pres','intermediaire'],sphMax:6,cylMax:0,aspherique:false,precalibrage:false,
+   indices:{'1.50':107.51,'1.60':107.51},achats:{'1.50':18,'1.60':22},
+   traitements:[
+    {nom:'Antireflet Classe A',icon:'ti-shield',desc:`Antireflet conforme 100% Santé. Résistance aux rayures et déperlant inclus de série.`},
+    {nom:'UV intégré',icon:'ti-sun',desc:`Protection UV jusqu'à 380nm intégrée dans la masse du verre.`},
+    {nom:'Durcissement standard',icon:'ti-tool',desc:`Traitement durci de série sur tous les verres Classe A.`},
+    {nom:'Hydrophobe basic',icon:'ti-droplets',desc:`Légère couche hydrophobe pour faciliter l'entretien quotidien.`}
+   ]},
+  // UNIFOCAUX TORIQUES
+  {id:'ca2',nom:'Unifocal torique Classe A',marque:'Panier 100% Santé',gamme:'entree',
+   compatible:['loin','pres','intermediaire'],sphMax:6,cylMax:4,aspherique:false,precalibrage:false,
+   indices:{'1.50':132.83,'1.60':132.83},achats:{'1.50':25,'1.60':30},
+   traitements:[
+    {nom:'Antireflet Classe A',icon:'ti-shield',desc:`Antireflet conforme 100% Santé avec résistance aux rayures.`},
+    {nom:'Correction torique',icon:'ti-refresh',desc:`Correction astigmatisme jusqu'à cylindre ±4 dioptries. Verre taillé selon ordonnance.`},
+    {nom:'UV intégré',icon:'ti-sun',desc:`Protection UV jusqu'à 380nm dans la masse.`},
+    {nom:'Durcissement standard',icon:'ti-tool',desc:`Traitement durci de série.`}
+   ]},
+  // PROGRESSIFS
+  {id:'ca3',nom:'Progressif Classe A',marque:'Panier 100% Santé',gamme:'entree',
+   compatible:['progressif'],sphMax:8,cylMax:4,aspherique:false,precalibrage:false,
+   indices:{'1.50':235,'1.60':235,'1.67':235},achats:{'1.50':45,'1.60':55,'1.67':70},
+   traitements:[
+    {nom:'Antireflet Classe A',icon:'ti-shield',desc:`Antireflet conforme 100% Santé avec déperlant et résistance aux rayures.`},
+    {nom:'Progressif Classe A',icon:'ti-adjustments',desc:`Design progressif standard. Pas de précalibrage — uniquement pour montures cerclées.`},
+    {nom:'UV 380 intégré',icon:'ti-sun',desc:`Filtre UV 380nm dans la masse. Protection incluse de série.`},
+    {nom:'Durcissement standard',icon:'ti-tool',desc:`Traitement durci standard inclus dans le prix 100% Santé.`}
+   ]},
+];
+
+const devisMutuelles = {
+  seveane:     {id:'seveane',     label:'Sévéane',       plafond_monture:130, plafond_verre:200},
+  itelis:      {id:'itelis',      label:'Itelis',         plafond_monture:130, plafond_verre:220},
+  santeclaire: {id:'santeclaire', label:'Santéclair',     plafond_monture:120, plafond_verre:220},
+  kalixia:     {id:'kalixia',     label:'Kalixia',        plafond_monture:130, plafond_verre:200},
+  carteblanche:{id:'carteblanche',label:'Carte Blanche',  plafond_monture:150, plafond_verre:250},
+};
+const mutLabels = {seveane:'Sévéane',itelis:'Itelis',santeclaire:'Santéclair',kalixia:'Kalixia',carteblanche:'Carte Blanche'};
+
+function selectMutuelleDevis(mid){
+  window._selectedMutDevis = mid;
+  document.getElementById('panier-mut-label').textContent = mutLabels[mid];
+  go('0panier');
+}
+
+function selectPrise(type){
+  window._priseType = type;
+  _backFrom2 = '0panier';
+  const mid = window._selectedMutDevis || 'cb';
+  state.mutuelle = devisMutuelles[mid] || mutuelles.find(m=>m.id===mid) || mutuelles[0];
+  document.getElementById('mut-label-h').textContent = `Mutuelle : ${state.mutuelle.label}`;
+  state.vision = null;
+  selectedMonture = null;
+  selectedTraits = new Set();
+  go(2);
+}
+
+// ─── DEMO VERRES PHOTOS ──────────────────────────────────────
+// Unsplash free photos - no attribution required for display
+const demoScenes = {
+  nuit:{
+    url:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgNDAwIj4KICA8ZGVmcz4KICAgIDxyYWRpYWxHcmFkaWVudCBpZD0ic2t5IiBjeD0iNTAlIiBjeT0iMCUiIHI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMGEwYTJhIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzA1MDUxMCIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICAgIDxyYWRpYWxHcmFkaWVudCBpZD0iaGwxIiBjeD0iMzAlIiBjeT0iNDUlIiByPSIzNSUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZmZmOGQwIiBzdG9wLW9wYWNpdHk9IjAuOTUiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI0MCUiIHN0b3AtY29sb3I9IiNmZmUwODAiIHN0b3Atb3BhY2l0eT0iMC41Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2ZmODgwMCIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJobDIiIGN4PSI3MCUiIGN5PSI0NSUiIHI9IjM1JSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmY4ZDAiIHN0b3Atb3BhY2l0eT0iMC45NSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjQwJSIgc3RvcC1jb2xvcj0iI2ZmZTA4MCIgc3RvcC1vcGFjaXR5PSIwLjUiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZmY4ODAwIiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9ImhsMyIgY3g9IjIwJSIgY3k9IjcwJSIgcj0iMjUlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmNDQwMCIgc3RvcC1vcGFjaXR5PSIwLjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZmY0NDAwIiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9ImhsNCIgY3g9IjgwJSIgY3k9IjcwJSIgcj0iMjUlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmNDQwMCIgc3RvcC1vcGFjaXR5PSIwLjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZmY0NDAwIiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSJ1cmwoI3NreSkiLz4KICA8IS0tIFN0YXJzIC0tPgogIDxjaXJjbGUgY3g9IjUwIiBjeT0iMzAiIHI9IjEuNSIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOCIvPgogIDxjaXJjbGUgY3g9IjEyMCIgY3k9IjYwIiByPSIxIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC42Ii8+CiAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iMjAiIHI9IjIiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjkiLz4KICA8Y2lyY2xlIGN4PSIzMDAiIGN5PSI0NSIgcj0iMSIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuNyIvPgogIDxjaXJjbGUgY3g9IjQ1MCIgY3k9IjE1IiByPSIxLjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSI1NjAiIGN5PSI1NSIgcj0iMSIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuNSIvPgogIDxjaXJjbGUgY3g9IjY1MCIgY3k9IjI1IiByPSIyIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iNzMwIiBjeT0iNDAiIHI9IjEiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjYiLz4KICA8Y2lyY2xlIGN4PSI4MCIgY3k9IjEwMCIgcj0iMSIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuNCIvPgogIDxjaXJjbGUgY3g9IjM4MCIgY3k9IjgwIiByPSIxLjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjciLz4KICA8IS0tIE1vb24gLS0+CiAgPGNpcmNsZSBjeD0iNjgwIiBjeT0iNjAiIHI9IjIyIiBmaWxsPSIjZThlMGIwIiBvcGFjaXR5PSIwLjkiLz4KICA8Y2lyY2xlIGN4PSI2NzAiIGN5PSI1MiIgcj0iMTgiIGZpbGw9IiMwYTBhMmEiLz4KICA8IS0tIFJvYWQgcGVyc3BlY3RpdmUgLS0+CiAgPHBvbHlnb24gcG9pbnRzPSIwLDQwMCA4MDAsNDAwIDU1MCwyMjAgMjUwLDIyMCIgZmlsbD0iIzFhMWEyYSIvPgogIDxwb2x5Z29uIHBvaW50cz0iMCw0MDAgODAwLDQwMCA1ODAsMjQwIDIyMCwyNDAiIGZpbGw9IiMyMjIyMzQiLz4KICA8IS0tIFJvYWQgY2VudGVyIGxpbmVzIC0tPgogIDxyZWN0IHg9IjM4NSIgeT0iMjUwIiB3aWR0aD0iMzAiIGhlaWdodD0iMTgiIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuNyIgcng9IjIiLz4KICA8cmVjdCB4PSIzNzUiIHk9IjI5MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjIyIiBmaWxsPSIjZmZlMDgwIiBvcGFjaXR5PSIwLjciIHJ4PSIyIi8+CiAgPHJlY3QgeD0iMzYwIiB5PSIzMzUiIHdpZHRoPSI4MCIgaGVpZ2h0PSIyOCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC42IiByeD0iMiIvPgogIDwhLS0gUm9hZCBlZGdlcyB3aGl0ZSBsaW5lcyAtLT4KICA8bGluZSB4MT0iMjIwIiB5MT0iMjQwIiB4Mj0iMCIgeTI9IjQwMCIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjMiIG9wYWNpdHk9IjAuNSIvPgogIDxsaW5lIHgxPSI1ODAiIHkxPSIyNDAiIHgyPSI4MDAiIHkyPSI0MDAiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIzIiBvcGFjaXR5PSIwLjUiLz4KICA8IS0tIEdyb3VuZC9zaWRlcyAtLT4KICA8cmVjdCB4PSIwIiB5PSIyNDAiIHdpZHRoPSIyMjAiIGhlaWdodD0iMTYwIiBmaWxsPSIjMGQxMDIwIi8+CiAgPHJlY3QgeD0iNTgwIiB5PSIyNDAiIHdpZHRoPSIyMjAiIGhlaWdodD0iMTYwIiBmaWxsPSIjMGQxMDIwIi8+CiAgPCEtLSBIZWFkbGlnaHRzIGdsb3cgLS0+CiAgPHJlY3Qgd2lkdGg9IjgwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9InVybCgjaGwxKSIvPgogIDxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSJ1cmwoI2hsMikiLz4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0idXJsKCNobDMpIi8+CiAgPHJlY3Qgd2lkdGg9IjgwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9InVybCgjaGw0KSIvPgogIDwhLS0gUm9hZHNpZGUgYnVpbGRpbmdzIHNpbGhvdWV0dGUgLS0+CiAgPHJlY3QgeD0iMCIgeT0iMTYwIiB3aWR0aD0iODAiIGhlaWdodD0iODAiIGZpbGw9IiMwYTBhMTgiLz4KICA8cmVjdCB4PSIxMCIgeT0iMTcwIiB3aWR0aD0iMTIiIGhlaWdodD0iOCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC42Ii8+CiAgPHJlY3QgeD0iMjgiIHk9IjE3MCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjgiIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuNCIvPgogIDxyZWN0IHg9IjEwIiB5PSIxODUiIHdpZHRoPSIxMiIgaGVpZ2h0PSI4IiBmaWxsPSIjZmZlMDgwIiBvcGFjaXR5PSIwLjciLz4KICA8cmVjdCB4PSI3MDAiIHk9IjE1MCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSI5MCIgZmlsbD0iIzBhMGExOCIvPgogIDxyZWN0IHg9IjcxMCIgeT0iMTY1IiB3aWR0aD0iMTQiIGhlaWdodD0iMTAiIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuNSIvPgogIDxyZWN0IHg9IjczMCIgeT0iMTY1IiB3aWR0aD0iMTQiIGhlaWdodD0iMTAiIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuNyIvPgogIDxyZWN0IHg9IjcxMCIgeT0iMTgzIiB3aWR0aD0iMTQiIGhlaWdodD0iMTAiIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuMyIvPgogIDwhLS0gU3RyZWV0IGxpZ2h0cyAtLT4KICA8bGluZSB4MT0iMTgwIiB5MT0iMjQwIiB4Mj0iMTUwIiB5Mj0iMTIwIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMyIvPgogIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjExOCIgcj0iNiIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMTUwIiBjeT0iMTE4IiByPSIyMCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC4xNSIvPgogIDxsaW5lIHgxPSI2MjAiIHkxPSIyNDAiIHgyPSI2NTAiIHkyPSIxMjAiIHN0cm9rZT0iIzU1NSIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgPGNpcmNsZSBjeD0iNjUwIiBjeT0iMTE4IiByPSI2IiBmaWxsPSIjZmZlMDgwIiBvcGFjaXR5PSIwLjkiLz4KICA8Y2lyY2xlIGN4PSI2NTAiIGN5PSIxMTgiIHI9IjIwIiBmaWxsPSIjZmZlMDgwIiBvcGFjaXR5PSIwLjE1Ii8+Cjwvc3ZnPg==',
+    label:'Route de nuit — autoroute',
+    traitLabels:{normal:'Reflets et halos visibles',ar:'Vision nette, halos supprimés',lb:'Protection écrans active',tr:'Verre teinté selon UV'}
+  },
+  ecran:{
+    url:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgNDAwIj4KICA8ZGVmcz4KICAgIDxyYWRpYWxHcmFkaWVudCBpZD0iZ2xvdyIgY3g9IjUwJSIgY3k9IjQ1JSIgcj0iNTAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzMwNjBmZiIgc3RvcC1vcGFjaXR5PSIwLjMiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMzA2MGZmIiBzdG9wLW9wYWNpdHk9IjAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgPC9kZWZzPgogIDwhLS0gUm9vbSBiYWNrZ3JvdW5kIC0tPgogIDxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjMWExYTJhIi8+CiAgPCEtLSBEZXNrIC0tPgogIDxyZWN0IHg9IjAiIHk9IjMyMCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI4MCIgZmlsbD0iIzJhMWEwOCIvPgogIDxyZWN0IHg9IjAiIHk9IjMxOCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2IiBmaWxsPSIjM2EyODEwIi8+CiAgPCEtLSBNb25pdG9yIHN0YW5kIC0tPgogIDxyZWN0IHg9IjM3MCIgeT0iMzAwIiB3aWR0aD0iNjAiIGhlaWdodD0iMjQiIGZpbGw9IiMyMjIiLz4KICA8cmVjdCB4PSIzNDAiIHk9IjMyMCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSI4IiBmaWxsPSIjMzMzIiByeD0iMiIvPgogIDwhLS0gTW9uaXRvciBib2R5IC0tPgogIDxyZWN0IHg9IjEyMCIgeT0iNjAiIHdpZHRoPSI1NjAiIGhlaWdodD0iMjUwIiBmaWxsPSIjMTExIiByeD0iMTIiLz4KICA8cmVjdCB4PSIxMzAiIHk9IjcwIiB3aWR0aD0iNTQwIiBoZWlnaHQ9IjIzMCIgZmlsbD0iIzBkMTExNyIgcng9IjgiLz4KICA8IS0tIFNjcmVlbiBnbG93IGZyb20gbW9uaXRvciAtLT4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0idXJsKCNnbG93KSIvPgogIDwhLS0gQ29kZSBlZGl0b3IgY29udGVudCAtLT4KICA8IS0tIExpbmUgbnVtYmVycyAtLT4KICA8cmVjdCB4PSIxMzAiIHk9IjcwIiB3aWR0aD0iNDUiIGhlaWdodD0iMjMwIiBmaWxsPSIjMTYxYjIyIiByeD0iMCIvPgogIDx0ZXh0IHg9IjE0OCIgeT0iOTUiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM0YTU1NjgiPjE8L3RleHQ+CiAgPHRleHQgeD0iMTQ4IiB5PSIxMTMiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM0YTU1NjgiPjI8L3RleHQ+CiAgPHRleHQgeD0iMTQ4IiB5PSIxMzEiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM0YTU1NjgiPjM8L3RleHQ+CiAgPHRleHQgeD0iMTQ4IiB5PSIxNDkiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM0YTU1NjgiPjQ8L3RleHQ+CiAgPHRleHQgeD0iMTQ4IiB5PSIxNjciIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM0YTU1NjgiPjU8L3RleHQ+CiAgPHRleHQgeD0iMTQ4IiB5PSIxODUiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM0YTU1NjgiPjY8L3RleHQ+CiAgPHRleHQgeD0iMTQ4IiB5PSIyMDMiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM0YTU1NjgiPjc8L3RleHQ+CiAgPHRleHQgeD0iMTQ4IiB5PSIyMjEiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM0YTU1NjgiPjg8L3RleHQ+CiAgPHRleHQgeD0iMTQ4IiB5PSIyMzkiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTEiIGZpbGw9IiM0YTU1NjgiPjk8L3RleHQ+CiAgPCEtLSBDb2RlIGxpbmVzIC0tPgogIDxyZWN0IHg9IjE4NSIgeT0iODQiIHdpZHRoPSIxMjAiIGhlaWdodD0iOSIgZmlsbD0iIzc5YzBmZiIgcng9IjIiLz4KICA8cmVjdCB4PSIzMTMiIHk9Ijg0IiB3aWR0aD0iNjAiIGhlaWdodD0iOSIgZmlsbD0iIzU2ZDM2NCIgcng9IjIiLz4KICA8cmVjdCB4PSIxODUiIHk9IjEwMSIgd2lkdGg9IjMwIiBoZWlnaHQ9IjkiIGZpbGw9IiNmZjdiNzIiIHJ4PSIyIi8+CiAgPHJlY3QgeD0iMjIzIiB5PSIxMDEiIHdpZHRoPSI4MCIgaGVpZ2h0PSI5IiBmaWxsPSIjZjBmNmZjIiByeD0iMiIvPgogIDxyZWN0IHg9IjE5NSIgeT0iMTE4IiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjkiIGZpbGw9IiNlM2IzNDEiIHJ4PSIyIi8+CiAgPHJlY3QgeD0iMzAzIiB5PSIxMTgiIHdpZHRoPSI1MCIgaGVpZ2h0PSI5IiBmaWxsPSIjZDJhOGZmIiByeD0iMiIvPgogIDxyZWN0IHg9IjE5NSIgeT0iMTM1IiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjkiIGZpbGw9IiM3OWMwZmYiIHJ4PSIyIi8+CiAgPHJlY3QgeD0iMTk1IiB5PSIxNTIiIHdpZHRoPSI5MCIgaGVpZ2h0PSI5IiBmaWxsPSIjNTZkMzY0IiByeD0iMiIvPgogIDxyZWN0IHg9IjI5MyIgeT0iMTUyIiB3aWR0aD0iNDAiIGhlaWdodD0iOSIgZmlsbD0iI2ZmYTY1NyIgcng9IjIiLz4KICA8cmVjdCB4PSIxODUiIHk9IjE2OSIgd2lkdGg9IjMwIiBoZWlnaHQ9IjkiIGZpbGw9IiNmZjdiNzIiIHJ4PSIyIi8+CiAgPHJlY3QgeD0iMTg1IiB5PSIxODYiIHdpZHRoPSIxNjAiIGhlaWdodD0iOSIgZmlsbD0iI2QyYThmZiIgcng9IjIiLz4KICA8cmVjdCB4PSIxOTUiIHk9IjIwMyIgd2lkdGg9IjExMCIgaGVpZ2h0PSI5IiBmaWxsPSIjNzljMGZmIiByeD0iMiIvPgogIDxyZWN0IHg9IjE5NSIgeT0iMjIwIiB3aWR0aD0iNzAiIGhlaWdodD0iOSIgZmlsbD0iI2UzYjM0MSIgcng9IjIiLz4KICA8IS0tIEN1cnNvciBibGluayAtLT4KICA8cmVjdCB4PSIxODUiIHk9IjIzNyIgd2lkdGg9IjIiIGhlaWdodD0iMTEiIGZpbGw9IiNmMGY2ZmMiIG9wYWNpdHk9IjAuOSIvPgogIDwhLS0gUmlnaHQgcGFuZWwgLS0+CiAgPHJlY3QgeD0iNTMwIiB5PSI3MCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMzAiIGZpbGw9IiMxNjFiMjIiIHJ4PSIwIi8+CiAgPHJlY3QgeD0iNTQwIiB5PSI4NSIgd2lkdGg9IjgwIiBoZWlnaHQ9IjgiIGZpbGw9IiMzMDM2M2QiIHJ4PSIyIi8+CiAgPHJlY3QgeD0iNTQwIiB5PSIxMDAiIHdpZHRoPSIxMDAiIGhlaWdodD0iNiIgZmlsbD0iIzU2ZDM2NCIgcng9IjIiIG9wYWNpdHk9IjAuNyIvPgogIDxyZWN0IHg9IjU0MCIgeT0iMTEzIiB3aWR0aD0iNjAiIGhlaWdodD0iNiIgZmlsbD0iI2ZmN2I3MiIgcng9IjIiIG9wYWNpdHk9IjAuNSIvPgogIDxyZWN0IHg9IjU0MCIgeT0iMTI2IiB3aWR0aD0iOTAiIGhlaWdodD0iNiIgZmlsbD0iI2UzYjM0MSIgcng9IjIiIG9wYWNpdHk9IjAuNiIvPgogIDwhLS0gTGFtcCBvbiBkZXNrIC0tPgogIDxsaW5lIHgxPSI3MjAiIHkxPSIzMjAiIHgyPSI3MjAiIHkyPSIyMDAiIHN0cm9rZT0iIzU1NSIgc3Ryb2tlLXdpZHRoPSI0Ii8+CiAgPGxpbmUgeDE9IjcyMCIgeTE9IjIwMCIgeDI9IjY4MCIgeTI9IjE3MCIgc3Ryb2tlPSIjNTU1IiBzdHJva2Utd2lkdGg9IjQiLz4KICA8ZWxsaXBzZSBjeD0iNjY4IiBjeT0iMTYyIiByeD0iMjAiIHJ5PSIxMCIgZmlsbD0iIzMzMyIvPgogIDxlbGxpcHNlIGN4PSI2NjgiIGN5PSIxNjIiIHJ4PSIxNCIgcnk9IjciIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuOCIvPgogIDwhLS0gQ29mZmVlIG11ZyAtLT4KICA8cmVjdCB4PSI2MjAiIHk9IjI5NSIgd2lkdGg9IjMwIiBoZWlnaHQ9IjI4IiBmaWxsPSIjOEI0NTEzIiByeD0iNCIvPgogIDxwYXRoIGQ9Ik02NTAsMzAyIFE2NjUsMzAyIDY2NSwzMTAgUTY2NSwzMTggNjUwLDMxOCIgc3Ryb2tlPSIjOEI0NTEzIiBzdHJva2Utd2lkdGg9IjQiIGZpbGw9Im5vbmUiLz4KICA8cmVjdCB4PSI2MjMiIHk9IjI5NSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjUiIGZpbGw9IiNjMDYwMTAiIHJ4PSIyIi8+Cjwvc3ZnPg==',
+    label:'Travail sur écran',
+    traitLabels:{normal:'Lumière bleue non filtrée',ar:'Reflets écran supprimés',lb:'Lumière bleue filtrée',tr:'Adaptation lumineuse'}
+  },
+  soleil:{
+    url:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgNDAwIj4KICA8ZGVmcz4KICAgIDxyYWRpYWxHcmFkaWVudCBpZD0ic3Vuc2t5IiBjeD0iNzAlIiBjeT0iMCUiIHI9IjgwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiM4N0NFRUIiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNEE5MEQ5Ii8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJzdW5nbG93IiBjeD0iNzIlIiBjeT0iOCUiIHI9IjI1JSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNGRkY1QzAiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSI1MCUiIHN0b3AtY29sb3I9IiNGRkQ3MDAiIHN0b3Atb3BhY2l0eT0iMC42Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI0ZGRDcwMCIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogIDwvZGVmcz4KICA8IS0tIFNreSAtLT4KICA8cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjI2MCIgZmlsbD0idXJsKCNzdW5za3kpIi8+CiAgPCEtLSBDbG91ZHMgLS0+CiAgPGVsbGlwc2UgY3g9IjE1MCIgY3k9IjgwIiByeD0iODAiIHJ5PSIzMCIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOSIvPgogIDxlbGxpcHNlIGN4PSIxOTAiIGN5PSI2OCIgcng9IjYwIiByeT0iMjgiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjkiLz4KICA8ZWxsaXBzZSBjeD0iMTEwIiBjeT0iNzUiIHJ4PSI1MCIgcnk9IjIyIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC44Ii8+CiAgPGVsbGlwc2UgY3g9IjUwMCIgY3k9IjExMCIgcng9IjcwIiByeT0iMjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjciLz4KICA8ZWxsaXBzZSBjeD0iNTQ1IiBjeT0iOTgiIHJ4PSI1NSIgcnk9IjIzIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC43Ii8+CiAgPCEtLSBTdW4gLS0+CiAgPGNpcmNsZSBjeD0iNjgwIiBjeT0iNTUiIHI9IjM4IiBmaWxsPSIjRkZENzAwIiBvcGFjaXR5PSIwLjk1Ii8+CiAgPHJlY3Qgd2lkdGg9IjgwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9InVybCgjc3VuZ2xvdykiLz4KICA8IS0tIFN1biByYXlzIC0tPgogIDxsaW5lIHgxPSI2ODAiIHkxPSI1IiB4Mj0iNjgwIiB5Mj0iLTUiIHN0cm9rZT0iI0ZGRDcwMCIgc3Ryb2tlLXdpZHRoPSIzIiBvcGFjaXR5PSIwLjYiLz4KICA8bGluZSB4MT0iNzIwIiB5MT0iMTUiIHgyPSI3MjgiIHkyPSI3IiBzdHJva2U9IiNGRkQ3MDAiIHN0cm9rZS13aWR0aD0iMyIgb3BhY2l0eT0iMC42Ii8+CiAgPGxpbmUgeDE9IjczMCIgeTE9IjU1IiB4Mj0iNzQyIiB5Mj0iNTUiIHN0cm9rZT0iI0ZGRDcwMCIgc3Ryb2tlLXdpZHRoPSIzIiBvcGFjaXR5PSIwLjYiLz4KICA8bGluZSB4MT0iNzIwIiB5MT0iOTUiIHgyPSI3MjgiIHkyPSIxMDMiIHN0cm9rZT0iI0ZGRDcwMCIgc3Ryb2tlLXdpZHRoPSIzIiBvcGFjaXR5PSIwLjYiLz4KICA8bGluZSB4MT0iNjQwIiB5MT0iMTUiIHgyPSI2MzIiIHkyPSI3IiBzdHJva2U9IiNGRkQ3MDAiIHN0cm9rZS13aWR0aD0iMyIgb3BhY2l0eT0iMC42Ii8+CiAgPGxpbmUgeDE9IjYzMCIgeTE9IjU1IiB4Mj0iNjE4IiB5Mj0iNTUiIHN0cm9rZT0iI0ZGRDcwMCIgc3Ryb2tlLXdpZHRoPSIzIiBvcGFjaXR5PSIwLjYiLz4KICA8IS0tIEdyb3VuZCAtLT4KICA8cmVjdCB4PSIwIiB5PSIyNTgiIHdpZHRoPSI4MDAiIGhlaWdodD0iMTQyIiBmaWxsPSIjNGE4YTJhIi8+CiAgPHJlY3QgeD0iMCIgeT0iMjU4IiB3aWR0aD0iODAwIiBoZWlnaHQ9IjE1IiBmaWxsPSIjNWE5YTM1Ii8+CiAgPCEtLSBSb2FkIC0tPgogIDxwb2x5Z29uIHBvaW50cz0iMjUwLDI1OCA1NTAsMjU4IDYyMCw0MDAgMTgwLDQwMCIgZmlsbD0iIzU1NSIvPgogIDxwb2x5Z29uIHBvaW50cz0iMjY1LDI1OCA1MzUsMjU4IDYwMCw0MDAgMjAwLDQwMCIgZmlsbD0iIzY2NiIvPgogIDwhLS0gUm9hZCBsaW5lcyAtLT4KICA8cmVjdCB4PSIzODgiIHk9IjI3MCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjE2IiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC44IiByeD0iMiIvPgogIDxyZWN0IHg9IjM4MSIgeT0iMzA1IiB3aWR0aD0iMzgiIGhlaWdodD0iMjAiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjgiIHJ4PSIyIi8+CiAgPHJlY3QgeD0iMzcwIiB5PSIzNDgiIHdpZHRoPSI2MCIgaGVpZ2h0PSIyNSIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuNyIgcng9IjIiLz4KICA8IS0tIFRyZWVzIC0tPgogIDxyZWN0IHg9IjEyMCIgeT0iMjEwIiB3aWR0aD0iMTIiIGhlaWdodD0iNTAiIGZpbGw9IiM1YTNhMTAiLz4KICA8ZWxsaXBzZSBjeD0iMTI2IiBjeT0iMTk1IiByeD0iMzIiIHJ5PSIzNSIgZmlsbD0iIzJkN2ExYSIvPgogIDxlbGxpcHNlIGN4PSIxMjYiIGN5PSIxODAiIHJ4PSIyNCIgcnk9IjI4IiBmaWxsPSIjM2E4YTIyIi8+CiAgPHJlY3QgeD0iNjUwIiB5PSIyMTUiIHdpZHRoPSIxMCIgaGVpZ2h0PSI0NSIgZmlsbD0iIzVhM2ExMCIvPgogIDxlbGxpcHNlIGN4PSI2NTUiIGN5PSIyMDAiIHJ4PSIyOCIgcnk9IjMwIiBmaWxsPSIjMmQ3YTFhIi8+CiAgPGVsbGlwc2UgY3g9IjY1NSIgY3k9IjE4OCIgcng9IjIwIiByeT0iMjQiIGZpbGw9IiMzYThhMjIiLz4KICA8IS0tIE1vdW50YWluIGJhY2tncm91bmQgLS0+CiAgPHBvbHlnb24gcG9pbnRzPSIwLDIwMCAxNTAsMTAwIDMwMCwyMDAiIGZpbGw9IiM3YTlhNmEiIG9wYWNpdHk9IjAuNSIvPgogIDxwb2x5Z29uIHBvaW50cz0iMTAwLDIwMCAyODAsODAgNDYwLDIwMCIgZmlsbD0iIzZhOGE1YSIgb3BhY2l0eT0iMC40Ii8+CiAgPHBvbHlnb24gcG9pbnRzPSI1MDAsMjAwIDY2MCw5MCA4MDAsMjAwIiBmaWxsPSIjN2E5YTZhIiBvcGFjaXR5PSIwLjUiLz4KICA8IS0tIEZsb3dlcnMgaW4gZ3Jhc3MgLS0+CiAgPGNpcmNsZSBjeD0iMTYwIiBjeT0iMjc1IiByPSI0IiBmaWxsPSIjRkZENzAwIi8+CiAgPGNpcmNsZSBjeD0iNjMwIiBjeT0iMjcyIiByPSIzIiBmaWxsPSIjRkY2MDgwIi8+CiAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iMjg1IiByPSIzIiBmaWxsPSJ3aGl0ZSIvPgogIDxjaXJjbGUgY3g9IjU5MCIgY3k9IjI4MCIgcj0iNCIgZmlsbD0iI0ZGRDcwMCIvPgo8L3N2Zz4=',
+    label:'Plein soleil — extérieur',
+    traitLabels:{normal:'Éblouissement solaire',ar:'Meilleur contraste',lb:'Protection UV active',tr:'Verre assombri automatiquement'}
+  },
+  ville:{
+    url:'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MDAgNDAwIj4KICA8ZGVmcz4KICAgIDxyYWRpYWxHcmFkaWVudCBpZD0iY2l0eXNreSIgY3g9IjUwJSIgY3k9IjAlIiByPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzJjM2U2YSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMxYTI0NDAiLz4KICAgIDwvcmFkaWFsR3JhZGllbnQ+CiAgPC9kZWZzPgogIDwhLS0gU2t5IGR1c2sgLS0+CiAgPHJlY3Qgd2lkdGg9IjgwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9InVybCgjY2l0eXNreSkiLz4KICA8IS0tIEhvcml6b24gZ2xvdyAtLT4KICA8ZWxsaXBzZSBjeD0iNDAwIiBjeT0iMjIwIiByeD0iNDAwIiByeT0iODAiIGZpbGw9IiNmZjhjNDIiIG9wYWNpdHk9IjAuMjUiLz4KICA8IS0tIEJ1aWxkaW5ncyBiYWNrIC0tPgogIDxyZWN0IHg9IjAiIHk9IjEyMCIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iIzFhMjAzNSIvPgogIDxyZWN0IHg9IjEwIiB5PSIxMzAiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxMCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC43Ii8+CiAgPHJlY3QgeD0iMzAiIHk9IjEzMCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjEwIiBmaWxsPSIjZmZlMDgwIiBvcGFjaXR5PSIwLjQiLz4KICA8cmVjdCB4PSIxMCIgeT0iMTUwIiB3aWR0aD0iMTQiIGhlaWdodD0iMTAiIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuOCIvPgogIDxyZWN0IHg9IjMwIiB5PSIxNTAiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxMCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC4zIi8+CiAgPHJlY3QgeD0iMTAiIHk9IjE3MCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjEwIiBmaWxsPSIjZmZlMDgwIiBvcGFjaXR5PSIwLjYiLz4KICA8cmVjdCB4PSI1MCIgeT0iMTcwIiB3aWR0aD0iMTQiIGhlaWdodD0iMTAiIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuNSIvPgogIDxyZWN0IHg9IjEwMCIgeT0iODAiIHdpZHRoPSIxMjAiIGhlaWdodD0iMjIwIiBmaWxsPSIjMjIyODQwIi8+CiAgPHJlY3QgeD0iMTEwIiB5PSI5NSIgd2lkdGg9IjIwIiBoZWlnaHQ9IjE0IiBmaWxsPSIjZmZlMDgwIiBvcGFjaXR5PSIwLjYiLz4KICA8cmVjdCB4PSIxMzgiIHk9Ijk1IiB3aWR0aD0iMjAiIGhlaWdodD0iMTQiIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuOCIvPgogIDxyZWN0IHg9IjE2NiIgeT0iOTUiIHdpZHRoPSIyMCIgaGVpZ2h0PSIxNCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC40Ii8+CiAgPHJlY3QgeD0iMTEwIiB5PSIxMTgiIHdpZHRoPSIyMCIgaGVpZ2h0PSIxNCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC45Ii8+CiAgPHJlY3QgeD0iMTM4IiB5PSIxMTgiIHdpZHRoPSIyMCIgaGVpZ2h0PSIxNCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC4zIi8+CiAgPHJlY3QgeD0iMTY2IiB5PSIxMTgiIHdpZHRoPSIyMCIgaGVpZ2h0PSIxNCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC43Ii8+CiAgPHJlY3QgeD0iMTEwIiB5PSIxNDEiIHdpZHRoPSIyMCIgaGVpZ2h0PSIxNCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC41Ii8+CiAgPHJlY3QgeD0iMTM4IiB5PSIxNDEiIHdpZHRoPSIyMCIgaGVpZ2h0PSIxNCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC44Ii8+CiAgPCEtLSBDZW50ZXIgdG93ZXIgLS0+CiAgPHJlY3QgeD0iMzMwIiB5PSI0MCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyNjAiIGZpbGw9IiMxZTI4NDUiLz4KICA8cmVjdCB4PSIzNDAiIHk9IjU1IiB3aWR0aD0iMjIiIGhlaWdodD0iMTYiIGZpbGw9IiM2MGEwZmYiIG9wYWNpdHk9IjAuOCIvPgogIDxyZWN0IHg9IjM3MCIgeT0iNTUiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxNiIgZmlsbD0iIzYwYTBmZiIgb3BhY2l0eT0iMC42Ii8+CiAgPHJlY3QgeD0iNDAwIiB5PSI1NSIgd2lkdGg9IjIyIiBoZWlnaHQ9IjE2IiBmaWxsPSIjNjBhMGZmIiBvcGFjaXR5PSIwLjkiLz4KICA8cmVjdCB4PSI0MzAiIHk9IjU1IiB3aWR0aD0iMjIiIGhlaWdodD0iMTYiIGZpbGw9IiM2MGEwZmYiIG9wYWNpdHk9IjAuNCIvPgogIDxyZWN0IHg9IjM0MCIgeT0iODAiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxNiIgZmlsbD0iIzYwYTBmZiIgb3BhY2l0eT0iMC41Ii8+CiAgPHJlY3QgeD0iMzcwIiB5PSI4MCIgd2lkdGg9IjIyIiBoZWlnaHQ9IjE2IiBmaWxsPSIjNjBhMGZmIiBvcGFjaXR5PSIwLjkiLz4KICA8cmVjdCB4PSI0MDAiIHk9IjgwIiB3aWR0aD0iMjIiIGhlaWdodD0iMTYiIGZpbGw9IiM2MGEwZmYiIG9wYWNpdHk9IjAuNyIvPgogIDxyZWN0IHg9IjQzMCIgeT0iODAiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxNiIgZmlsbD0iIzYwYTBmZiIgb3BhY2l0eT0iMC44Ii8+CiAgPHJlY3QgeD0iMzQwIiB5PSIxMDUiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxNiIgZmlsbD0iIzYwYTBmZiIgb3BhY2l0eT0iMC4zIi8+CiAgPHJlY3QgeD0iMzcwIiB5PSIxMDUiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxNiIgZmlsbD0iIzYwYTBmZiIgb3BhY2l0eT0iMC42Ii8+CiAgPHJlY3QgeD0iNDAwIiB5PSIxMDUiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxNiIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC44Ii8+CiAgPHJlY3QgeD0iNDMwIiB5PSIxMDUiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxNiIgZmlsbD0iIzYwYTBmZiIgb3BhY2l0eT0iMC41Ii8+CiAgPCEtLSBSaWdodCBidWlsZGluZ3MgLS0+CiAgPHJlY3QgeD0iNTgwIiB5PSIxMDAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjMjIyODQwIi8+CiAgPHJlY3QgeD0iNTkwIiB5PSIxMTUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC43Ii8+CiAgPHJlY3QgeD0iNjE0IiB5PSIxMTUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC40Ii8+CiAgPHJlY3QgeD0iNjM4IiB5PSIxMTUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC45Ii8+CiAgPHJlY3QgeD0iNTkwIiB5PSIxMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC41Ii8+CiAgPHJlY3QgeD0iNjE0IiB5PSIxMzUiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxMiIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC44Ii8+CiAgPHJlY3QgeD0iNjgwIiB5PSIxNDAiIHdpZHRoPSIxMjAiIGhlaWdodD0iMTYwIiBmaWxsPSIjMWEyMDM1Ii8+CiAgPHJlY3QgeD0iNjkyIiB5PSIxNTUiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxMCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC42Ii8+CiAgPHJlY3QgeD0iNzE0IiB5PSIxNTUiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxMCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC44Ii8+CiAgPHJlY3QgeD0iNzM2IiB5PSIxNTUiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxMCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC4zIi8+CiAgPHJlY3QgeD0iNzU4IiB5PSIxNTUiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxMCIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC43Ii8+CiAgPCEtLSBTdHJlZXQgLS0+CiAgPHJlY3QgeD0iMCIgeT0iMzAwIiB3aWR0aD0iODAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzFhMWEyYSIvPgogIDxyZWN0IHg9IjAiIHk9IjI5OCIgd2lkdGg9IjgwMCIgaGVpZ2h0PSI2IiBmaWxsPSIjMmEyYTNhIi8+CiAgPCEtLSBTaWRld2FsayAtLT4KICA8cmVjdCB4PSIwIiB5PSIyOTAiIHdpZHRoPSI4MDAiIGhlaWdodD0iMTIiIGZpbGw9IiMyYTJhMzUiLz4KICA8IS0tIFN0cmVldCBsaWdodHMgLS0+CiAgPGxpbmUgeDE9IjIwMCIgeTE9IjI5MCIgeDI9IjIwMCIgeTI9IjIwMCIgc3Ryb2tlPSIjNjY2IiBzdHJva2Utd2lkdGg9IjQiLz4KICA8bGluZSB4MT0iMjAwIiB5MT0iMjAwIiB4Mj0iMjIwIiB5Mj0iMTg1IiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMyIvPgogIDxjaXJjbGUgY3g9IjIyMiIgY3k9IjE4MyIgcj0iNyIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC45NSIvPgogIDxjaXJjbGUgY3g9IjIyMiIgY3k9IjE4MyIgcj0iMjIiIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuMTIiLz4KICA8bGluZSB4MT0iNjAwIiB5MT0iMjkwIiB4Mj0iNjAwIiB5Mj0iMjAwIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iNCIvPgogIDxsaW5lIHgxPSI2MDAiIHkxPSIyMDAiIHgyPSI1ODAiIHkyPSIxODUiIHN0cm9rZT0iIzY2NiIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgPGNpcmNsZSBjeD0iNTc4IiBjeT0iMTgzIiByPSI3IiBmaWxsPSIjZmZlMDgwIiBvcGFjaXR5PSIwLjk1Ii8+CiAgPGNpcmNsZSBjeD0iNTc4IiBjeT0iMTgzIiByPSIyMiIgZmlsbD0iI2ZmZTA4MCIgb3BhY2l0eT0iMC4xMiIvPgogIDwhLS0gQ2FycyAtLT4KICA8cmVjdCB4PSI4MCIgeT0iMzA4IiB3aWR0aD0iODAiIGhlaWdodD0iMzUiIGZpbGw9IiNjMDM5MmIiIHJ4PSI2Ii8+CiAgPHJlY3QgeD0iODgiIHk9IjMwMCIgd2lkdGg9IjY1IiBoZWlnaHQ9IjIwIiBmaWxsPSIjZTc0YzNjIiByeD0iNCIvPgogIDxjaXJjbGUgY3g9Ijk4IiBjeT0iMzQzIiByPSI4IiBmaWxsPSIjMjIyIi8+CiAgPGNpcmNsZSBjeD0iMTUwIiBjeT0iMzQzIiByPSI4IiBmaWxsPSIjMjIyIi8+CiAgPHJlY3QgeD0iODIiIHk9IjMwNSIgd2lkdGg9IjEwIiBoZWlnaHQ9IjciIGZpbGw9IiNmZmUwODAiIG9wYWNpdHk9IjAuOSIvPgogIDxyZWN0IHg9IjU5MCIgeT0iMzEwIiB3aWR0aD0iOTAiIGhlaWdodD0iMzIiIGZpbGw9IiMyOTgwYjkiIHJ4PSI2Ii8+CiAgPHJlY3QgeD0iNjAwIiB5PSIzMDMiIHdpZHRoPSI3MCIgaGVpZ2h0PSIxOCIgZmlsbD0iIzM0OThkYiIgcng9IjQiLz4KICA8Y2lyY2xlIGN4PSI2MDYiIGN5PSIzNDIiIHI9IjgiIGZpbGw9IiMyMjIiLz4KICA8Y2lyY2xlIGN4PSI2NjUiIGN5PSIzNDIiIHI9IjgiIGZpbGw9IiMyMjIiLz4KICA8cmVjdCB4PSI2NjgiIHk9IjMwOCIgd2lkdGg9IjEwIiBoZWlnaHQ9IjYiIGZpbGw9IiNmZjQ0MDAiIG9wYWNpdHk9IjAuOSIvPgo8L3N2Zz4=',
+    label:'Rue en ville — lumière mixte',
+    traitLabels:{normal:'Reflets vitrines et panneaux',ar:'Vision claire en ville',lb:'Confort visuel urbain',tr:'Adaptation intérieur/extérieur'}
+  }
+};
+
+const demoTraits = {
+  normal:{
+    title:'Sans traitement',
+    icon:'ti-eye',
+    desc:'Vision naturelle sans traitement. Reflets parasites visibles, éblouissement en conduite nocturne, fatigue oculaire plus rapide.',
+    avs:[{t:'Reflets visibles',s:'#2a1010',c:'#ff8080'},{t:'Éblouissement',s:'#2a1010',c:'#ff8080'},{t:'Fatigue rapide',s:'#2a1010',c:'#ff8080'}],
+    filter:'none',
+    glare:'radial-gradient(ellipse at 30% 35%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 50%), radial-gradient(ellipse at 70% 20%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 40%)'
+  },
+  ar:{
+    title:'Anti-reflet',
+    icon:'ti-sparkles',
+    desc:'Élimine 99% des reflets parasites. Vision nette et contrastée, yeux moins fatigués. Indispensable pour la conduite de nuit et le travail sur écran.',
+    avs:[{t:'Reflets supprimés',s:'#0a2a1a',c:'#70c8a0'},{t:'Contraste +40%',s:'#0a2a1a',c:'#70c8a0'},{t:'Idéal conduite',s:'#0a2a1a',c:'#70c8a0'}],
+    filter:'contrast(1.08) brightness(1.04)',
+    glare:''
+  },
+  lb:{
+    title:'Filtre lumière bleue',
+    icon:'ti-device-desktop',
+    desc:`Bloque les longueurs d'onde nocives des écrans. Réduit la fatigue visuelle de 30%, améliore le sommeil. Légère teinte ambrée à peine perceptible.`,
+    avs:[{t:'Fatigue -30%',s:'#1a0f30',c:'#c080f0'},{t:'Meilleur sommeil',s:'#1a0f30',c:'#c080f0'},{t:'Protection rétine',s:'#1a0f30',c:'#c080f0'}],
+    filter:'sepia(0.18) saturate(0.95) brightness(0.98)',
+    glare:''
+  },
+  tr:{
+    title:'Verres Transitions',
+    icon:'ti-sun-moon',
+    desc:`S'assombrissent automatiquement sous les UV en 30 secondes. Retour transparent en 3 minutes en intérieur. Protection UV 100%. 8 couleurs disponibles.`,
+    avs:[{t:'UV 100% bloqués',s:'#0a2a10',c:'#70c8a0'},{t:'Adaptation auto',s:'#0a2a10',c:'#70c8a0'},{t:'8 couleurs',s:'#1a1a30',c:'#a0a0f0'}],
+    filter:'sepia(0.6) saturate(0.7) brightness(0.7)',
+    glare:''
+  }
+};
+
+let demoScene = 'nuit';
+let demoTrait = 'normal';
+let trSun = 0;
+
+function setScene(s){
+  demoScene = s;
+  document.querySelectorAll('#scene-tabs .demo-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('stab-'+s).classList.add('active');
+  applyFilter();
+}
+
+function setTrait(t){
+  demoTrait = t;
+  document.querySelectorAll('#trait-tabs .demo-tab').forEach(tab=>tab.classList.remove('active'));
+  document.getElementById('ttab-'+t).classList.add('active');
+  document.getElementById('demo-tr-slider').style.display = t==='tr'?'block':'none';
+  const td = demoTraits[t];
+  document.getElementById('demo-info-title').innerHTML = `<i class="ti ${td.icon}"></i> ${td.title}`;
+  document.getElementById('demo-info-desc').textContent = td.desc;
+  document.getElementById('demo-info-avs').innerHTML = td.avs.map(a=>`<span class="demo-av" style="background:${a.s};color:${a.c}">${a.t}</span>`).join('');
+  document.getElementById('demo-after-label').textContent = td.title;
+  applyFilter();
+}
+
+function applyFilter(){
+  const scene = demoScenes[demoScene];
+  const trait = demoTraits[demoTrait];
+  const photo = document.getElementById('demo-photo');
+  const before = document.getElementById('demo-before');
+  const after = document.getElementById('demo-after');
+  const glare = document.getElementById('demo-glare');
+  const label = document.getElementById('demo-photo-label');
+
+  if(!photo) return;
+
+  // Set images
+  const url = scene.url;
+  photo.src = url;
+  before.src = url;
+  after.src = url;
+
+  // Apply filter based on trait
+  let filter = trait.filter;
+  if(demoTrait === 'tr'){
+    const sun = trSun/100;
+    filter = `sepia(${sun*0.7}) saturate(${1-sun*0.35}) brightness(${1-sun*0.32})`;
+  }
+
+  photo.style.filter = filter;
+  after.style.filter = filter;
+  before.style.filter = 'none';
+
+  // Glare overlay
+  glare.style.background = trait.glare || '';
+  glare.style.opacity = '1';
+
+  // Label
+  label.textContent = scene.traitLabels[demoTrait] || scene.label;
+}
+
+function initDemo(){
+  setScene('nuit');
+  setTrait('normal');
+}
+
+
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#185FA5;color:#fff;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:700;z-index:9998;box-shadow:0 4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;gap:8px;';
+  t.innerHTML='<i class="ti ti-check"></i>'+msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+// ─── CALCULATEUR ÉPAISSEUR ───────────────────────────────────
+
+const THICK_INDICES = [
+  {ind:'1.50', nM1:0.50, color:'#e05050', label:'1.50 — Standard'},
+  {ind:'1.60', nM1:0.60, color:'#e09030', label:'1.60 — Aminci'},
+  {ind:'1.67', nM1:0.67, color:'#378ADD', label:'1.67 — Très aminci'},
+  {ind:'1.74', nM1:0.74, color:'#70c8a0', label:'1.74 — Ultra-mince'},
+];
+
+function calcEpaisseur(sph, cyl, diam, nM1){
+  const power = (parseFloat(sph)||0) + (parseFloat(cyl)||0) / 2;
+  const h = (parseFloat(diam)||65) / 2;
+  const MIN = 1.2;
+  if(power <= 0){
+    const tEdge = MIN + (h*h * Math.abs(power||0.01)) / (2000 * nM1);
+    return {center:MIN, edge:Math.round(tEdge*10)/10, max:Math.round(tEdge*10)/10};
+  } else {
+    const tCenter = MIN + (h*h * power) / (2000 * nM1);
+    return {center:Math.round(tCenter*10)/10, edge:MIN, max:Math.round(tCenter*10)/10};
+  }
+}
+
+function openThick(){
+  thickLoadPrescription();
+  document.getElementById('thick-modal').classList.add('open');
+  renderThick();
+}
+
+function closeThick(){
+  document.getElementById('thick-modal').classList.remove('open');
+}
+
+function thickLoadPrescription(){
+  const odSph = parseFloat(document.getElementById('od-sph')?.value)||0;
+  const ogSph = parseFloat(document.getElementById('og-sph')?.value)||0;
+  const odCyl = parseFloat(document.getElementById('od-cyl')?.value)||0;
+  const ogCyl = parseFloat(document.getElementById('og-cyl')?.value)||0;
+  const sph = Math.abs(odSph) >= Math.abs(ogSph) ? odSph : ogSph;
+  const cyl = Math.abs(odCyl) >= Math.abs(ogCyl) ? odCyl : ogCyl;
+  document.getElementById('thick-sph').value = sph;
+  document.getElementById('thick-cyl').value = cyl;
+  renderThick();
+}
+
+function thickReset(){
+  document.getElementById('thick-sph').value = '0';
+  document.getElementById('thick-cyl').value = '0';
+  document.getElementById('thick-diam').value = '65';
+  renderThick();
+}
+
+function renderThick(){
+  const sph = parseFloat(document.getElementById('thick-sph').value)||0;
+  const cyl = parseFloat(document.getElementById('thick-cyl').value)||0;
+  const diam = parseInt(document.getElementById('thick-diam').value)||65;
+  const power = sph + cyl/2;
+  const isPlus = power > 0;
+
+  document.getElementById('thick-diam-label').textContent = diam;
+
+  const results = THICK_INDICES.map(t => ({
+    ...t, ...calcEpaisseur(sph, cyl, diam, t.nM1)
+  }));
+
+  const maxThick = Math.max(...results.map(r => r.max));
+  const minThick = Math.min(...results.map(r => r.max));
+  const refThick = results[0].max;
+  const MAX_H = 100;
+
+  // ─── VISUALISATION SVG ─────────────────────────────────────
+  const visEl = document.getElementById('thick-visual');
+  visEl.innerHTML = results.map((r, idx) => {
+    const scale = MAX_H / maxThick;
+    const eH = Math.max(8, Math.round(r.edge * scale));
+    const cH = Math.max(6, Math.round(r.center * scale));
+    const W = 62, H = MAX_H + 8;
+    const gradId = `tg${idx}`;
+    // Lens profile: for minus → concave top (edges higher), for plus → convex top (center higher)
+    const topLeft  = H - (isPlus ? eH : eH);
+    const topMid   = H - (isPlus ? cH : cH);
+    // topLeft is edge height from bottom, topMid is center height from bottom
+    const svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block">
+      <defs>
+        <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${r.color}" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="${r.color}" stop-opacity="0.25"/>
+        </linearGradient>
+      </defs>
+      <path d="M2,${H} L2,${H - eH} Q${W/2},${H - cH} ${W-2},${H - eH} L${W-2},${H} Z"
+        fill="url(#${gradId})" stroke="${r.color}" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>`;
+    const isBest = r.max === minThick;
+    const isWorst = r.max === maxThick;
+    return `<div class="lens-col">
+      ${svg}
+      <div style="font-size:17px;font-weight:800;color:${r.color};margin-top:4px">${r.max}<span style="font-size:10px;font-weight:600"> mm</span></div>
+      <div class="lens-label" style="color:${r.color};font-size:12px">Indice ${r.ind}</div>
+      ${isBest ? `<div style="font-size:9px;font-weight:800;background:#0a2a18;color:#70c8a0;padding:2px 7px;border-radius:20px;white-space:nowrap">✓ Le plus fin</div>` : ''}
+      ${isWorst && !isBest ? `<div style="font-size:9px;font-weight:800;background:#2a1010;color:#e07070;padding:2px 7px;border-radius:20px;white-space:nowrap">Référence</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // ─── TABLEAU ───────────────────────────────────────────────
+  const tableEl = document.getElementById('thick-table');
+  tableEl.innerHTML = `
+    <div style="font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 8px;display:flex;align-items:center;gap:6px">
+      <i class="ti ti-table"></i> Comparaison détaillée
+    </div>
+    ${results.map((r,i) => {
+      const red = i===0 ? 0 : Math.round((1 - r.max/refThick)*100);
+      const isBest = r.max === minThick;
+      return `<div class="thick-row ${isBest?'best':i===0?'worst':''}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:12px;height:12px;border-radius:50%;background:${r.color};flex-shrink:0"></div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#f0f0f0">${r.label}</div>
+            ${isBest?`<div style="font-size:11px;color:#70c8a0;margin-top:2px">✓ Recommandé pour justifier la montée en gamme</div>`:''}
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:20px;font-weight:800;color:${r.color}">${r.max}<span style="font-size:11px"> mm</span></div>
+          ${i>0 ? `<div style="font-size:11px;font-weight:700;color:#70c8a0">−${red}% vs 1.50</div>` : `<div style="font-size:11px;color:#555">référence</div>`}
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+// ─── COMPARATEUR VERRES ───────────────────────────────────────
+
+let compareSlots = [null, null];
+
+function toggleCompareBtn(btn, vid){
+  const allCat = [...catalogue, ...catalogue2e, ...verresClasseA];
+  const v = allCat.find(x => x.id === vid);
+  if(!v) return;
+  const idx = compareSlots.findIndex(s => s && s.id === vid);
+  if(idx >= 0){
+    compareSlots[idx] = null;
+    btn.classList.remove('active');
+    btn.innerHTML = `<i class="ti ti-layout-columns"></i> Comparer`;
+  } else {
+    if(!compareSlots[0]) compareSlots[0] = v;
+    else if(!compareSlots[1]) compareSlots[1] = v;
+    else { compareSlots[0] = compareSlots[1]; compareSlots[1] = v; }
+    btn.classList.add('active');
+    btn.innerHTML = `<i class="ti ti-check"></i> Sélectionné`;
+  }
+  updateCompareBar();
+}
+
+function updateCompareBar(){
+  const bar = document.getElementById('compare-bar');
+  const btn = document.getElementById('cbar-btn');
+  const s0  = document.getElementById('cbar-slot-0');
+  const s1  = document.getElementById('cbar-slot-1');
+  const hasAny = compareSlots[0] || compareSlots[1];
+  bar.classList.toggle('visible', !!hasAny);
+  s0.innerHTML = compareSlots[0]
+    ? `<span class="cbar-slot-filled"><i class="ti ti-check" style="color:#70c8a0;font-size:10px;margin-right:3px"></i>${compareSlots[0].nom}</span>`
+    : `<span class="cbar-slot-empty">Verre 1 — cliquez Comparer</span>`;
+  s1.innerHTML = compareSlots[1]
+    ? `<span class="cbar-slot-filled"><i class="ti ti-check" style="color:#70c8a0;font-size:10px;margin-right:3px"></i>${compareSlots[1].nom}</span>`
+    : `<span class="cbar-slot-empty">Verre 2 — cliquez Comparer</span>`;
+  const ready = compareSlots[0] && compareSlots[1];
+  btn.style.opacity = ready ? '1' : '0.4';
+  btn.style.pointerEvents = ready ? 'auto' : 'none';
+}
+
+function openComparateur(){
+  if(!compareSlots[0] || !compareSlots[1]){ showToast(`Sélectionnez 2 verres via le bouton Comparer`); return; }
+  renderComparateur();
+  document.getElementById('compare-modal').classList.add('open');
+}
+
+function closeComparateur(){
+  document.getElementById('compare-modal').classList.remove('open');
+}
+
+function clearComparateur(){
+  compareSlots = [null, null];
+  updateCompareBar();
+  document.querySelectorAll('.btn-comparer').forEach(b => {
+    b.classList.remove('active');
+    b.innerHTML = `<i class="ti ti-layout-columns"></i> Comparer`;
+  });
+}
+
+function showComparatorIntro(){
+  if(compareSlots[0] && compareSlots[1]) openComparateur();
+  else showToast(`Ouvrez les verres en s4 et cliquez "Comparer" sur 2 cartes`);
+}
+
+function renderComparateur(){
+  const [v1, v2] = compareSlots;
+  if(!v1 || !v2) return;
+  const sph = parseFloat(document.getElementById('od-sph')?.value)||0;
+  const cyl = parseFloat(document.getElementById('od-cyl')?.value)||0;
+  const diam = 65;
+
+  function metrics(v){
+    const indRec = getIndiceRec(Math.abs(sph), Math.abs(cyl));
+    const ind = getBestIndice(v, indRec);
+    const vente = ind ? (v.indices[ind]||null) : null;
+    const achat = ind && v.achats ? (v.achats[ind]||null) : null;
+    const marge = vente && achat ? vente - achat : null;
+    const taux  = vente && marge ? Math.round(marge/vente*100) : null;
+    const t = ind ? calcEpaisseur(sph, cyl, diam, THICK_INDICES.find(x=>x.ind===ind)?.nM1 || 0.60) : null;
+    const rac = state.mutuelle && vente ? Math.max(0, vente*2 - state.mutuelle.plafond_verre*2) : null;
+    return {ind, vente, achat, marge, taux, thick:t?.max||null, rac};
+  }
+
+  const m1 = metrics(v1), m2 = metrics(v2);
+
+  function cmp(a, b, higherIsBetter){
+    if(a===null||b===null) return ['equal','equal'];
+    if(a===b) return ['equal','equal'];
+    return higherIsBetter ? (a>b?['better','worse']:['worse','better']) : (a<b?['better','worse']:['worse','better']);
+  }
+
+  const [cm_marge1, cm_marge2]   = cmp(m1.marge, m2.marge, true);
+  const [cm_thick1, cm_thick2]   = cmp(m1.thick, m2.thick, false);
+  const [cm_prix1,  cm_prix2]    = cmp(m1.vente, m2.vente, false);
+  const [cm_rac1,   cm_rac2]     = cmp(m1.rac,   m2.rac,   false);
+
+  const score1 = (cm_marge1==='better'?1:0) + (cm_thick1==='better'?1:0) + (cm_rac1==='better'?1:0);
+  const score2 = (cm_marge2==='better'?1:0) + (cm_thick2==='better'?1:0) + (cm_rac2==='better'?1:0);
+  const w1 = score1 >= score2, w2 = score2 > score1;
+
+  function col(v, m, isWinner, cmMarge, cmThick, cmPrix, cmRac){
+    const gc = v.gamme==='haut'?'#9060e0':v.gamme==='milieu'?'#185FA5':'#3B6D11';
+    return `<div class="compare-col ${isWinner?'winner':''}">
+      <div class="compare-col-header">
+        <div style="width:10px;height:10px;border-radius:50%;background:${gc};margin:0 auto 8px"></div>
+        <div class="compare-col-name">${v.nom}</div>
+        <div class="compare-col-brand">${v.marque}</div>
+        ${m.ind ? `<div style="font-size:11px;color:#555;margin-top:3px">Indice ${m.ind}</div>` : ''}
+        ${isWinner ? `<div class="compare-winner-badge"><i class="ti ti-trophy" style="font-size:10px"></i> Recommandé</div>` : ''}
+      </div>
+      <div class="compare-metric">
+        <span class="compare-metric-key"><i class="ti ti-coin" style="font-size:13px"></i> Prix vente</span>
+        <span class="compare-metric-val ${cmPrix}">${m.vente!=null?m.vente+' €':'—'}</span>
+      </div>
+      ${currentUser?.admin
+        ? `<div class="compare-metric"><span class="compare-metric-key"><i class="ti ti-trending-up" style="font-size:13px"></i> Bénéfice paire</span><span class="compare-metric-val ${cmMarge}">${m.marge!=null?'+'+(m.marge*2)+' €':'—'}</span></div>`
+        : `<div class="compare-metric"><span class="compare-metric-key"><i class="ti ti-percent" style="font-size:13px"></i> Marge</span><span class="compare-metric-val ${cmMarge}">${m.taux!=null?m.taux+' %':'—'}</span></div>`
+      }
+      ${state.mutuelle?`<div class="compare-metric"><span class="compare-metric-key"><i class="ti ti-shield" style="font-size:13px"></i> RAC patient</span><span class="compare-metric-val ${cmRac}">${m.rac!=null?m.rac+' €':'—'}</span></div>`:''}
+      <div class="compare-metric">
+        <span class="compare-metric-key"><i class="ti ti-ruler-measure" style="font-size:13px"></i> Épaisseur</span>
+        <span class="compare-metric-val ${cmThick}">${m.thick!=null?m.thick+' mm':'—'}</span>
+      </div>
+      <div class="compare-metric">
+        <span class="compare-metric-key"><i class="ti ti-adjustments" style="font-size:13px"></i> Gamme</span>
+        <span class="compare-metric-val" style="font-size:12px">${v.gamme==='haut'?'Haut de gamme':v.gamme==='milieu'?'Milieu de gamme':'Entrée de gamme'}</span>
+      </div>
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid #1e1e1e">
+        <div style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:7px">Traitements phares</div>
+        ${v.traitements.slice(0,2).map(t=>`<div style="font-size:12px;color:#b0b0b0;padding:3px 0;display:flex;align-items:center;gap:6px"><i class="ti ${t.icon}" style="color:var(--blue-400);font-size:12px"></i>${t.nom}</div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('compare-grid').innerHTML =
+    col(v1,m1,w1,cm_marge1,cm_thick1,cm_prix1,cm_rac1) +
+    col(v2,m2,w2,cm_marge2,cm_thick2,cm_prix2,cm_rac2);
+}
+
+// ─── INIT ────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+  loadSavedPrix();
+  document.getElementById('od-sph').innerHTML=genSph();
+  document.getElementById('og-sph').innerHTML=genSph();
+  document.getElementById('od-cyl').innerHTML=genCyl();
+  document.getElementById('og-cyl').innerHTML=genCyl();
+  document.getElementById('od-add').innerHTML=genAdd();
+  document.getElementById('og-add').innerHTML=genAdd();
+  renderMutuelles();
+});
+</script>
+  <div class="logout-bar" id="logout-bar">
+    <div class="user-info"><i class="ti ti-user-circle" style="font-size:18px;color:#378ADD"></i> Connecté : <strong id="user-display-name">—</strong> <span id="user-role-badge" style="font-size:11px;padding:2px 8px;border-radius:20px;background:#1e3a5a;color:#60aaee;font-weight:600"></span></div>
+    <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Déconnexion</button>
+  </div>
+
+  <!-- SIMULATEUR MODAL -->
+  <div id="sim-modal">
+    <div class="sim-modal-box">
+      <div class="sim-modal-header">
+        <div class="sim-modal-title"><i class="ti ti-eye" style="color:#378ADD"></i> Simulateur de traitements</div>
+        <button class="sim-close" onclick="closeSimulateur()"><i class="ti ti-x"></i> Fermer</button>
+      </div>
+      <div class="sim-tabs-m">
+        <button class="sim-tab-m active" onclick="simSetMode('normal')" id="stab-normal"><i class="ti ti-eye"></i> Sans traitement</button>
+        <button class="sim-tab-m" onclick="simSetMode('ar')" id="stab-ar"><i class="ti ti-sparkles"></i> Anti-reflet</button>
+        <button class="sim-tab-m" onclick="simSetMode('lb')" id="stab-lb"><i class="ti ti-device-desktop"></i> Lumière bleue</button>
+        <button class="sim-tab-m" onclick="simSetMode('tr')" id="stab-tr"><i class="ti ti-sun-moon"></i> Transitions</button>
+      </div>
+      <div class="sim-canvas-wrap">
+        <canvas class="sim-canvas-m" id="simMainCanvas" width="600" height="220"></canvas>
+      </div>
+      <div id="sim-sliders-m"></div>
+      <div class="sim-info-m">
+        <div class="sim-info-title-m" id="sim-info-title-m">Sans traitement</div>
+        <div class="sim-info-desc-m" id="sim-info-desc-m">Vision standard — reflets et éblouissements visibles.</div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Comparaison scènes</div>
+      <div class="sim-compare-m">
+        <div class="sim-cmp-card">
+          <div class="sim-cmp-label">Conduite de nuit</div>
+          <canvas class="sim-cmp-canvas" id="simCmpNuit" width="280" height="100"></canvas>
+        </div>
+        <div class="sim-cmp-card">
+          <div class="sim-cmp-label">Écran ordinateur</div>
+          <canvas class="sim-cmp-canvas" id="simCmpEcran" width="280" height="100"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ÉPAISSEUR MODAL ─────────────────────────────────── -->
+  <div id="thick-modal">
+    <div class="thick-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div style="font-size:18px;font-weight:800;color:#f0f0f0;display:flex;align-items:center;gap:10px">
+          <i class="ti ti-ruler-measure" style="color:#378ADD"></i> Épaisseur des verres
+        </div>
+        <button onclick="closeThick()" style="background:#252525;border:1px solid #333;color:#aaa;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:inherit;font-size:13px"><i class="ti ti-x"></i></button>
+      </div>
+      <!-- Inputs -->
+      <div style="background:#1e1e1e;border-radius:14px;padding:16px;margin-bottom:4px">
+        <div style="font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px"><i class="ti ti-clipboard-text" style="font-size:12px"></i> Paramètres</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Sphère (D)</label>
+            <input type="number" id="thick-sph" step="0.25" value="0" min="-20" max="20"
+              style="width:100%;padding:9px 11px;border-radius:8px;border:1.5px solid #333;background:#252525;color:#f0f0f0;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s"
+              onfocus="this.style.borderColor='#378ADD'" onblur="this.style.borderColor='#333'" oninput="renderThick()"/>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Cylindre (D)</label>
+            <input type="number" id="thick-cyl" step="0.25" value="0" min="-6" max="6"
+              style="width:100%;padding:9px 11px;border-radius:8px;border:1.5px solid #333;background:#252525;color:#f0f0f0;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s"
+              onfocus="this.style.borderColor='#378ADD'" onblur="this.style.borderColor='#333'" oninput="renderThick()"/>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em">Diamètre (mm)</label>
+            <input type="number" id="thick-diam" step="1" value="65" min="40" max="80"
+              style="width:100%;padding:9px 11px;border-radius:8px;border:1.5px solid #333;background:#252525;color:#f0f0f0;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s"
+              onfocus="this.style.borderColor='#378ADD'" onblur="this.style.borderColor='#333'" oninput="renderThick()"/>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="thickLoadPrescription()" style="background:#185FA5;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+            <i class="ti ti-download"></i> Utiliser l'ordonnance du patient
+          </button>
+          <button onclick="thickReset()" style="background:#252525;border:1px solid #333;color:#aaa;border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">
+            <i class="ti ti-refresh"></i> Réinitialiser
+          </button>
+        </div>
+      </div>
+      <!-- Visual -->
+      <div style="font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 8px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-eye-check"></i> Coupe transversale — vue patient
+      </div>
+      <div class="thick-vis" id="thick-visual"></div>
+      <!-- Table -->
+      <div id="thick-table"></div>
+      <!-- Info -->
+      <div style="background:#0f1e30;border:1px solid #1e3a5a;border-radius:12px;padding:12px 14px;font-size:12px;color:#8bbfe8;line-height:1.6;margin-top:4px">
+        <strong style="color:#60aaee"><i class="ti ti-info-circle"></i> À retenir :</strong>
+        Un verre d'indice plus élevé est physiquement plus fin et plus léger à correction égale. L'épaisseur est calculée pour un diamètre de monture de <span id="thick-diam-label">65</span> mm.
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── BARRE COMPARATEUR ─────────────────────────────────── -->
+  <div id="compare-bar">
+    <i class="ti ti-layout-columns" style="color:#378ADD;font-size:20px;flex-shrink:0"></i>
+    <div class="cbar-slot" id="cbar-slot-0"><span class="cbar-slot-empty">Verre 1 — cliquez Comparer</span></div>
+    <div style="color:#2a4a6a;font-size:11px;font-weight:700;flex-shrink:0">VS</div>
+    <div class="cbar-slot" id="cbar-slot-1"><span class="cbar-slot-empty">Verre 2 — cliquez Comparer</span></div>
+    <button onclick="openComparateur()" id="cbar-btn" style="background:#185FA5;color:#fff;border:none;border-radius:10px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;flex-shrink:0;opacity:0.4;pointer-events:none">
+      <i class="ti ti-eye"></i> Comparer
+    </button>
+    <button onclick="clearComparateur()" style="background:#1a0a0a;border:1px solid #3a1a1a;color:#e07070;border-radius:10px;padding:9px 11px;font-size:13px;cursor:pointer;font-family:inherit;flex-shrink:0">
+      <i class="ti ti-trash"></i>
+    </button>
+  </div>
+
+  <!-- ─── COMPARATEUR MODAL ─────────────────────────────────── -->
+  <div id="compare-modal">
+    <div class="compare-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:18px;font-weight:800;color:#f0f0f0;display:flex;align-items:center;gap:10px">
+          <i class="ti ti-layout-columns" style="color:#378ADD"></i> Comparateur de verres
+        </div>
+        <button onclick="closeComparateur()" style="background:#252525;border:1px solid #333;color:#aaa;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:inherit;font-size:13px"><i class="ti ti-x"></i></button>
+      </div>
+      <div style="font-size:13px;color:#555;margin-bottom:4px">Côte à côte pour aider le patient à choisir</div>
+      <div class="compare-grid" id="compare-grid"></div>
+      <button onclick="closeComparateur()" style="width:100%;margin-top:16px;padding:12px;border-radius:12px;border:1px solid #2a2a2a;background:#1e1e1e;color:#aaa;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
+        <i class="ti ti-x"></i> Fermer
+      </button>
+    </div>
+  </div>
+
+</body>
+</html>
