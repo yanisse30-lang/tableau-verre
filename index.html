@@ -585,6 +585,43 @@ select option{background:#252525;color:#f0f0f0}
   .es-legend-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0}
   @media(max-width:540px){.es-row-4{grid-template-columns:1fr 1fr}}
 
+  /* ─── OC VERRES INTERFACE ─────────────────────────────────────── */
+  #soc{background:#f0f2f5;margin:-24px;padding:0;min-height:calc(100vh + 48px)}
+  .oc-wrap{max-width:880px;margin:0 auto;padding:0 20px 100px}
+  .oc-top{display:flex;align-items:center;justify-content:space-between;padding:22px 0 18px;border-bottom:1px solid #dde0e5;margin-bottom:20px}
+  .oc-tabs{display:flex}
+  .oc-tab{padding:10px 26px;font-size:15px;font-weight:600;background:none;border:none;cursor:pointer;border-bottom:2.5px solid transparent;font-family:var(--font);transition:0.15s;color:#aaa}
+  .oc-tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a}
+  .oc-actions{display:flex;gap:10px;align-items:center}
+  .oc-bell{width:46px;height:46px;border:2px solid #E53935;border-radius:12px;background:white;color:#E53935;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+  .oc-voir{background:#1a1a1a;color:white;border:none;border-radius:12px;padding:13px 24px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:8px;transition:background .15s}
+  .oc-voir:hover{background:#333}
+  .oc-grid{display:grid;gap:14px;margin-bottom:14px}
+  .oc-row2{grid-template-columns:3fr 2fr}
+  .oc-sect{background:white;border-radius:16px;padding:20px;box-shadow:0 1px 5px rgba(0,0,0,0.07)}
+  .oc-sect-title{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:16px}
+  .oc-geom-row{display:flex;gap:8px}
+  .oc-geom-card,.oc-type-card{flex:1;display:flex;flex-direction:column;align-items:center;gap:9px;padding:14px 6px 12px;border-radius:12px;border:2px solid #ededed;cursor:pointer;background:white;font-family:var(--font);transition:0.15s;min-width:0}
+  .oc-geom-card:hover:not(.selected),.oc-type-card:hover:not(.selected){border-color:#bbb}
+  .oc-geom-card.selected,.oc-type-card.selected{border-color:#E53935}
+  .oc-geom-lbl,.oc-type-lbl{font-size:11px;font-weight:600;color:#666;line-height:1.3;text-align:center}
+  .oc-geom-card.selected .oc-geom-lbl,.oc-type-card.selected .oc-type-lbl{color:#E53935;font-weight:700}
+  .oc-lens-path{fill:#f4f4f4;stroke:#d0d0d0;stroke-width:1.5}
+  .oc-geom-card.selected .oc-lens-path,.oc-type-card.selected .oc-lens-path{fill:#2c2c2c;stroke:#E53935;stroke-width:2}
+  .oc-lens-zone{stroke:#c8c8c8;stroke-width:1;fill:none;stroke-dasharray:3,2}
+  .oc-geom-card.selected .oc-lens-zone{stroke:#888}
+  .oc-type-row{display:flex;gap:10px}
+  .oc-mut-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .oc-mut-card{border:1.5px solid #eeeeee;border-radius:12px;padding:8px 4px;cursor:pointer;background:white;display:flex;align-items:center;justify-content:center;min-height:60px;transition:border .15s}
+  .oc-mut-card:hover:not(.selected){border-color:#aaa}
+  .oc-mut-card.selected{border:2.5px solid #1a1a1a}
+  .oc-opt-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .oc-opt-chip{padding:8px 14px;border-radius:20px;border:1.5px solid #e5e5e5;background:white;color:#888;font-size:13px;cursor:pointer;font-family:var(--font);transition:.15s}
+  .oc-opt-chip.active{border-color:#E53935;color:#E53935;background:#fff5f5;font-weight:600}
+  .oc-back-btn{background:none;border:none;color:#999;font-size:14px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px;padding:14px 0 4px}
+  .oc-back-btn:hover{color:#333}
+  @media(max-width:600px){#soc{margin:-14px}.oc-row2{grid-template-columns:1fr}.oc-geom-row{flex-wrap:wrap}.oc-mut-grid{grid-template-columns:repeat(3,1fr)}.oc-voir{padding:11px 16px;font-size:14px}}
+
 </style>
 </head>
 <body>
@@ -699,7 +736,7 @@ select option{background:#252525;color:#f0f0f0}
       </div>
     </div>
     <div style="margin-top:16px">
-      <button class="btn-primary" onclick="go(1)" style="background:#252525;border:1.5px solid #333;color:#aaa;font-size:14px;font-weight:600">
+      <button class="btn-primary" onclick="go('oc')" style="background:#252525;border:1.5px solid #333;color:#aaa;font-size:14px;font-weight:600">
         <i class="ti ti-eyeglass"></i> Commencer une vente (sélection complète)
       </button>
     </div>
@@ -1058,6 +1095,103 @@ select option{background:#252525;color:#f0f0f0}
   </div>
   </div>
 
+  <!-- SOC : INTERFACE OC VERRES ──────────────────────────────── -->
+  <div id="soc" class="screen">
+  <div class="oc-wrap">
+
+    <!-- HEADER -->
+    <div class="oc-top">
+      <div class="oc-tabs">
+        <button class="oc-tab active" id="oc-tab-1" onclick="ocSetPaire(1)">Première paire</button>
+        <button class="oc-tab" id="oc-tab-2" onclick="ocSetPaire(2)">Deuxième paire</button>
+      </div>
+      <div class="oc-actions">
+        <div class="oc-bell"><i class="ti ti-bell"></i></div>
+        <button class="oc-voir" onclick="ocVoirVerres()"><i class="ti ti-eye"></i> Voir les verres</button>
+      </div>
+    </div>
+
+    <!-- ROW 1 : Géométrie + Type -->
+    <div class="oc-grid oc-row2">
+      <div class="oc-sect">
+        <div class="oc-sect-title">Géométrie</div>
+        <div class="oc-geom-row">
+          <button class="oc-geom-card" id="ocg-unifocal" onclick="ocSelGeom('unifocal',this)">
+            <svg viewBox="0 0 88 56" width="66" height="42">
+              <path class="oc-lens-path" d="M12,37 C10,20 20,6 46,6 C74,6 82,22 82,34 C82,48 70,54 46,52 C22,50 12,50 12,37Z"/>
+            </svg>
+            <span class="oc-geom-lbl">Unifocal</span>
+          </button>
+          <button class="oc-geom-card selected" id="ocg-progressif" onclick="ocSelGeom('progressif',this)">
+            <svg viewBox="0 0 88 56" width="66" height="42">
+              <path class="oc-lens-path" d="M12,37 C10,20 20,6 46,6 C74,6 82,22 82,34 C82,48 70,54 46,52 C22,50 12,50 12,37Z"/>
+              <line class="oc-lens-zone" x1="18" y1="30" x2="78" y2="30"/>
+              <line class="oc-lens-zone" x1="22" y1="41" x2="74" y2="41"/>
+            </svg>
+            <span class="oc-geom-lbl">Progressif</span>
+          </button>
+          <button class="oc-geom-card" id="ocg-prog_inter" onclick="ocSelGeom('prog_inter',this)">
+            <svg viewBox="0 0 88 56" width="66" height="42">
+              <path class="oc-lens-path" d="M12,37 C10,20 20,6 46,6 C74,6 82,22 82,34 C82,48 70,54 46,52 C22,50 12,50 12,37Z"/>
+              <line class="oc-lens-zone" x1="16" y1="23" x2="80" y2="23"/>
+              <line class="oc-lens-zone" x1="18" y1="33" x2="78" y2="33"/>
+              <line class="oc-lens-zone" x1="22" y1="43" x2="74" y2="43"/>
+            </svg>
+            <span class="oc-geom-lbl">Progressifs<br>d'intérieur</span>
+          </button>
+          <button class="oc-geom-card" id="ocg-degressif" onclick="ocSelGeom('degressif',this)">
+            <svg viewBox="0 0 88 56" width="66" height="42">
+              <path class="oc-lens-path" d="M12,37 C10,20 20,6 46,6 C74,6 82,22 82,34 C82,48 70,54 46,52 C22,50 12,50 12,37Z"/>
+              <path class="oc-lens-zone" d="M14,30 Q46,23 80,30" stroke-dasharray="none"/>
+            </svg>
+            <span class="oc-geom-lbl">Dégressif</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="oc-sect">
+        <div class="oc-sect-title">Type</div>
+        <div class="oc-type-row">
+          <button class="oc-type-card selected" id="oct-blanc" onclick="ocSelType('blanc',this)">
+            <svg viewBox="0 0 88 56" width="66" height="42">
+              <path class="oc-lens-path" d="M12,37 C10,20 20,6 46,6 C74,6 82,22 82,34 C82,48 70,54 46,52 C22,50 12,50 12,37Z"/>
+            </svg>
+            <span class="oc-type-lbl">Blanc</span>
+          </button>
+          <button class="oc-type-card" id="oct-photo" onclick="ocSelType('photo',this)">
+            <svg viewBox="0 0 88 56" width="66" height="42">
+              <path class="oc-lens-path" d="M12,37 C10,20 20,6 46,6 C74,6 82,22 82,34 C82,48 70,54 46,52 C22,50 12,50 12,37Z"/>
+              <ellipse cx="46" cy="24" rx="26" ry="16" fill="rgba(0,0,0,0.22)"/>
+            </svg>
+            <span class="oc-type-lbl">Photochr.</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2 : Réseau mutuelle + Options -->
+    <div class="oc-grid oc-row2">
+      <div class="oc-sect">
+        <div class="oc-sect-title">Réseau mutuelle</div>
+        <div class="oc-mut-grid" id="oc-mut-grid"></div>
+      </div>
+      <div class="oc-sect">
+        <div class="oc-sect-title">Option(s)</div>
+        <div class="oc-opt-grid">
+          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">Nylor / Percé</button>
+          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">Anti-fatigue</button>
+          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">Freinateur</button>
+          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">100% Santé</button>
+          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">Individualisé</button>
+          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">Mesures indiv.</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="oc-back-btn" onclick="go('0')"><i class="ti ti-arrow-left"></i> Retour à l'accueil</button>
+  </div>
+  </div>
+
   <!-- S1 MUTUELLE -->
   <div id="s1" class="screen">
     <div class="header-block blue">
@@ -1099,7 +1233,7 @@ select option{background:#252525;color:#f0f0f0}
     </div>
     <div class="step-bar"><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot"></div><div class="step-dot"></div></div>
     <div class="card">
-      <button class="btn-back" onclick="go(2)"><i class="ti ti-arrow-left"></i> Retour</button>
+      <button class="btn-back" onclick="go(_backFrom3||2)"><i class="ti ti-arrow-left"></i> Retour</button>
       <div class="section-label"><i class="ti ti-forms"></i> Ordonnance</div>
       <div class="eye-grid">
         <div class="eye-block eye-od">
@@ -1466,6 +1600,72 @@ function getBestIndice(v,rec){
 let state={mutuelle:null,vision:null,verre1:null};
 let _backFrom2 = 1;
 let _backFrom3b = '3a';
+let _backFrom3 = 2;
+
+// ─── OC VERRES FUNCTIONS ──────────────────────────────────────────
+let _ocPaire = 1;
+let _ocGeom  = 'progressif';
+let _ocType  = 'blanc';
+let _ocMutId = null;
+
+function ocSetPaire(n){
+  _ocPaire = n;
+  document.querySelectorAll('.oc-tab').forEach((t,i)=>t.classList.toggle('active',i===n-1));
+}
+
+function ocSelGeom(geom, btn){
+  _ocGeom = geom;
+  document.querySelectorAll('.oc-geom-card').forEach(c=>c.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+
+function ocSelType(type, btn){
+  _ocType = type;
+  document.querySelectorAll('.oc-type-card').forEach(c=>c.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+
+function ocSelMut(id){
+  _ocMutId = id;
+  document.querySelectorAll('.oc-mut-card').forEach(c=>c.classList.remove('selected'));
+  const el = document.getElementById('ocm-'+id);
+  if(el) el.classList.add('selected');
+}
+
+function ocRenderMuts(){
+  const order = ['itelis','sc','kalixia','cb','seveane','actil','optilys','horsocam'];
+  const container = document.getElementById('oc-mut-grid');
+  if(!container) return;
+  container.innerHTML = order.map(id=>{
+    const m = mutuelles.find(x=>x.id===id);
+    if(!m) return '';
+    const logo = mutLogos[id]
+      ? `<div style="width:92px;height:46px;display:flex;align-items:center;justify-content:center;overflow:hidden">${mutLogos[id]}</div>`
+      : `<span style="font-size:12px;font-weight:700;color:#444;text-align:center;line-height:1.3">${m.label}</span>`;
+    return `<button class="oc-mut-card" id="ocm-${id}" onclick="ocSelMut('${id}')">${logo}</button>`;
+  }).join('');
+}
+
+function ocVoirVerres(){
+  if(!_ocMutId){
+    const g = document.getElementById('oc-mut-grid');
+    if(g){ g.style.outline='2px solid #E53935'; setTimeout(()=>g.style.outline='',1200); }
+    showToast('Sélectionnez une mutuelle');
+    return;
+  }
+  const geomMap = {
+    unifocal:   {id:'loin',         label:'Vision de loin'},
+    progressif: {id:'progressif',   label:'Progressif'},
+    prog_inter: {id:'intermediaire',label:'Intermédiaire'},
+    degressif:  {id:'loin',         label:'Vision de loin'},
+  };
+  const vis = geomMap[_ocGeom] || geomMap.progressif;
+  state.mutuelle = mutuelles.find(m=>m.id===_ocMutId);
+  window._priseType = null;
+  _backFrom3 = 'oc';
+  document.getElementById('mut-label-h').textContent = `Mutuelle : ${state.mutuelle.label}`;
+  selectVision(vis.id, vis.label);
+}
 
 function genSph(){let o='';for(let v=-20;v<=20;v+=0.25) o+=`<option value="${v}" ${v===0?'selected':''}>${v>0?'+':''}${v.toFixed(2)}</option>`;return o}
 function genCyl(){let o='';for(let v=-6;v<=6;v+=0.25) o+=`<option value="${v}" ${v===0?'selected':''}>${v>0?'+':''}${v.toFixed(2)}</option>`;return o}
@@ -1868,11 +2068,8 @@ function go(n){
   const el=document.getElementById('s'+n);
   if(el) el.classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
-  if(n==='0demo'){
-    setTimeout(()=>{
-      initDemo();
-    },50);
-  }
+  if(n==='0demo') setTimeout(()=>initDemo(),50);
+  if(n==='oc')    setTimeout(()=>ocRenderMuts(),50);
 }
 
 // ─── LOGIN ───────────────────────────────────────────────────
