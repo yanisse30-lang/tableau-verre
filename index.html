@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -1041,160 +1041,69 @@ const mutuelles = [
 // Classe A = prix réglementés 100% Santé — ne pas modifier
 const catalogue = [
 
-  // ══ HAUT DE GAMME — PROGRESSIFS ══
-  {id:'h1',nom:'Essilor Varilux XR series',marque:'Essilor',gamme:'haut',
-   compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.60':297,'1.67':379,'1.74':429},achats:{'1.60':90,'1.67':115,'1.74':130},
+  // ── HAUT DE GAMME — PROGRESSIF ──────────────────────────
+  {id:'nk_h1',nom:'Nikon Presio Infinite',marque:'Nikon',gamme:'haut',
+   compatible:['progressif'],sphMax:16,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.50':373,'1.60':455,'1.67':551},achats:{'1.50':113,'1.60':138,'1.67':167},
    traitements:[
-    {nom:'Crizal Rock UV',icon:'ti-shield',desc:`Antireflet ultra-résistant, 3× plus dur qu'un verre standard. Hydrophobe, oléophobe, antistatique. Durée de vie 2× supérieure.`},
-    {nom:'Eyezen+ Technology',icon:'ti-device-mobile',desc:`Filtre lumière bleue nocive et soulage les muscles ciliaires lors de l'utilisation prolongée des écrans numériques.`},
-    {nom:'W.A.V.E. Technology 3',icon:'ti-wave-sine',desc:`2 millions de points de calcul individualisés. Réduction maximale des aberrations en vision périphérique.`},
-    {nom:'Optifog Activate',icon:'ti-droplets',desc:`Anti-buée activé par essuyage, efficace 200 jours. Idéal porteurs de masques et lunettes de sport.`}
+    {nom:'SeeCoat Next UV (SCCNext)',icon:'ti-shield',desc:Antireflet premium Nikon — resistance maximale aux rayures, deperlant haute performance, UV 400nm. Garantie 5 ans. Livre avec carte d authenticite.},
+    {nom:'ECC+ Technology',icon:'ti-cpu',desc:Eye-Curvature Compensation Plus. Correction des aberrations binoculaires propres a chaque oeil. Personnalisation totale selon la geometrie corneenne du patient.},
+    {nom:'DigiFit Personalization',icon:'ti-arrows-cross',desc:Mesure en conditions de port reel — posture, angle panoramique, distance vertex. Le corridor est calcule pour CE patient avec CETTE monture.},
+    {nom:'Polashade & Transitions disponibles',icon:'ti-sun-moon',desc:'Versions Polashade polarise (reflets eau supprimes) et Transitions Gen S / XTRActive NG disponibles en option.'}
    ]},
-  {id:'h2',nom:'Zeiss Individual 2 Plus',marque:'Zeiss',gamme:'haut',
-   compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.60':330,'1.67':412,'1.74':462},achats:{'1.60':100,'1.67':125,'1.74':140},
+  // ── HAUT DE GAMME — UNIFOCAL ─────────────────────────────
+  {id:'nk_h2',nom:'Nikon SCC+ UV NG',marque:'Nikon',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:19,cylMax:9,aspherique:true,precalibrage:true,
+   indices:{'1.50':185,'1.60':205,'1.67':251,'1.74':304},achats:{'1.50':56,'1.60':62,'1.67':76,'1.74':92},
    traitements:[
-    {nom:'DuraVision Platinum UV',icon:'ti-shield',desc:`Le traitement antireflet le plus résistant de Zeiss. Couche hydrophobe et oléophobe intégrée, résistance 3×.`},
-    {nom:'BlueGuard Technology',icon:'ti-device-desktop',desc:`Protection lumière bleue-violette intégrée dans la masse du verre — permanente et inaltérable.`},
-    {nom:'Digital Inside Technology',icon:'ti-cpu',desc:`Personnalisation sur 5 données biométriques individuelles pour une vision parfaite dans toutes directions du regard.`},
-    {nom:'LotuTec UV',icon:'ti-droplets',desc:`Effet lotus : eau et poussières glissent. Nettoyage facilité, vision nette beaucoup plus longtemps.`}
+    {nom:'SeeCoat Clear+ UV NG',icon:'ti-shield',desc:'Antireflet nouvelle generation Nikon — resistance maximale, couche antistatique integree, super-hydrophobe, oleophobe. UV 400nm transparent en masse.'},
+    {nom:"Carte d'authenticite Nikon",icon:'ti-certificate',desc:'Chaque verre livre avec certificat d authenticite Nikon. Garantie qualite, tracabilite totale, remplacement assure en cas de defaut.'},
+    {nom:'Aspherique biface',icon:'ti-maximize',desc:'Surfaces aspheriques avant et arriere. Verre plus plat, plus leger, vision nette et sans distorsion du centre a la peripherie.'},
+    {nom:'Pure Blue UV & Polashade disponibles',icon:'ti-device-desktop',desc:'Version Pure Blue UV (filtre lumiere bleue 380-460nm) et Polashade (polarise) disponibles sur demande.'}
    ]},
-  {id:'h3',nom:'Shamir Autograph Intelligence',marque:'Shamir',gamme:'haut',
-   compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.60':280,'1.67':346,'1.74':412},achats:{'1.60':85,'1.67':105,'1.74':125},
-   traitements:[
-    {nom:'Glacier Plus UV',icon:'ti-shield',desc:`Antireflet premium 7 couches. UV complet, antistatique, résistance aux rayures et aux taches.`},
-    {nom:'IntelliCorridor AI',icon:'ti-brain',desc:`IA adapte les corridors progressifs selon données biométriques et comportements visuels du porteur.`},
-    {nom:'StarBrite Anti-Fatigue',icon:'ti-eye',desc:`Sur-correction intermédiaire intégrée pour réduire la fatigue liée à l'utilisation intensive des écrans.`},
-    {nom:'ThinMax Freeform',icon:'ti-maximize',desc:`Surfaçage numérique point par point. Épaisseur réduite de 45 % pour les fortes corrections.`}
-   ]},
-  {id:'h4',nom:'Hoya Hoyalux iD MySelf',marque:'Hoya',gamme:'haut',
-   compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.60':264,'1.67':330,'1.74':396},achats:{'1.60':80,'1.67':100,'1.74':120},
-   traitements:[
-    {nom:'Recharge UV Blue Control',icon:'ti-sun',desc:`Bloque 100 % des UV + filtre 25 % de la lumière bleue nocive. Double protection optimale.`},
-    {nom:'HiVision Aqua',icon:'ti-droplets',desc:`Hydrophile haute performance. Résistance à l'eau, aux corps gras et aux empreintes digitales.`},
-    {nom:'SumitechV+ Freeform',icon:'ti-vector-bezier',desc:`2 millions de points de calcul. Vision périphérique sans déformation, adaptation immédiate.`},
-    {nom:'Tact Anti-Statique',icon:'ti-bolt',desc:`Repousse activement les particules de poussière. Entretien réduit, traitement longue durée.`}
-   ]},
-
-  // ══ HAUT DE GAMME — UNIFOCAUX ══
-  {id:'h5',nom:'Zeiss Single Vision Superb',marque:'Zeiss',gamme:'haut',
-   compatible:['loin','pres','intermediaire'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.50':125,'1.60':171,'1.67':237,'1.74':346},achats:{'1.50':38,'1.60':52,'1.67':72,'1.74':105},
-   traitements:[
-    {nom:'DuraVision Platinum UV',icon:'ti-shield',desc:`Antireflet le plus résistant de Zeiss, couche hydrophobe et oléophobe intégrée.`},
-    {nom:'BlueGuard Integrated',icon:'ti-device-desktop',desc:`Filtre lumière bleue dans la masse. Permanent, inaltérable, sans reflet jaune.`},
-    {nom:'UVProtect 400',icon:'ti-sun',desc:`UV 400 transparent en masse, efficace même sur les tranches du verre.`},
-    {nom:'Asphérique personnalisé',icon:'ti-maximize',desc:`Calcul asphérique adapté à la correction pour un verre fin, plat et léger.`}
-   ]},
-  {id:'h6',nom:'Essilor Crizal Forte UV',marque:'Essilor',gamme:'haut',
-   compatible:['loin','pres','intermediaire'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.50':132,'1.60':181,'1.67':247,'1.74':356},achats:{'1.50':40,'1.60':55,'1.67':75,'1.74':108},
-   traitements:[
-    {nom:'Crizal Forte',icon:'ti-shield',desc:`Antireflet premium : résistance aux rayures, à l'eau et aux taches. Nettoyage ultra-facilité.`},
-    {nom:'UV 400 Protection',icon:'ti-sun',desc:`Filtre 100 % UV jusqu'à 400 nm. Protection de la cornée et du cristallin.`},
-    {nom:'E-SPF 35',icon:'ti-sun-moon',desc:`Indice de protection solaire du verre le plus élevé de la gamme Crizal.`},
-    {nom:'Asphérique biface',icon:'ti-maximize',desc:`Surfaces asphériques avant et arrière pour vision nette du centre en périphérie.`}
-   ]},
-
-  // ══ MILIEU DE GAMME — PROGRESSIFS ══
-  {id:'m1',nom:'Essilor Varilux Comfort Max',marque:'Essilor',gamme:'milieu',
-   compatible:['progressif'],sphMax:12,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':148,'1.60':214,'1.67':280},achats:{'1.50':45,'1.60':65,'1.67':85},
-   traitements:[
-    {nom:'Crizal Prevencia',icon:'ti-shield',desc:`Antireflet sélectif : filtre la lumière bleue nocive, laisse passer la bénéfique. Protection unique.`},
-    {nom:'W.A.V.E. Technology 2',icon:'ti-wave-sine',desc:`Réduit les aberrations en vision intermédiaire de 30 %. Adaptation rapide au progressif.`},
-    {nom:'Nanoptix Anti-Balancement',icon:'ti-arrows-left-right',desc:`Réduit effets de balancement et distorsion en vision latérale pour un confort immédiat.`},
-    {nom:'Transitions Signature',icon:'ti-sun-moon',desc:`Photochromisme réactif : transparent en intérieur, teinté en extérieur en 30 secondes.`}
-   ]},
-  {id:'m2',nom:'Zeiss Progressive Plus 2',marque:'Zeiss',gamme:'milieu',
-   compatible:['progressif'],sphMax:12,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':158,'1.60':224,'1.67':290},achats:{'1.50':48,'1.60':68,'1.67':88},
-   traitements:[
-    {nom:'DuraVision BlueProtect',icon:'ti-device-desktop',desc:`Filtre anti-lumière bleue en couche antireflet. Réduit éblouissement des écrans LED.`},
-    {nom:'UVProtect Technology',icon:'ti-sun',desc:`UV 400 intégré en masse. Transparent et permanent, aucun entretien.`},
-    {nom:'Digital Lens Technology',icon:'ti-device-laptop',desc:`Zone intermédiaire élargie pour les utilisateurs d'écrans. Passage fluide loin/écran/lecture.`},
-    {nom:'EasyClean Coating',icon:'ti-droplets',desc:`Surface hydrophobe et oléophobe. Les taches s'essuient en un seul geste.`}
-   ]},
-  {id:'m3',nom:'Nikon Presio Power Smart',marque:'Nikon',gamme:'milieu',
-   compatible:['progressif'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
+  // ── MILIEU DE GAMME — PROGRESSIF ─────────────────────────
+  {id:'nk_m1',nom:'Nikon Presio Power Smart',marque:'Nikon',gamme:'milieu',
+   compatible:['progressif'],sphMax:12,cylMax:6,aspherique:true,precalibrage:true,
    indices:{'1.50':198,'1.60':297,'1.67':458},achats:{'1.50':60,'1.60':90,'1.67':139},
    traitements:[
-    {nom:'SeeCoat Blue UV (SCB)',icon:'ti-device-desktop',desc:`Antireflet premium SeeCoat Blue — filtre lumière bleue nocive 380-450 nm. Confort écrans renforcé. Résistance aux rayures SCB.`},
-    {nom:'SumitechV+ Technology',icon:'ti-cpu',desc:`Surfaçage numérique Nikon — 2 millions de points de calcul. Correction des aberrations en vision périphérique pour une adaptation rapide.`},
-    {nom:'Balanced View Binoculaire',icon:'ti-adjustments-horizontal',desc:`Équilibre binoculaire optimisé. Réduit la fatigue au passage loin/intermédiaire/près. Vision fluide en toutes conditions.`},
-    {nom:'Pure Blue UV disponible',icon:'ti-shield',desc:`Version Pure Blue UV disponible — antireflet avec filtrage lumière bleue-violette renforcé. Compatible Transitions Gen S et XTRActive.`}
+    {nom:'SeeCoat Blue UV (SCB)',icon:'ti-device-desktop',desc:'Antireflet SeeCoat Blue — filtre lumiere bleue nocive 380-460nm integre. Confort ecrans renforce. UV 400nm. Resistance aux rayures SeeCoat certifiee.'},
+    {nom:'SumitechV+ Technology',icon:'ti-cpu',desc:'Surfacage numerique Nikon — 2 millions de points de calcul. Correction des aberrations peripheriques, adaptation rapide, confort binoculaire.'},
+    {nom:'Balanced View Binoculaire',icon:'ti-adjustments-horizontal',desc:'Vision binoculaire optimisee. Equilibre parfait entre les deux yeux, reduction de la fatigue au passage loin / intermediaire / pres.'},
+    {nom:'Transitions XTRActive disponible',icon:'ti-sun-moon',desc:'Versions Transitions Gen S et XTRActive NG disponibles — photochromique transparent en interieur, teinte en exterieur en 30 secondes.'}
    ]},
-  {id:'m4',nom:'Hoya Lifestyle 3',marque:'Hoya',gamme:'milieu',
-   compatible:['progressif'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':132,'1.60':191,'1.67':247},achats:{'1.50':40,'1.60':58,'1.67':75},
+  // ── MILIEU DE GAMME — UNIFOCAL ───────────────────────────
+  {id:'nk_m2',nom:'Nikon Pure Blue UV',marque:'Nikon',gamme:'milieu',
+   compatible:['loin','pres','intermediaire'],sphMax:14,cylMax:8,aspherique:true,precalibrage:true,
+   indices:{'1.50':145,'1.60':165,'1.67':211},achats:{'1.50':44,'1.60':50,'1.67':64},
    traitements:[
-    {nom:'iD Technology',icon:'ti-cpu',desc:`Personnalisation numérique selon monture et position de port. 1 million de points de calcul.`},
-    {nom:'Recharge UV',icon:'ti-sun',desc:`Bloque 100 % UV. Maintient ses propriétés filtrantes toute la durée de vie du verre.`},
-    {nom:'HiVision LongLife',icon:'ti-clock',desc:`Résistance accrue à l'abrasion et aux agents chimiques (crèmes solaires, solvants).`},
-    {nom:'Hard Multi-coat',icon:'ti-layers',desc:`4 couches : antistatique, anti-rayures, antireflet et déperlant en une seule opération.`}
+    {nom:'Pure Blue UV Filter',icon:'ti-device-desktop',desc:'Filtre dedie lumiere bleue nocive — bloque les longueurs d onde nocives 380-460nm. Reduit la fatigue oculaire lors de l utilisation intensive d ecrans LED/OLED.'},
+    {nom:'ECC+ UV (SeeCoat Clear)',icon:'ti-shield',desc:'Antireflet ECC+ UV integre — resistance aux rayures renforcee, UV 400nm transparent. Carte d authenticite Nikon incluse.'},
+    {nom:'Aspherique',icon:'ti-maximize',desc:'Surface aspherique pour un verre plus plat et plus leger. Vision nette et confortable, meme en vision peripherique et en forte correction.'},
+    {nom:'Polashade disponible',icon:'ti-polaroid',desc:'Version Polashade disponible — filtre polarisant + Pure Blue UV dans le meme verre. Ideal peche, voile, conduite.'}
    ]},
+  // ── ENTREE DE GAMME — PROGRESSIF ─────────────────────────
+  {id:'nk_e1',nom:'Nikon Presio Smart',marque:'Nikon',gamme:'entree',
+   compatible:['progressif'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
+   indices:{'1.50':112,'1.60':181},achats:{'1.50':34,'1.60':55},
+   traitements:[
+    {nom:'HCC — Antireflet multi-couches',icon:'ti-sparkles',desc:'Antireflet multi-couches standard Nikon. Resistance aux rayures, reduction des reflets. Carte d authenticite incluse. Livraison J+1 avant 18h30.'},
+    {nom:'SumitechV Freeform',icon:'ti-cpu',desc:'Surfacage numerique de base — calcul personnalise selon l ordonnance et la monture. Corridor progressif accessible, adaptation rapide pour le patient.'},
+    {nom:'UV 380 nm',icon:'ti-sun',desc:'Protection UV 380nm integree dans la masse. Inclus sans supplement sur tous les verres Nikon de la gamme.'},
+    {nom:'Transitions Gen S disponible',icon:'ti-sun-moon',desc:'Version photochromique Transitions Gen S disponible en option — ideal pour les patients souhaitant eviter de changer de lunettes.'}
+   ]},
+  // ── ENTREE DE GAMME — UNIFOCAL ───────────────────────────
+  {id:'nk_e2',nom:'Nikon Blanc HCC',marque:'Nikon',gamme:'entree',
+   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:6,aspherique:false,precalibrage:true,
+   indices:{'1.50':128,'1.60':148,'1.67':194,'1.74':237},achats:{'1.50':39,'1.60':45,'1.67':59,'1.74':72},
+   traitements:[
+    {nom:'HCC — Antireflet basique',icon:'ti-shield',desc:'Antireflet multi-couches economique Nikon. Resistance basique aux rayures, reduction efficace des reflets. Solution accessible pour corrections courantes.'},
+    {nom:'UV 380nm de serie',icon:'ti-sun',desc:'Protection UV 380nm dans la masse sur tous les verres Nikon — inclus sans supplement dans le HCC.'},
+    {nom:'Stock J+1',icon:'ti-truck',desc:'Disponible en stock pour les corrections courantes — livraison J+1 pour commandes avant 18h30. Ideal pour les urgences et les remplacements rapides.'},
+    {nom:'Transitions Gen S disponible',icon:'ti-sun-moon',desc:'Version Transitions Gen S disponible en 1.50 — verre photochromique : blanc en interieur, teinte en exterieur.'}
+   ]},
+]
 
-  // ══ MILIEU DE GAMME — UNIFOCAUX ══
-  {id:'m5',nom:'Hoya Hilux BlueControl',marque:'Hoya',gamme:'milieu',
-   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':92,'1.60':125,'1.67':171},achats:{'1.50':28,'1.60':38,'1.67':52},
-   traitements:[
-    {nom:'BlueControl UV',icon:'ti-device-desktop',desc:`Filtre lumière bleue à 420 nm. Réduit reflets bleutés des écrans, moins de fatigue visuelle.`},
-    {nom:'HiVision Aqua',icon:'ti-droplets',desc:`Hydrophobe et oléophobe haute performance. Empreintes glissent facilement.`},
-    {nom:'Asphérique bi-face',icon:'ti-maximize',desc:`Avant et arrière asphériques pour vision nette du centre à la périphérie.`},
-    {nom:'Hard Coat LongLife',icon:'ti-shield',desc:`Durcissement longue durée résistant aux solvants et aux crèmes solaires.`}
-   ]},
-  {id:'m6',nom:'Essilor Eyezen Start',marque:'Essilor',gamme:'milieu',
-   compatible:['loin','pres','intermediaire'],sphMax:8,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':86,'1.60':115,'1.67':165},achats:{'1.50':26,'1.60':35,'1.67':50},
-   traitements:[
-    {nom:'Eyezen+ Focus',icon:'ti-eye',desc:`Légère sur-correction en bas du verre pour soulager les muscles ciliaires lors de la lecture sur écran.`},
-    {nom:'Crizal Easy UV',icon:'ti-shield',desc:`Antireflet avec protection UV, antistatique et résistance basique aux rayures.`},
-    {nom:'Light Scan Blue',icon:'ti-sun',desc:`Filtre sélectif des longueurs d'onde bleues nocives tout en laissant passer la lumière bénéfique.`},
-    {nom:'Asphérique',icon:'ti-maximize',desc:`Surface asphérique pour un verre plus plat, plus léger et une meilleure vision périphérique.`}
-   ]},
 
-  // ══ ENTRÉE DE GAMME ══
-  {id:'e1',nom:'BBGR Inov Access Progressif',marque:'BBGR',gamme:'entree',
-   compatible:['progressif'],sphMax:8,cylMax:3,aspherique:false,precalibrage:true,
-   indices:{'1.50':92,'1.60':125,'1.67':171},achats:{'1.50':28,'1.60':38,'1.67':52},
-   traitements:[
-    {nom:'AR Premium BBGR',icon:'ti-shield',desc:`Antireflet multicouches avec déperlant. Bonne performance pour usage quotidien standard.`},
-    {nom:'UV 380 intégré',icon:'ti-sun',desc:`Protection UV 380 en masse. Filtre les UV proches du visible.`},
-    {nom:'Durcissement Class A',icon:'ti-tool',desc:`Traitement antirayures pour usage quotidien soigneux.`},
-    {nom:'Hydrophobe Basic',icon:'ti-droplets',desc:`Légère couche hydrophobe réduisant l'accroche des taches d'eau.`}
-   ]},
-  {id:'e2',nom:'Indo Innova Access',marque:'Indo',gamme:'entree',
-   compatible:['progressif'],sphMax:8,cylMax:3,aspherique:false,precalibrage:true,
-   indices:{'1.50':82,'1.60':115,'1.67':165},achats:{'1.50':25,'1.60':35,'1.67':50},
-   traitements:[
-    {nom:'Xtreme Coat',icon:'ti-shield',desc:`Antireflet résistant aux rayures avec couche déperlante intégrée.`},
-    {nom:'UV 400',icon:'ti-sun',desc:`Bloque 100 % des UV jusqu'à 400 nm. Protection optimale.`},
-    {nom:'Easy Clean',icon:'ti-droplets',desc:`Surface oléophobe facilitant l'élimination des empreintes digitales.`},
-    {nom:'Design Soft',icon:'ti-adjustments',desc:`Corridor souple pour une adaptation rapide et confortable au progressif.`}
-   ]},
-  {id:'e3',nom:'Essilor Airwear Polycarbonate',marque:'Essilor',gamme:'entree',
-   compatible:['loin','pres','intermediaire'],sphMax:6,cylMax:2,aspherique:false,precalibrage:true,
-   indices:{'1.59':59,'1.60':73},achats:{'1.59':18,'1.60':22},
-   traitements:[
-    {nom:'Crizal Easy UV',icon:'ti-shield',desc:`Antireflet d'entrée de gamme avec protection UV basique et réduction des reflets.`},
-    {nom:'Polycarbonate IK10',icon:'ti-shield-check',desc:`10× plus résistant aux chocs que le verre minéral. Idéal enfants, sportifs, professions à risque.`},
-    {nom:'Durcissement Standard',icon:'ti-tool',desc:`Résistance basique aux rayures du quotidien.`},
-    {nom:'UV 380 intégré',icon:'ti-sun',desc:`Filtre UV intégré dans la masse du polycarbonate.`}
-   ]},
-  {id:'e4',nom:'BBGR Orma 1.5 Confort',marque:'BBGR',gamme:'entree',
-   compatible:['loin','pres','intermediaire'],sphMax:4,cylMax:2,aspherique:false,precalibrage:true,
-   indices:{'1.50':49},achats:{'1.50':15},
-   traitements:[
-    {nom:'Ormix AR Standard',icon:'ti-shield',desc:`Antireflet multicouches basique. Réduit les reflets parasites en lumière artificielle.`},
-    {nom:'Durcissement Class A',icon:'ti-tool',desc:`Protection antirayures pour usage quotidien soigneux.`},
-    {nom:'UV 380 de série',icon:'ti-sun',desc:`Protection UV 380 incluse de série dans tous les verres BBGR Orma.`},
-    {nom:'Hydrophobe Basic',icon:'ti-droplets',desc:`Légère couche hydrophobe réduisant l'accroche des taches d'eau.`}
-   ]},
-];
 
 // ─── 2EME PAIRE — CATALOGUE SIGN BY BBGR (Avril 2026) ────────
 // Prix achat = tarifs HT opticien Sign avril 2026
@@ -2903,6 +2812,78 @@ function renderComparateur(){
     col(v2,m2,w2,cm_marge2,cm_thick2,cm_prix2,cm_rac2);
 }
 
+// ─── MON COMPTE ──────────────────────────────────────────────
+
+function openMonCompte(){
+  const modal = document.getElementById('moncompte-modal');
+  document.getElementById('mc-username').value = '';
+  document.getElementById('mc-password').value = '';
+  document.getElementById('mc-password2').value = '';
+  document.getElementById('mc-msg').style.display = 'none';
+  document.getElementById('mc-current-user').textContent =
+    `Connecté en tant que : ${currentUser?.nom || '—'} (${currentUser?.username || ''})`;
+  modal.style.display = 'flex';
+}
+
+function closeMonCompte(){
+  document.getElementById('moncompte-modal').style.display = 'none';
+}
+
+async function saveMonCompte(){
+  const newUser = document.getElementById('mc-username').value.trim().toLowerCase();
+  const newPass = document.getElementById('mc-password').value;
+  const newPass2 = document.getElementById('mc-password2').value;
+  const msg = document.getElementById('mc-msg');
+  const btn = document.getElementById('mc-save-btn');
+
+  function showMsg(txt, ok){
+    msg.textContent = txt;
+    msg.style.display = 'block';
+    msg.style.background = ok ? '#0a2a10' : '#2a1010';
+    msg.style.border = `1px solid ${ok ? '#2a5a20' : '#5a2020'}`;
+    msg.style.color = ok ? '#70c8a0' : '#ff8080';
+  }
+
+  // Validation
+  if(!newUser && !newPass){ showMsg(`Remplissez au moins un des champs.`, false); return; }
+  if(newPass && newPass.length < 6){ showMsg(`Mot de passe trop court (6 caractères minimum).`, false); return; }
+  if(newPass && newPass !== newPass2){ showMsg(`Les deux mots de passe ne correspondent pas.`, false); return; }
+  if(newUser && newUser === currentUser.username && !newPass){ showMsg(`L'identifiant est identique à l'actuel.`, false); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = `<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Enregistrement...`;
+
+  try {
+    const updates = {};
+    if(newUser) updates.username = newUser;
+    if(newPass) updates.password = newPass;
+
+    await sbFetch(`/rest/v1/comptes?id=eq.${currentUser.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates)
+    });
+
+    // Mettre à jour l'objet currentUser en mémoire
+    if(newUser){ currentUser.username = newUser; }
+    if(newPass){ currentUser.password = newPass; }
+
+    showMsg(`✓ Modifications enregistrées ! Nouveaux identifiants actifs.`, true);
+    document.getElementById('mc-current-user').textContent =
+      `Connecté en tant que : ${currentUser.nom} (${currentUser.username})`;
+    document.getElementById('mc-username').value = '';
+    document.getElementById('mc-password').value = '';
+    document.getElementById('mc-password2').value = '';
+
+    setTimeout(() => closeMonCompte(), 2000);
+  } catch(e) {
+    if(e.message.includes('duplicate')) showMsg(`Cet identifiant est déjà utilisé.`, false);
+    else showMsg(`Erreur : ${e.message}`, false);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="ti ti-device-floppy"></i> Sauvegarder les modifications`;
+  }
+}
+
 // ─── INIT ────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
   loadSavedPrix();
@@ -2917,7 +2898,10 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
   <div class="logout-bar" id="logout-bar">
     <div class="user-info"><i class="ti ti-user-circle" style="font-size:18px;color:#378ADD"></i> Connecté : <strong id="user-display-name">—</strong> <span id="user-role-badge" style="font-size:11px;padding:2px 8px;border-radius:20px;background:#1e3a5a;color:#60aaee;font-weight:600"></span></div>
-    <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Déconnexion</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button onclick="openMonCompte()" style="background:#1e1e1e;border:1px solid #333;color:#aaa;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="ti ti-settings" style="font-size:14px"></i> Mon compte</button>
+      <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Déconnexion</button>
+    </div>
   </div>
 
   <!-- SIMULATEUR MODAL -->
@@ -3038,6 +3022,49 @@ document.addEventListener('DOMContentLoaded', function(){
       <div class="compare-grid" id="compare-grid"></div>
       <button onclick="closeComparateur()" style="width:100%;margin-top:16px;padding:12px;border-radius:12px;border:1px solid #2a2a2a;background:#1e1e1e;color:#aaa;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
         <i class="ti ti-x"></i> Fermer
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── MON COMPTE MODAL ──────────────────────────────────── -->
+  <div id="moncompte-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10003;display:none;align-items:center;justify-content:center;padding:16px">
+    <div style="background:#161616;border:1px solid #2a2a2a;border-radius:22px;padding:28px;width:100%;max-width:420px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:18px;font-weight:800;color:#f0f0f0;display:flex;align-items:center;gap:10px">
+          <i class="ti ti-user-edit" style="color:#378ADD"></i> Mon compte
+        </div>
+        <button onclick="closeMonCompte()" style="background:#252525;border:1px solid #333;color:#aaa;border-radius:8px;padding:7px 11px;cursor:pointer;font-family:inherit;font-size:13px"><i class="ti ti-x"></i></button>
+      </div>
+      <div style="font-size:13px;color:#555;margin-bottom:22px" id="mc-current-user">Modifier vos identifiants de connexion</div>
+
+      <div id="mc-msg" style="display:none;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px;text-align:center"></div>
+
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Nouvel identifiant</label>
+        <input type="text" id="mc-username" autocomplete="off" placeholder="Laisser vide pour ne pas changer"
+          style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid #2a2a2a;background:#1e1e1e;color:#f0f0f0;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s"
+          onfocus="this.style.borderColor='#378ADD'" onblur="this.style.borderColor='#2a2a2a'"/>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Nouveau mot de passe</label>
+        <input type="password" id="mc-password" autocomplete="new-password" placeholder="Laisser vide pour ne pas changer"
+          style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid #2a2a2a;background:#1e1e1e;color:#f0f0f0;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s"
+          onfocus="this.style.borderColor='#378ADD'" onblur="this.style.borderColor='#2a2a2a'"/>
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="display:block;font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Confirmer le mot de passe</label>
+        <input type="password" id="mc-password2" autocomplete="new-password" placeholder="Répéter le nouveau mot de passe"
+          style="width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid #2a2a2a;background:#1e1e1e;color:#f0f0f0;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s"
+          onfocus="this.style.borderColor='#378ADD'" onblur="this.style.borderColor='#2a2a2a'"/>
+      </div>
+      <button onclick="saveMonCompte()" id="mc-save-btn"
+        style="width:100%;padding:13px;background:var(--blue-600);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;transition:background .15s"
+        onmouseover="this.style.background='#0C447C'" onmouseout="this.style.background='var(--blue-600)'">
+        <i class="ti ti-device-floppy"></i> Sauvegarder les modifications
+      </button>
+      <button onclick="closeMonCompte()"
+        style="width:100%;padding:10px;background:#1e1e1e;border:1px solid #2a2a2a;color:#666;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit">
+        Annuler
       </button>
     </div>
   </div>
