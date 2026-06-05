@@ -1033,6 +1033,8 @@ const catalogue = [
   {id:'nk_h1',nom:'Nikon Presio Infinite',marque:'Nikon',gamme:'haut',
    compatible:['progressif'],sphMax:16,cylMax:6,aspherique:true,precalibrage:true,
    indices:{'1.50':373,'1.60':455,'1.67':551},achats:{'1.50':113,'1.60':138,'1.67':167},
+   // CB: P.Mast Z FP 12 (design 9) | Actil: D1 base + Design9(165) + SAR HD(35) + précalibrage(15)
+   tarifsReseau:{cb:{'1.50':288,'1.60':340,'1.67':395},actil:{'1.50':310,'1.60':325,'1.67':355}},
    traitements:[
     {nom:'SeeCoat Next UV (SCCNext)',icon:'ti-shield',desc:`Antireflet premium Nikon — résistance maximale aux rayures, déperlant haute performance, UV 400nm. Garantie 5 ans. Livré avec carte d'authenticité.`},
     {nom:'ECC+ Technology',icon:'ti-cpu',desc:`Eye-Curvature Compensation Plus. Correction des aberrations binoculaires propres à chaque œil. Personnalisation totale selon la géométrie cornéenne du patient.`},
@@ -1043,6 +1045,8 @@ const catalogue = [
   {id:'nk_h2',nom:'Nikon SCC+ UV NG',marque:'Nikon',gamme:'haut',
    compatible:['loin','pres','intermediaire'],sphMax:19,cylMax:9,aspherique:true,precalibrage:true,
    indices:{'1.50':185,'1.60':205,'1.67':251,'1.74':304},achats:{'1.50':56,'1.60':62,'1.67':76,'1.74':92},
+   // CB: Nikon As St SCC+UV NG | Actil: base(32/52/66/76) + SAR HD(35) + asph(15) + SCC+UV(8)
+   tarifsReseau:{cb:{'1.50':109,'1.60':144,'1.67':164,'1.74':185},actil:{'1.50':90,'1.60':110,'1.67':124,'1.74':134}},
    traitements:[
     {nom:'SeeCoat Clear+ UV NG',icon:'ti-shield',desc:'Antireflet nouvelle generation Nikon — resistance maximale, couche antistatique integree, super-hydrophobe, oleophobe. UV 400nm transparent en masse.'},
     {nom:"Carte d'authenticite Nikon",icon:'ti-certificate',desc:'Chaque verre livre avec certificat d authenticite Nikon. Garantie qualite, tracabilite totale, remplacement assure en cas de defaut.'},
@@ -1053,6 +1057,8 @@ const catalogue = [
   {id:'nk_m1',nom:'Nikon Presio Power Smart',marque:'Nikon',gamme:'milieu',
    compatible:['progressif'],sphMax:12,cylMax:6,aspherique:true,precalibrage:true,
    indices:{'1.50':198,'1.60':297,'1.67':458},achats:{'1.50':60,'1.60':90,'1.67':139},
+   // CB: Nikon P.Power Z 12 (design 7) | Actil: D1 base + Design7(110) + SAR HD(35) + précalibrage(15)
+   tarifsReseau:{cb:{'1.50':228,'1.60':263,'1.67':319},actil:{'1.50':255,'1.60':270,'1.67':300}},
    traitements:[
     {nom:'SeeCoat Blue UV (SCB)',icon:'ti-device-desktop',desc:'Antireflet SeeCoat Blue — filtre lumiere bleue nocive 380-460nm integre. Confort ecrans renforce. UV 400nm. Resistance aux rayures SeeCoat certifiee.'},
     {nom:'SumitechV+ Technology',icon:'ti-cpu',desc:'Surfacage numerique Nikon — 2 millions de points de calcul. Correction des aberrations peripheriques, adaptation rapide, confort binoculaire.'},
@@ -1063,6 +1069,8 @@ const catalogue = [
   {id:'nk_m2',nom:'Nikon Pure Blue UV',marque:'Nikon',gamme:'milieu',
    compatible:['loin','pres','intermediaire'],sphMax:14,cylMax:8,aspherique:true,precalibrage:true,
    indices:{'1.50':145,'1.60':165,'1.67':211},achats:{'1.50':44,'1.60':50,'1.67':64},
+   // CB: Nikon As PurBlueUV SCC+UV NG | Actil: base + SAR HD(35) + LB matière(8)
+   tarifsReseau:{cb:{'1.50':99,'1.60':126,'1.67':125},actil:{'1.50':75,'1.60':95,'1.67':109}},
    traitements:[
     {nom:'Pure Blue UV Filter',icon:'ti-device-desktop',desc:'Filtre dedie lumiere bleue nocive — bloque les longueurs d onde nocives 380-460nm. Reduit la fatigue oculaire lors de l utilisation intensive d ecrans LED/OLED.'},
     {nom:'ECC+ UV (SeeCoat Clear)',icon:'ti-shield',desc:'Antireflet ECC+ UV integre — resistance aux rayures renforcee, UV 400nm transparent. Carte d authenticite Nikon incluse.'},
@@ -1073,6 +1081,8 @@ const catalogue = [
   {id:'nk_e1',nom:'Nikon Presio Smart',marque:'Nikon',gamme:'entree',
    compatible:['progressif'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
    indices:{'1.50':112,'1.60':181},achats:{'1.50':34,'1.60':55},
+   // CB: Nikon P.Clear 13 HCC (design 4) | Actil: D1 base + Design4(50) + SAR HD(35) + précalibrage(15)
+   tarifsReseau:{cb:{'1.50':181,'1.60':215,'1.67':229},actil:{'1.50':195,'1.60':210}},
    traitements:[
     {nom:'HCC — Antireflet multi-couches',icon:'ti-sparkles',desc:'Antireflet multi-couches standard Nikon. Resistance aux rayures, reduction des reflets. Carte d authenticite incluse. Livraison J+1 avant 18h30.'},
     {nom:'SumitechV Freeform',icon:'ti-cpu',desc:'Surfacage numerique de base — calcul personnalise selon l ordonnance et la monture. Corridor progressif accessible, adaptation rapide pour le patient.'},
@@ -1083,6 +1093,8 @@ const catalogue = [
   {id:'nk_e2',nom:'Nikon Blanc HCC',marque:'Nikon',gamme:'entree',
    compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:6,aspherique:false,precalibrage:true,
    indices:{'1.50':128,'1.60':148,'1.67':194,'1.74':237},achats:{'1.50':39,'1.60':45,'1.67':59,'1.74':72},
+   // CB: Nikon As 1.50/1.60/1.67 HCC | Actil: base unifocal + SAR HD(35)
+   tarifsReseau:{cb:{'1.50':76,'1.60':88,'1.67':103,'1.74':115},actil:{'1.50':67,'1.60':87,'1.67':101,'1.74':111}},
    traitements:[
     {nom:'HCC — Antireflet basique',icon:'ti-shield',desc:'Antireflet multi-couches economique Nikon. Resistance basique aux rayures, reduction efficace des reflets. Solution accessible pour corrections courantes.'},
     {nom:'UV 380nm de serie',icon:'ti-sun',desc:'Protection UV 380nm dans la masse sur tous les verres Nikon — inclus sans supplement dans le HCC.'},
@@ -1337,6 +1349,28 @@ function renderVerreCard(v,i,showTop,paire2=false){
             <span class="marge-val">${currentUser && currentUser.admin ? '+ '+(marge*2)+' €' : taux+' %'}</span>
           </div>
           ${currentUser && currentUser.admin ? '' : `<div style="font-size:12px;color:#aaa;margin-top:6px;display:flex;align-items:center;gap:5px"><i class="ti ti-info-circle" style="color:#378ADD"></i> Verre recommandé — marge optimisée pour le magasin</div>`}
+          ${(()=>{
+            if(!v.tarifsReseau || !v.indiceChoisi) return '';
+            const ind = v.indiceChoisi;
+            const cbP = v.tarifsReseau.cb && v.tarifsReseau.cb[ind] != null ? v.tarifsReseau.cb[ind] : null;
+            const acP = v.tarifsReseau.actil && v.tarifsReseau.actil[ind] != null ? v.tarifsReseau.actil[ind] : null;
+            if(!cbP && !acP) return '';
+            return `<div style="margin-top:12px;background:#1a1a2a;border:1px solid #2a2a4a;border-radius:10px;padding:12px 14px">
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#7090d0;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-building-store" style="font-size:13px"></i> Tarifs réseau — indice ${ind}</div>
+              <div style="display:flex;gap:10px">
+                ${cbP!=null?`<div style="flex:1;background:#111830;border:1px solid #1e3060;border-radius:8px;padding:10px;text-align:center">
+                  <div style="font-size:10px;color:#7090d0;font-weight:700;letter-spacing:0.06em;margin-bottom:4px">CRYSTAL B</div>
+                  <div style="font-size:18px;font-weight:800;color:#80b0f0">${cbP} €</div>
+                  <div style="font-size:10px;color:#556;margin-top:2px">le verre</div>
+                </div>`:''}
+                ${acP!=null?`<div style="flex:1;background:#111820;border:1px solid #1e402a;border-radius:8px;padding:10px;text-align:center">
+                  <div style="font-size:10px;color:#60b080;font-weight:700;letter-spacing:0.06em;margin-bottom:4px">ACTIL</div>
+                  <div style="font-size:18px;font-weight:800;color:#70d090">${acP} €</div>
+                  <div style="font-size:10px;color:#556;margin-top:2px">le verre</div>
+                </div>`:''}
+              </div>
+            </div>`;
+          })()}
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
             ${btnCompare}
             ${btnP2}
