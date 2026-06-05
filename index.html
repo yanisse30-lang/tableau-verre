@@ -1844,88 +1844,165 @@ function loadSavedPrix(){
 }
 
 // ─── PDF IMPORT ───────────────────────────────────────────────
+// Version PDF.js stable et connue
+const _PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120';
+
 function handlePdfDrop(e){
   e.preventDefault();
   document.getElementById('pdf-drop').classList.remove('drag');
   const file = e.dataTransfer.files[0];
   if(file && file.type==='application/pdf') handlePdfFile(file);
-  else showToast('Veuillez déposer un fichier PDF.');
+  else showToast(`Veuillez déposer un fichier PDF.`);
 }
 
 function handlePdfFile(file){
   if(!file) return;
   const drop = document.getElementById('pdf-drop');
-  drop.innerHTML = '<i class="ti ti-loader-2" style="font-size:36px;color:#378ADD;animation:spin 1s linear infinite;display:block;margin-bottom:10px"></i><p style="color:#aaa">Analyse du PDF en cours...</p>';
+  drop.innerHTML = `<i class="ti ti-loader-2" style="font-size:36px;color:#378ADD;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#aaa">Lecture du PDF en cours...</p><p style="font-size:12px;color:#555;margin-top:6px">Extraction du texte...</p>`;
+  document.getElementById('pdf-result').style.display = 'none';
 
   const reader = new FileReader();
-  reader.onload = function(e){
-    // Use PDF.js CDN to extract text
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    script.onload = () => extractPdfText(e.target.result);
-    script.onerror = () => fallbackPdfAnalysis(file);
-    document.head.appendChild(script);
+  reader.onload = function(evt){
+    const buf = evt.target.result;
+    // ── Fix : ne recrée PAS le script si pdfjsLib est déjà chargé ──
+    if(typeof pdfjsLib !== 'undefined'){
+      extractPdfText(buf);
+      return;
+    }
+    // Evite le double chargement si le tag existe déjà
+    if(document.getElementById('_pdfjs_script')){
+      // attendre que le chargement en cours se termine
+      const wait = setInterval(()=>{
+        if(typeof pdfjsLib !== 'undefined'){
+          clearInterval(wait);
+          extractPdfText(buf);
+        }
+      }, 100);
+      return;
+    }
+    const s = document.createElement('script');
+    s.id = '_pdfjs_script';
+    s.src = _PDFJS + '/pdf.min.js';
+    s.onload  = () => extractPdfText(buf);
+    s.onerror = () => { resetPdfDrop(); showToast(`Impossible de charger PDF.js — vérifiez votre connexion.`); };
+    document.head.appendChild(s);
   };
+  reader.onerror = () => { resetPdfDrop(); showToast(`Erreur lecture fichier.`); };
   reader.readAsArrayBuffer(file);
 }
 
 async function extractPdfText(arrayBuffer){
   try{
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS + '/pdf.worker.min.js';
     const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+    const drop = document.getElementById('pdf-drop');
+    drop.innerHTML = `<i class="ti ti-loader-2" style="font-size:36px;color:#378ADD;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#aaa">Analyse des prix — page 0/${pdf.numPages}...</p>`;
+
     let fullText = '';
-    for(let i=1; i<=Math.min(pdf.numPages,20); i++){
+    for(let i = 1; i <= Math.min(pdf.numPages, 30); i++){
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      fullText += content.items.map(s=>s.str).join(' ') + '\n';
+      // Joindre les items avec espace, conserver les fins de ligne
+      fullText += content.items.map(s => s.str).join(' ') + '\n';
+      drop.innerHTML = `<i class="ti ti-loader-2" style="font-size:36px;color:#378ADD;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#aaa">Analyse — page ${i}/${pdf.numPages}...</p>`;
     }
     analyzePdfText(fullText);
   }catch(err){
     resetPdfDrop();
-    showToast('Erreur lecture PDF : '+err.message);
+    showToast(`Erreur lecture PDF : ${err.message}`);
+    console.error('PDF.js error:', err);
   }
 }
 
-function fallbackPdfAnalysis(file){
-  resetPdfDrop();
-  showToast('Impossible de lire ce PDF. Essayez un PDF non scanné.');
+// ── Extrait les prix numériques d'un contexte textuel ──────────
+function _extractPrices(snippet){
+  const results = new Set();
+  const patterns = [
+    /(\d{1,4})[,.](\d{2})\s*€/g,   // 145,00 € ou 145.00 €
+    /€\s*(\d{1,4})[,.](\d{2})/g,   // € 145,00
+    /(\d{1,4})[,.](\d{2})/g,        // 145,00 (sans €)
+    /\b(\d{2,4})\s*€/g,             // 145 €
+  ];
+  patterns.forEach(pat => {
+    pat.lastIndex = 0;
+    let m;
+    while((m = pat.exec(snippet)) !== null){
+      // Reconstituer le nombre
+      let str = m[0].replace(/[€\s]/g,'').replace(',','.');
+      // Pour les patterns avec 2 groupes
+      if(m[2]) str = m[1] + '.' + m[2];
+      const p = parseFloat(str);
+      if(p >= 10 && p <= 1500) results.add(Math.round(p * 100) / 100);
+    }
+  });
+  return [...results].sort((a,b)=>a-b);
+}
+
+// ── Cherche un prix dans les N caractères autour d'un mot-clé ──
+function _pricesNear(text, keyword, window=300){
+  const idx = text.toLowerCase().indexOf(keyword.toLowerCase());
+  if(idx < 0) return [];
+  const snip = text.substring(Math.max(0, idx - 30), idx + window);
+  return _extractPrices(snip);
+}
+
+// ── Vérifie si un verre est mentionné dans le texte ────────────
+function _verreMentionné(text, v){
+  const t = text.toLowerCase();
+  const nom = v.nom.toLowerCase();
+  const marque = v.marque.toLowerCase();
+  // 1. Nom complet présent ?
+  if(t.includes(nom)) return true;
+  // 2. Marque + au moins 1 mot significatif du nom
+  const mots = nom.split(/\s+/).filter(w => w.length >= 4 && w !== marque);
+  if(t.includes(marque) && mots.some(m => t.includes(m))) return true;
+  // 3. Au moins 2 mots significatifs du nom (toutes marques)
+  const motsSignif = nom.split(/\s+/).filter(w => w.length >= 5);
+  return motsSignif.filter(m => t.includes(m)).length >= 2;
 }
 
 function analyzePdfText(text){
   resetPdfDrop();
   pdfPrixDetectes = [];
   const all = [...catalogue, ...catalogue2e];
-  const indices = ['1.74','1.67','1.60','1.59','1.50'];
+  const indices = ['1.50','1.59','1.60','1.67','1.74'];
+  const textLower = text.toLowerCase();
 
   all.forEach(v => {
-    // Check if verre name or brand appears in PDF
-    const nomWords = v.nom.toLowerCase().split(' ').filter(w=>w.length>3);
-    const found = nomWords.filter(w=>text.toLowerCase().includes(w)).length >= 2;
-    if(!found) return;
+    if(!_verreMentionné(text, v)) return;
 
-    const detected = {id:v.id, nom:v.nom, marque:v.marque, prix:{}};
+    const detected = {id: v.id, nom: v.nom, marque: v.marque, prix: {}};
+
+    // Stratégie 1 : chercher le prix près de l'indice dans le contexte du verre
+    const verreIdx = textLower.indexOf(v.nom.toLowerCase().split(' ')[0]);
+    const verreContext = verreIdx >= 0 ? text.substring(Math.max(0, verreIdx - 50), verreIdx + 500) : text;
+
     indices.forEach(ind => {
-      if(v.indices[ind]==null) return;
-      // Look for price patterns near index mention
-      const indReg = new RegExp(ind.replace('.','\\.')+'[^0-9]{0,30}([0-9]+[,.]?[0-9]*)\\s*€?','i');
-      const m = text.match(indReg);
-      if(m){
-        const prix = parseFloat(m[1].replace(',','.'));
-        if(prix > 10 && prix < 1000) detected.prix[ind] = prix;
-      }
+      if(v.indices[ind] == null) return;
+      // Chercher "1.60" ou "1,60" avec un prix à proximité
+      const variants = [ind, ind.replace('.', ',')];
+      variants.forEach(variant => {
+        const p = _pricesNear(verreContext, variant, 120);
+        if(p.length > 0 && !detected.prix[ind]){
+          // Prendre le prix le plus plausible (proche du prix catalogue actuel)
+          const ref = v.indices[ind];
+          const best = p.reduce((a, b) => Math.abs(a - ref) < Math.abs(b - ref) ? a : b);
+          if(Math.abs(best - ref) / ref < 0.7) detected.prix[ind] = best; // max 70% d'écart
+        }
+      });
     });
 
-    // Also look for generic prices near brand name
+    // Stratégie 2 : si aucun prix par indice, chercher n'importe quel prix proche du nom
     if(Object.keys(detected.prix).length === 0){
-      const brandReg = new RegExp(v.marque+'[^0-9]{0,50}([0-9]+[,.]?[0-9]*)','i');
-      const m2 = text.match(brandReg);
-      if(m2){
-        const prix = parseFloat(m2[1].replace(',','.'));
-        if(prix > 10 && prix < 1000){
-          // Apply to most common index
-          const mainInd = Object.keys(v.indices).find(i=>v.indices[i]!=null);
-          if(mainInd) detected.prix[mainInd] = prix;
-        }
+      const mots = v.nom.toLowerCase().split(' ');
+      const motPrincipal = mots.find(m => m.length >= 5) || mots[0];
+      const prix = _pricesNear(text, motPrincipal, 400);
+      if(prix.length > 0){
+        // Associer aux indices disponibles dans l'ordre des prix croissants
+        const indsDispos = indices.filter(i => v.indices[i] != null);
+        prix.forEach((p, i) => {
+          if(indsDispos[i]) detected.prix[indsDispos[i]] = p;
+        });
       }
     }
 
@@ -1933,27 +2010,39 @@ function analyzePdfText(text){
   });
 
   const result = document.getElementById('pdf-result');
-  const found = document.getElementById('pdf-verres-found');
+  const foundEl = document.getElementById('pdf-verres-found');
+  const applyBtn = document.querySelector('.btn-apply-pdf');
 
   if(pdfPrixDetectes.length === 0){
-    found.innerHTML = '<div style="color:#ff8080;font-size:13px;padding:10px;text-align:center"><i class="ti ti-search-off"></i> Aucun verre de votre catalogue détecté dans ce PDF.<br><span style="font-size:12px;color:#777">Vérifiez que le PDF contient les noms des verres et des prix.</span></div>';
-    document.querySelector('.btn-apply-pdf').style.display='none';
-    result.style.display='block';
+    // Afficher un aperçu du texte extrait pour aider au diagnostic
+    const preview = text.substring(0, 400).replace(/\s+/g, ' ');
+    foundEl.innerHTML = `
+      <div style="color:#ff8080;font-size:13px;padding:10px;text-align:center">
+        <i class="ti ti-search-off" style="font-size:22px;display:block;margin-bottom:8px"></i>
+        <strong>Aucun verre du catalogue détecté</strong><br>
+        <span style="font-size:12px;color:#777">Le PDF doit contenir les noms des marques (Essilor, Zeiss, Hoya…) et des prix.</span>
+      </div>
+      <div style="background:#1e1e1e;border-radius:10px;padding:12px;margin-top:10px">
+        <div style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:6px">Texte extrait (aperçu) :</div>
+        <div style="font-size:11px;color:#777;line-height:1.6;word-break:break-all">${preview || 'Aucun texte — PDF scanné (image) non supporté.'}</div>
+      </div>`;
+    applyBtn.style.display = 'none';
+    result.style.display = 'block';
     return;
   }
 
-  found.innerHTML = pdfPrixDetectes.map(v=>`
+  foundEl.innerHTML = pdfPrixDetectes.map(v => `
     <div class="pdf-verre-found">
       <div class="pdf-verre-nom">${v.nom} <span style="color:#777;font-weight:400">${v.marque}</span></div>
-      <div class="pdf-verre-prix">${Object.entries(v.prix).map(([ind,p])=>`Indice ${ind} : <strong>${p} €</strong>`).join(' · ')}</div>
-      <div class="pdf-verre-new">✓ Ces prix remplaceront les prix actuels</div>
+      <div class="pdf-verre-prix">${Object.entries(v.prix).map(([ind,p]) => `Indice ${ind} : <strong>${p} €</strong>`).join(' · ')}</div>
+      <div class="pdf-verre-new"><i class="ti ti-check" style="font-size:11px"></i> Remplacera les prix actuels</div>
     </div>`).join('');
-  document.querySelector('.btn-apply-pdf').style.display='flex';
-  result.style.display='block';
+  applyBtn.style.display = 'flex';
+  result.style.display = 'block';
 }
 
 function resetPdfDrop(){
-  document.getElementById('pdf-drop').innerHTML = '<i class="ti ti-file-upload"></i><p><strong>Cliquez ou glissez votre PDF ici</strong></p><p style="font-size:12px;margin-top:6px">Tarifs fournisseur, catalogue verres, grille de prix</p>';
+  document.getElementById('pdf-drop').innerHTML = `<i class="ti ti-file-upload"></i><p><strong>Cliquez ou glissez votre PDF ici</strong></p><p style="font-size:12px;margin-top:6px">Tarifs fournisseur, catalogue verres, grille de prix</p>`;
 }
 
 function applyPdfPrix(){
@@ -1961,24 +2050,21 @@ function applyPdfPrix(){
   const all = [...catalogue, ...catalogue2e];
   let count = 0;
   pdfPrixDetectes.forEach(det => {
-    const v = all.find(x=>x.id===det.id);
+    const v = all.find(x => x.id === det.id);
     if(!v) return;
-    Object.entries(det.prix).forEach(([ind,prix]) => {
-      if(v.indices[ind]!=null){
-        v.indices[ind] = prix;
-        count++;
-      }
+    Object.entries(det.prix).forEach(([ind, prix]) => {
+      if(v.indices[ind] != null){ v.indices[ind] = prix; count++; }
     });
   });
-  // Save all
   try{
     const saved = JSON.parse(localStorage.getItem('maneo_prix')||'{}');
-    all.forEach(v => { saved[v.id]={indices:{...v.indices},achats:{...v.achats}}; });
+    all.forEach(v => { saved[v.id] = {indices:{...v.indices}, achats:{...v.achats}}; });
     localStorage.setItem('maneo_prix', JSON.stringify(saved));
   }catch(e){}
-  document.getElementById('pdf-result').style.display='none';
+  document.getElementById('pdf-result').style.display = 'none';
   renderVerresEdit();
-  showToast(count+' prix mis à jour depuis le PDF !');
+  showToast(`${count} prix mis à jour depuis le PDF !`);
+  pdfPrixDetectes = [];
 }
 
 
