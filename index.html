@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manéo Opticiens — Outil de vente</title>
+<title>Verre Beta Test — Manéo Opticiens</title>
 <link rel="canonical" href="https://yanisse30-lang.github.io/tableau-verre/"/>
 <meta name="description" content="OptiConseil — Outil d'aide à la vente pour Manéo Opticiens"/>
 <meta property="og:title" content="Manéo Opticiens — OptiConseil"/>
@@ -197,6 +197,19 @@ select option{background:#252525;color:#f0f0f0}
 .login-footer{text-align:center;font-size:12px;color:#444;margin-top:20px}
 
 @media(max-width:540px){body{padding:14px}.eye-grid{grid-template-columns:1fr}.grid-4{grid-template-columns:1fr 1fr}.card{padding:18px}.traitements-grid{grid-template-columns:1fr}}
+
+/* ─── MUTUELLE SECTIONS ─────────────────────────────────────── */
+.mut-section-header{text-align:center;font-size:13px;font-weight:700;color:#C8A020;letter-spacing:0.06em;margin:18px 0 12px;display:flex;align-items:center;gap:10px}
+.mut-section-header::before,.mut-section-header::after{content:'';flex:1;height:1px;background:linear-gradient(to right,transparent,#C8A020,transparent);opacity:0.5}
+.mut-logo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:6px}
+.mut-logo-card{background:#fff;border:1.5px solid #d4c080;border-radius:10px;padding:10px 8px 7px;cursor:pointer;text-align:center;transition:0.15s;display:flex;flex-direction:column;align-items:center;gap:5px}
+.mut-logo-card:hover{border-color:#C8A020;box-shadow:0 3px 14px rgba(200,160,32,0.35);transform:translateY(-2px)}
+.mut-logo-card.selected{border-color:#C8A020;box-shadow:0 0 0 2.5px rgba(200,160,32,0.5)}
+.mut-logo-card .mut-maj{font-size:9px;color:#888;line-height:1.4}
+.mut-logo-card.sans-contrat{border-color:#cc3333}
+.mut-logo-card.sans-contrat:hover{box-shadow:0 3px 14px rgba(200,50,50,0.3)}
+.mut-logo-card.hors-ocam{border-color:#6B3FA0}
+.mut-logo-card.hors-ocam:hover{box-shadow:0 3px 14px rgba(107,63,160,0.3)}
 
 /* ─── MODERN UI ─────────────────────────────────────────────── */
 .home-card{position:relative;overflow:hidden}
@@ -525,8 +538,8 @@ select option{background:#252525;color:#f0f0f0}
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-title">Manéo Opticiens</div>
-    <div class="login-sub">Espace réservé au personnel</div>
+    <div class="login-title">Verre Beta Test</div>
+    <div class="login-sub">Manéo Opticiens — Accès réservé au personnel</div>
     <div class="login-error" id="login-error"><i class="ti ti-alert-circle"></i> Identifiant ou mot de passe incorrect</div>
     <div class="login-field">
       <label><i class="ti ti-user" style="font-size:12px"></i> Identifiant</label>
@@ -546,8 +559,8 @@ select option{background:#252525;color:#f0f0f0}
   <div class="app-logo" style="position:relative;cursor:pointer" onclick="go('0')">
     <div class="app-logo-icon"><i class="ti ti-eye"></i></div>
     <div>
-      <h1>Manéo Opticiens</h1>
-      <p>Outil d'aide à la vente</p>
+      <h1>Verre Beta Test</h1>
+      <p>Manéo Opticiens · Outil de vente</p>
     </div>
     <button class="admin-btn-top" id="admin-btn" style="display:none" onclick="openAdmin()"><i class="ti ti-settings"></i> Comptes</button>
     <button class="admin-btn-verres" id="verres-admin-btn" style="display:none" onclick="openVerresAdmin()"><i class="ti ti-pencil"></i> Verres</button>
@@ -665,33 +678,7 @@ select option{background:#252525;color:#f0f0f0}
     </div>
     <div class="card">
       <button class="btn-back" onclick="go('0')"><i class="ti ti-arrow-left"></i> Retour</button>
-      <div class="mut-selector">
-        <div class="mut-sel-item" onclick="selectMutuelleDevis('seveane')">
-          <div class="mut-sel-logo" style="background:#0055A4">SEV</div>
-          <div><div class="mut-sel-name">Sévéane</div><div class="mut-sel-sub">Réseau de soins optique</div></div>
-          <i class="ti ti-chevron-right" style="margin-left:auto;color:#555"></i>
-        </div>
-        <div class="mut-sel-item" onclick="selectMutuelleDevis('itelis')">
-          <div class="mut-sel-logo" style="background:#E2001A">ITE</div>
-          <div><div class="mut-sel-name">Itelis</div><div class="mut-sel-sub">Réseau de soins optique</div></div>
-          <i class="ti ti-chevron-right" style="margin-left:auto;color:#555"></i>
-        </div>
-        <div class="mut-sel-item" onclick="selectMutuelleDevis('santeclaire')">
-          <div class="mut-sel-logo" style="background:#00923F">SAN</div>
-          <div><div class="mut-sel-name">Santéclair</div><div class="mut-sel-sub">Réseau de soins optique</div></div>
-          <i class="ti ti-chevron-right" style="margin-left:auto;color:#555"></i>
-        </div>
-        <div class="mut-sel-item" onclick="selectMutuelleDevis('kalixia')">
-          <div class="mut-sel-logo" style="background:#6B3FA0">KAL</div>
-          <div><div class="mut-sel-name">Kalixia</div><div class="mut-sel-sub">Réseau de soins optique</div></div>
-          <i class="ti ti-chevron-right" style="margin-left:auto;color:#555"></i>
-        </div>
-        <div class="mut-sel-item" onclick="selectMutuelleDevis('carteblanche')">
-          <div class="mut-sel-logo" style="background:#7B2D8B">CB</div>
-          <div><div class="mut-sel-name">Carte Blanche</div><div class="mut-sel-sub">Partenaires</div></div>
-          <i class="ti ti-chevron-right" style="margin-left:auto;color:#555"></i>
-        </div>
-      </div>
+      <div id="s0mut-grid"></div>
     </div>
   </div>
 
@@ -846,7 +833,7 @@ select option{background:#252525;color:#f0f0f0}
     <div class="card">
       <div class="search-wrap"><i class="ti ti-search"></i><input type="text" id="mut-search" placeholder="Rechercher une mutuelle..." oninput="filterMut()"/></div>
       <div class="section-label"><i class="ti ti-building-community"></i> Réseaux conventionnés</div>
-      <div class="grid-2" id="mut-grid"></div>
+      <div id="mut-grid"></div>
     </div>
   </div>
 
@@ -1021,16 +1008,17 @@ select option{background:#252525;color:#f0f0f0}
 <script>
 // ─── MUTUELLES ───────────────────────────────────────────────
 const mutuelles = [
-  {id:'cb',label:'Carte Blanche',plafond_monture:150,plafond_verre:250,bg:'#7B2D8B',fg:'#fff'},
-  {id:'sc',label:'Santéclair',plafond_monture:120,plafond_verre:220,bg:'#00923F',fg:'#fff'},
-  {id:'klesia',label:'Klesia',plafond_monture:130,plafond_verre:200,bg:'#003C8F',fg:'#fff'},
-  {id:'mgen',label:'MGEN',plafond_monture:200,plafond_verre:300,bg:'#E2001A',fg:'#fff'},
-  {id:'malakoff',label:'Malakoff Humanis',plafond_monture:160,plafond_verre:280,bg:'#0055A4',fg:'#fff'},
-  {id:'harmonie',label:'Harmonie Mutuelle',plafond_monture:140,plafond_verre:230,bg:'#78BE20',fg:'#fff'},
-  {id:'ag2r',label:'AG2R La Mondiale',plafond_monture:180,plafond_verre:260,bg:'#C8002B',fg:'#fff'},
-  {id:'apicil',label:'Apicil',plafond_monture:150,plafond_verre:210,bg:'#009BB4',fg:'#fff'},
-  {id:'swisslife',label:'Swiss Life',plafond_monture:170,plafond_verre:290,bg:'#E30613',fg:'#fff'},
-  {id:'inter',label:'Intériale',plafond_monture:130,plafond_verre:220,bg:'#004F9F',fg:'#fff'},
+  // ── Sous Contrat ─────────────────────────────────────────────
+  {id:'kalixia', label:'Kalixia',       section:'sous', lastMaj:'27/04/2026', plafond_monture:130, plafond_verre:200},
+  {id:'cb',      label:'Carte Blanche', section:'sous', lastMaj:'09/01/2026', plafond_monture:150, plafond_verre:250},
+  {id:'sc',      label:'Santéclair',    section:'sous', lastMaj:'07/01/2026', plafond_monture:120, plafond_verre:220},
+  {id:'itelis',  label:'Itelis',        section:'sous', lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220},
+  {id:'seveane', label:'Séveane',       section:'sous', lastMaj:'07/01/2026', plafond_monture:130, plafond_verre:200},
+  {id:'optilys', label:'Optilys',       section:'sous', lastMaj:'19/05/2025', plafond_monture:130, plafond_verre:210},
+  // ── Sans Contrat ─────────────────────────────────────────────
+  {id:'actil',   label:'Actil',         section:'sans', lastMaj:'16/04/2026', plafond_monture:100, plafond_verre:180},
+  // ── Hors OCAM ────────────────────────────────────────────────
+  {id:'horsocam',label:'Hors OCAM',     section:'hors', lastMaj:'17/04/2026', plafond_monture:0,   plafond_verre:0},
 ];
 
 // ─── CATALOGUE VERRES ────────────────────────────────────────
@@ -1237,30 +1225,48 @@ function genCyl(){let o='';for(let v=-6;v<=6;v+=0.25) o+=`<option value="${v}" $
 function genAdd(){let o='<option value="">--</option>';for(let v=0.75;v<=3.5;v+=0.25) o+=`<option value="${v}">+${v.toFixed(2)}</option>`;return o}
 
 // ─── MUTUELLE LOGOS ──────────────────────────────────────────
+// ── Logos SVG blancs (fond blanc, identité visuelle de chaque réseau) ──
 const mutLogos={
-  cb:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#7B2D8B"/><text x="40" y="13" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="Arial">CARTE</text><text x="40" y="24" text-anchor="middle" fill="white" font-size="8.5" font-weight="bold" font-family="Arial">BLANCHE</text><text x="40" y="33" text-anchor="middle" fill="#dbb0f0" font-size="6.5" font-family="Arial">PARTENAIRES</text></svg>`,
-  sc:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#00923F"/><text x="40" y="15" text-anchor="middle" fill="white" font-size="9" font-weight="bold" font-family="Arial">SANTÉCLAIR</text><line x1="10" y1="20" x2="70" y2="20" stroke="white" stroke-width="0.8" opacity="0.5"/><text x="40" y="30" text-anchor="middle" fill="#a0e8c0" font-size="7.5" font-family="Arial">réseau de soins</text></svg>`,
-  klesia:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#003C8F"/><text x="40" y="16" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial">klesia</text><rect x="10" y="20" width="60" height="2" rx="1" fill="#F5A800"/><text x="40" y="31" text-anchor="middle" fill="#a0b8e8" font-size="7" font-family="Arial">prévoyance · santé</text></svg>`,
-  mgen:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#E2001A"/><text x="40" y="20" text-anchor="middle" fill="white" font-size="15" font-weight="bold" font-family="Arial">MGEN</text><text x="40" y="31" text-anchor="middle" fill="#ffaaaa" font-size="7" font-family="Arial">mutuelle générale</text></svg>`,
-  malakoff:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#0055A4"/><text x="40" y="13" text-anchor="middle" fill="white" font-size="7.5" font-weight="bold" font-family="Arial">MALAKOFF</text><text x="40" y="23" text-anchor="middle" fill="#F5A800" font-size="7.5" font-weight="bold" font-family="Arial">HUMANIS</text><text x="40" y="32" text-anchor="middle" fill="#a0c0e8" font-size="6.5" font-family="Arial">groupe de protection</text></svg>`,
-  harmonie:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#78BE20"/><text x="40" y="14" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">HARMONIE</text><text x="40" y="24" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">MUTUELLE</text><text x="40" y="33" text-anchor="middle" fill="#d0f0a0" font-size="6.5" font-family="Arial">groupe mutualiste</text></svg>`,
-  ag2r:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#C8002B"/><text x="40" y="15" text-anchor="middle" fill="white" font-size="10.5" font-weight="bold" font-family="Arial">AG2R</text><text x="40" y="25" text-anchor="middle" fill="white" font-size="7" font-family="Arial">LA MONDIALE</text><text x="40" y="33" text-anchor="middle" fill="#f0a0b0" font-size="6" font-family="Arial">groupe de protection</text></svg>`,
-  apicil:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#009BB4"/><text x="40" y="20" text-anchor="middle" fill="white" font-size="13" font-weight="bold" font-family="Arial">APICIL</text><text x="40" y="31" text-anchor="middle" fill="#a0e0f0" font-size="7" font-family="Arial">groupe de protection</text></svg>`,
-  swisslife:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#E30613"/><rect x="34" y="4" width="12" height="5" rx="1" fill="white"/><rect x="29" y="7" width="22" height="5" rx="1" fill="white"/><text x="40" y="23" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">SWISS LIFE</text><text x="40" y="32" text-anchor="middle" fill="#f0a0a0" font-size="6.5" font-family="Arial">assurance · épargne</text></svg>`,
-  inter:`<svg viewBox="0 0 80 36" width="80" height="36"><rect width="80" height="36" rx="7" fill="#004F9F"/><text x="40" y="15" text-anchor="middle" fill="white" font-size="9.5" font-weight="bold" font-family="Arial">INTÉRIALE</text><line x1="15" y1="19" x2="65" y2="19" stroke="#F5A800" stroke-width="1.5"/><text x="40" y="30" text-anchor="middle" fill="#a0c0e8" font-size="7" font-family="Arial">mutuelle fonctionnaires</text></svg>`,
+  kalixia:`<svg viewBox="0 0 100 52" width="100" height="52"><rect width="100" height="52" fill="white"/><!-- K teal --><text x="8" y="40" font-family="Arial Black,sans-serif" font-size="38" font-weight="900" fill="#00B4C8">K</text><text x="40" y="30" font-family="Arial,sans-serif" font-size="14" font-weight="700" fill="#5B2D8A">alixia</text><rect x="40" y="33" width="50" height="2.5" rx="1.5" fill="#00B4C8"/></svg>`,
+  cb:`<svg viewBox="0 0 100 52" width="100" height="52"><rect width="100" height="52" fill="#003B8E"/><!-- card icon --><rect x="6" y="8" width="28" height="18" rx="3" fill="white" opacity="0.92"/><rect x="9" y="12" width="10" height="3" rx="1" fill="#003B8E" opacity="0.4"/><text x="56" y="18" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="bold" fill="white">CARTE</text><text x="56" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" font-weight="bold" fill="white">BLANCHE</text><text x="56" y="38" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="#FFD700">Partenaires</text></svg>`,
+  sc:`<svg viewBox="0 0 100 52" width="100" height="52"><rect width="100" height="52" fill="white"/><!-- leaf --><ellipse cx="18" cy="26" rx="11" ry="14" fill="#00923F" opacity="0.85" transform="rotate(-20 18 26)"/><ellipse cx="18" cy="26" rx="5" ry="12" fill="white" opacity="0.5" transform="rotate(-20 18 26)"/><text x="56" y="23" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#00923F">Santé</text><text x="56" y="38" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#00923F">clair</text></svg>`,
+  itelis:`<svg viewBox="0 0 100 52" width="100" height="52"><rect width="100" height="52" fill="white"/><text x="50" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#0066CC">itelis</text><rect x="14" y="34" width="13" height="4" rx="2" fill="#FF4444"/><rect x="29" y="34" width="13" height="4" rx="2" fill="#FF9900"/><rect x="44" y="34" width="13" height="4" rx="2" fill="#33BB55"/><rect x="59" y="34" width="13" height="4" rx="2" fill="#0066CC"/><rect x="74" y="34" width="13" height="4" rx="2" fill="#9933CC"/></svg>`,
+  seveane:`<svg viewBox="0 0 100 52" width="100" height="52"><rect width="100" height="52" fill="white"/><circle cx="50" cy="26" r="23" fill="#F07800"/><text x="50" y="31" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="white">séveane</text></svg>`,
+  optilys:`<svg viewBox="0 0 100 52" width="100" height="52"><rect width="100" height="52" fill="white"/><text x="50" y="15" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.5" fill="#888" letter-spacing="1">Partenaire</text><!-- glasses --><path d="M18,28 Q18,22 25,22 Q32,22 32,28 Q32,34 25,34 Q18,34 18,28Z" fill="none" stroke="#1a1a1a" stroke-width="2"/><path d="M68,28 Q68,22 75,22 Q82,22 82,28 Q82,34 75,34 Q68,34 68,28Z" fill="none" stroke="#1a1a1a" stroke-width="2"/><line x1="32" y1="28" x2="40" y2="28" stroke="#1a1a1a" stroke-width="2"/><line x1="60" y1="28" x2="68" y2="28" stroke="#1a1a1a" stroke-width="2"/><text x="50" y="46" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#1a1a1a">Optilys</text></svg>`,
+  actil:`<svg viewBox="0 0 100 52" width="100" height="52"><rect width="100" height="52" fill="white"/><rect width="100" height="19" rx="4" fill="#CC0000"/><rect x="0" y="15" width="100" height="4" fill="#CC0000"/><text x="50" y="13.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="white">1/3 P</text><text x="50" y="43" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="22" font-weight="900" fill="#CC0000">ACTIL</text></svg>`,
+  horsocam:`<svg viewBox="0 0 100 52" width="100" height="52"><rect width="100" height="52" fill="white"/><text x="50" y="25" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="#5B2D8A">HORS</text><text x="50" y="45" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="18" font-weight="900" fill="#C8A020">OCAM</text></svg>`,
 };
 
-function filterMut(){renderMutuelles(document.getElementById('mut-search').value.toLowerCase())}
+// ── Sections pour l'affichage ───────────────────────────────────
+const mutSections = [
+  {key:'sous', label:'Sous Contrat'},
+  {key:'sans', label:'Sans Contrat'},
+  {key:'hors', label:'Hors OCAM'},
+];
+
+function _renderMutGrid(containerId, onClickFn, f=''){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  const list = f ? mutuelles.filter(m => m.label.toLowerCase().includes(f)) : mutuelles;
+  container.innerHTML = mutSections.map(s => {
+    const items = list.filter(m => m.section === s.key);
+    if(!items.length) return '';
+    return `<div class="mut-section-header">${s.label}</div>
+    <div class="mut-logo-grid">
+      ${items.map(m => `
+        <div class="mut-logo-card${s.key==='sans'?' sans-contrat':s.key==='hors'?' hors-ocam':''}" onclick="${onClickFn}('${m.id}')">
+          <div>${mutLogos[m.id]||''}</div>
+          <div class="mut-maj">Dernière maj : ${m.lastMaj||''}</div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function filterMut(){
+  _renderMutGrid('mut-grid','selectMut',document.getElementById('mut-search').value.toLowerCase());
+}
 function renderMutuelles(f=''){
-  const list=f?mutuelles.filter(m=>m.label.toLowerCase().includes(f)):mutuelles;
-  const grid=document.getElementById('mut-grid');
-  if(!grid) return;
-  grid.innerHTML=list.map(m=>`
-    <div class="mut-card" onclick="selectMut('${m.id}')">
-      <div style="display:flex;justify-content:center">${mutLogos[m.id]||''}</div>
-      <div class="label">${m.label}</div>
-      <div class="sub">Monture ${m.plafond_monture} €<br>Verre ${m.plafond_verre} €</div>
-    </div>`).join('');
+  _renderMutGrid('mut-grid','selectMut',f);
 }
 
 function selectMut(id){
@@ -2237,26 +2243,20 @@ const verresClasseA = [
    ]},
 ];
 
-const devisMutuelles = {
-  seveane:     {id:'seveane',     label:'Sévéane',       plafond_monture:130, plafond_verre:200},
-  itelis:      {id:'itelis',      label:'Itelis',         plafond_monture:130, plafond_verre:220},
-  santeclaire: {id:'santeclaire', label:'Santéclair',     plafond_monture:120, plafond_verre:220},
-  kalixia:     {id:'kalixia',     label:'Kalixia',        plafond_monture:130, plafond_verre:200},
-  carteblanche:{id:'carteblanche',label:'Carte Blanche',  plafond_monture:150, plafond_verre:250},
-};
-const mutLabels = {seveane:'Sévéane',itelis:'Itelis',santeclaire:'Santéclair',kalixia:'Kalixia',carteblanche:'Carte Blanche'};
+// devisMutuelles remplacé — tous les IDs sont maintenant dans mutuelles[]
 
 function selectMutuelleDevis(mid){
   window._selectedMutDevis = mid;
-  document.getElementById('panier-mut-label').textContent = mutLabels[mid];
+  const m = mutuelles.find(x => x.id === mid) || mutuelles[0];
+  document.getElementById('panier-mut-label').textContent = m.label;
   go('0panier');
 }
 
 function selectPrise(type){
   window._priseType = type;
   _backFrom2 = '0panier';
-  const mid = window._selectedMutDevis || 'cb';
-  state.mutuelle = devisMutuelles[mid] || mutuelles.find(m=>m.id===mid) || mutuelles[0];
+  const mid = window._selectedMutDevis || 'kalixia';
+  state.mutuelle = mutuelles.find(m => m.id === mid) || mutuelles[0];
   document.getElementById('mut-label-h').textContent = `Mutuelle : ${state.mutuelle.label}`;
   state.vision = null;
   selectedMonture = null;
@@ -2894,6 +2894,10 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('od-add').innerHTML=genAdd();
   document.getElementById('og-add').innerHTML=genAdd();
   renderMutuelles();
+  // Grille s0mut (démo mutuelle depuis l'accueil)
+  _renderMutGrid('s0mut-grid', 'selectMutuelleDevis');
+  // Grille s1 (vente complète) → même layout
+  _renderMutGrid('mut-grid', 'selectMut');
 });
 </script>
   <div class="logout-bar" id="logout-bar">
