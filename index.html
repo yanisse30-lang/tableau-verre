@@ -123,7 +123,39 @@ select option{background:#252525;color:#f0f0f0}
 .gamme-header i{font-size:20px}
 .gamme-header .gamme-desc{font-size:12px;font-weight:400;opacity:0.85;margin-left:auto}
 
-/* VERRE CARDS */
+/* ─── VERRE TABLE ─────────────────────────────────────────── */
+.verre-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.verre-table thead th{padding:9px 12px;text-align:left;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#666;background:#161616;border-bottom:2px solid #2a2a2a;white-space:nowrap}
+.verre-table thead th.col-tarifs,.verre-table thead th.col-saisie-v,.verre-table thead th.col-saisie-p,.verre-table thead th.col-saisie-t,.verre-table thead th.col-marge{text-align:right}
+.vt-gamme-hdr td{padding:8px 12px;font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;border-bottom:1px solid #222}
+.vt-gamme-hdr.gp td{color:#E57373}
+.vt-gamme-hdr.gd td{color:#64B5F6}
+.vt-gamme-hdr.ge td{color:#81C784}
+.verre-row{border-bottom:1px solid #1e1e1e;cursor:pointer;transition:background 0.1s}
+.verre-row:hover{background:#1a1a1a}
+.verre-row td{padding:10px 12px;vertical-align:middle}
+.vr-name{font-size:13px;font-weight:700;color:#e8e8e8;margin-bottom:2px}
+.vr-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.vr-marque{font-size:11px;color:#555}
+.vr-gamme-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.vr-reseau-badge{font-size:9px;font-weight:800;letter-spacing:0.06em;padding:2px 6px;border-radius:4px;background:#0f2a1a;color:#50d080;border:1px solid #1a4a28}
+.vt-indice{display:inline-block;background:#1a2a3a;color:#60a0e0;font-size:12px;font-weight:800;padding:3px 9px;border-radius:6px}
+.vt-precal-incl{font-size:11px;color:#50c090;background:#0a1e14;border:1px solid #1a4030;padding:3px 8px;border-radius:5px;white-space:nowrap}
+.vt-precal-non{font-size:11px;color:#666;background:#1a1a1a;border:1px solid #2a2a2a;padding:3px 8px;border-radius:5px;white-space:nowrap}
+.vt-prix{font-size:14px;font-weight:800;color:#f0f0f0;white-space:nowrap}
+.vt-prix.reseau{color:#50e090}
+.vt-saisie{font-size:13px;color:#bbb;text-align:right;white-space:nowrap}
+.vt-marge{font-size:13px;font-weight:800;color:#60aaee;text-align:right;white-space:nowrap}
+.vt-marge.high{color:#50d080}
+.vt-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:0}
+.vt-detail{display:none;background:#141414;border-bottom:1px solid #252525}
+.vt-detail.open{display:table-row}
+.vt-detail td{padding:14px 14px 14px 20px}
+.vt-detail-inner{display:flex;flex-wrap:wrap;gap:10px}
+.vt-trait{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:9px 12px;font-size:12px;color:#b0b0b0;flex:1;min-width:180px}
+.vt-trait strong{display:block;color:#d0d0d0;margin-bottom:3px;font-size:12px}
+
+/* VERRE CARDS (kept for 2eme paire) */
 .verre-card{background:#1e1e1e;border:1.5px solid #333;border-radius:var(--radius-xl);margin-bottom:12px;overflow:hidden;transition:border-color 0.15s,box-shadow 0.15s}
 .verre-card:hover{box-shadow:0 2px 16px rgba(55,138,221,0.18)}
 .verre-card.top{border:2px solid var(--blue-400);background:#162030}
@@ -1692,7 +1724,8 @@ function goMontureFromS3(){
   if(!state.vision){ showToast('Veuillez choisir le type de vision'); go(2); return; }
   if(!selectedMonture) selectedMonture = 'cercle';
   if(window._priseType === 'sante') selectedMonture = 'cercle';
-  goTraitements();
+  selectedTraits = new Set();
+  showVerres();
 }
 
 function genSph(){let o='';for(let v=-20;v<=20;v+=0.25) o+=`<option value="${v}" ${v===0?'selected':''}>${v>0?'+':''}${v.toFixed(2)}</option>`;return o}
@@ -1845,6 +1878,64 @@ function renderVerreCard(v,i,showTop,paire2=false){
 }
 
 function toggleVC(id){document.getElementById('vc-'+id).classList.toggle('open')}
+
+// ─── VERRE TABLE ──────────────────────────────────────────────
+function renderVerreLigne(v){
+  const marge = v.vente - v.achat;
+  const taux  = Math.round(marge / v.vente * 100);
+  const mutId = state.mutuelle?.id;
+  const isReseau = (mutId==='cb'||mutId==='actil') && v.tarifsReseau
+    && (mutId==='cb' ? v.tarifsReseau.cb?.[v.indiceChoisi] : v.tarifsReseau.actil?.[v.indiceChoisi]);
+  const gcColor = v.gamme==='haut'?'#9060e0':v.gamme==='milieu'?'#378ADD':'#3B6D11';
+  const precalSaisie = v.precalibrage ? '+15 €' : '—';
+  const margeClass = taux >= 45 ? 'high' : '';
+  const trHTML = v.traitements.slice(0,3).map(t =>
+    `<div class="vt-trait"><strong><i class="ti ${t.icon}" style="margin-right:4px;color:#378ADD"></i>${t.nom}</strong>${t.desc.substring(0,90)}…</div>`
+  ).join('');
+
+  return `
+    <tr class="verre-row" onclick="toggleVT('vt-${v.id}')">
+      <td class="col-info">
+        <div class="vr-name">${v.nom}</div>
+        <div class="vr-meta">
+          <span class="vr-gamme-dot" style="background:${gcColor}"></span>
+          <span class="vr-marque">${v.marque}</span>
+          ${isReseau ? `<span class="vr-reseau-badge">${mutId==='cb'?'CB':'ACTIL'}</span>` : ''}
+        </div>
+      </td>
+      <td><span class="vt-indice">${v.indiceChoisi}</span></td>
+      <td>${v.precalibrage
+        ? `<span class="vt-precal-incl"><i class="ti ti-check" style="font-size:10px;margin-right:3px"></i>Inclus valorisé</span>`
+        : `<span class="vt-precal-non">Non inclus</span>`}</td>
+      <td style="text-align:right"><span class="vt-prix ${isReseau?'reseau':''}">${v.vente} €</span></td>
+      <td class="vt-saisie">${v.vente} €</td>
+      <td class="vt-saisie">${precalSaisie}</td>
+      <td class="vt-saisie">—</td>
+      <td><span class="vt-marge ${margeClass}">+${marge} €<br><span style="font-size:10px;opacity:0.7">${taux} % · +${marge*2} €/paire</span></span></td>
+    </tr>
+    <tr class="vt-detail" id="vt-${v.id}">
+      <td colspan="8">
+        <div class="vt-detail-inner">
+          ${trHTML}
+          <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
+            <button class="btn-comparer" id="cmp-${v.id}" onclick="event.stopPropagation();toggleCompareBtn(this,'${v.id}')"><i class="ti ti-layout-columns"></i> Comparer</button>
+            <button class="btn-choisir" style="width:auto;margin-top:0;padding:10px 16px" onclick="event.stopPropagation();choisirPaire2('${v.id}')"><i class="ti ti-copy"></i> 2ème paire</button>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+}
+
+function toggleVT(id){
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle('open');
+}
+
+function buildVerreSection(verres, label, cls){
+  if(!verres.length) return '';
+  return `<tr class="vt-gamme-hdr ${cls}"><td colspan="8">${label}</td></tr>`
+    + verres.map(v => renderVerreLigne(v)).join('');
+}
 
 // ─── SHOW VERRES ─────────────────────────────────────────────
 // ─── MONTURE ─────────────────────────────────────────────────
@@ -2043,16 +2134,27 @@ function showVerres(){
     }
   }
 
-  let html=conseilHTML;
-  if(haut.length){html+=`<div class="gamme-header gamme-haut"><i class="ti ti-diamond"></i> Haut de gamme <span class="gamme-desc">Technologie premium · Marges maximales</span></div>`;haut.forEach((v,i)=>html+=renderVerreCard(v,i,true));}
-  if(mil.length){html+=`<div class="gamme-header gamme-milieu"><i class="ti ti-star"></i> Milieu de gamme <span class="gamme-desc">Excellent rapport qualité / prix</span></div>`;mil.forEach((v,i)=>html+=renderVerreCard(v,i,true));}
-  if(ent.length){html+=`<div class="gamme-header gamme-entree"><i class="ti ti-leaf"></i> Entrée de gamme <span class="gamme-desc">Accessibles · Bonne protection</span></div>`;ent.forEach((v,i)=>html+=renderVerreCard(v,i,true));}
-  if(!compat.length) html+=`<div style="text-align:center;padding:30px;color:#aaa"><i class="ti ti-alert-circle" style="font-size:32px;display:block;margin-bottom:10px"></i>Aucun verre compatible avec cette correction.</div>`;
+  let tableBody = buildVerreSection(haut,'GAMME PREMIUM','gp')
+                + buildVerreSection(mil,'GAMME DYNAMIQUE','gd')
+                + buildVerreSection(ent,'GAMME ESSENTIELLE','ge');
 
-  // Add trait info to recap
-  const traitLabels = {ar:'Anti-reflet',lb:'Filtre lumière bleue',tr:'Transitions'};
-  const traitStr = [...selectedTraits].map(t=>traitLabels[t]).join(' + ');
-  document.getElementById('recap').innerHTML += `<div class="summary-row"><span class="key"><i class="ti ti-sparkles" style="font-size:14px"></i> Traitement</span><span class="val">${traitStr}</span></div>`;
+  const tableHTML = compat.length
+    ? `<div style="overflow-x:auto;margin-top:8px"><table class="verre-table">
+        <thead><tr>
+          <th class="col-info">Informations</th>
+          <th>Indice</th>
+          <th>Précal</th>
+          <th class="col-tarifs">Tarifs</th>
+          <th class="col-saisie-v">Saisie Verre</th>
+          <th class="col-saisie-p">Saisie Précal</th>
+          <th class="col-saisie-t">Saisie Teinte</th>
+          <th class="col-marge">Marge</th>
+        </tr></thead>
+        <tbody>${tableBody}</tbody>
+      </table></div>`
+    : `<div style="text-align:center;padding:30px;color:#aaa"><i class="ti ti-alert-circle" style="font-size:32px;display:block;margin-bottom:10px"></i>Aucun verre compatible avec cette correction.</div>`;
+
+  const html = conseilHTML + tableHTML;
 
   document.getElementById('verres-list').innerHTML=html;
   go(4);
