@@ -263,6 +263,11 @@ select option{background:#252525;color:#f0f0f0}
 .compare-metric-val{font-weight:700;color:#f0f0f0;font-size:14px}
 .compare-metric-val.better{color:#70c8a0}
 .compare-metric-val.worse{color:#e07070}
+/* Progressif zones */
+.prog-col{display:flex;flex-direction:column;gap:0}
+.prog-col canvas{width:100%;border-radius:12px 12px 0 0;display:block;background:#0a0a0a}
+.prog-label{font-size:11px;font-weight:700;color:#fff;padding:7px 8px 5px;border-radius:0 0 10px 10px;line-height:1.3;text-align:center}
+.prog-sublabel{font-size:9px;font-weight:400;opacity:0.75;margin-top:2px}
 .btn-comparer{background:#18162a;border:1px solid #302a50;color:#8080c0;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;transition:0.15s;white-space:nowrap}
 .btn-comparer:hover{background:#20183a;border-color:#8060c0;color:#a080e0}
 .btn-comparer.active{background:#1e0f38;border-color:#c080f0;color:#d090ff}
@@ -738,6 +743,7 @@ select option{background:#252525;color:#f0f0f0}
         <button class="demo-tab" onclick="setScene('ecran')" id="stab-ecran"><i class="ti ti-device-desktop"></i> Écran / bureau</button>
         <button class="demo-tab" onclick="setScene('soleil')" id="stab-soleil"><i class="ti ti-sun"></i> Plein soleil</button>
         <button class="demo-tab" onclick="setScene('ville')" id="stab-ville"><i class="ti ti-building"></i> Ville / rue</button>
+        <button class="demo-tab" onclick="setScene('eau')" id="stab-eau" style="border-color:#1a5a8a;color:#60aaee"><i class="ti ti-ripple"></i> Eau / Lac</button>
       </div>
 
       <!-- TREATMENT SELECTOR -->
@@ -747,6 +753,8 @@ select option{background:#252525;color:#f0f0f0}
         <button class="demo-tab" onclick="setTrait('ar')" id="ttab-ar"><i class="ti ti-sparkles"></i> Anti-reflet</button>
         <button class="demo-tab" onclick="setTrait('lb')" id="ttab-lb"><i class="ti ti-device-desktop"></i> Lumière bleue</button>
         <button class="demo-tab" onclick="setTrait('tr')" id="ttab-tr"><i class="ti ti-sun-moon"></i> Transitions</button>
+        <button class="demo-tab" onclick="setTrait('solaire')" id="ttab-solaire" style="border-color:#5a3000;color:#e8b870"><i class="ti ti-sun-filled"></i> Solaire standard</button>
+        <button class="demo-tab" onclick="setTrait('polarise')" id="ttab-polarise" style="border-color:#1a4a3a;color:#70c8a0"><i class="ti ti-polaroid"></i> Polarisé</button>
       </div>
 
       <!-- SLIDER FOR TRANSITIONS -->
@@ -761,16 +769,14 @@ select option{background:#252525;color:#f0f0f0}
 
       <!-- IMAGE VIEWER with CSS filter -->
       <div style="position:relative;border-radius:16px;overflow:hidden;border:1px solid #333;margin-bottom:14px">
-        <img id="demo-photo" src="" alt="Simulation verre" 
+        <img id="demo-photo" src="" alt="Simulation verre"
           style="width:100%;height:300px;object-fit:cover;display:block;transition:filter 0.4s ease"/>
-        <!-- Glare overlay for no-AR mode -->
         <div id="demo-glare" style="position:absolute;inset:0;pointer-events:none;transition:opacity 0.4s"></div>
-        <!-- Label -->
         <div id="demo-photo-label" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:#fff;font-size:13px;font-weight:600;padding:6px 16px;border-radius:20px;white-space:nowrap;backdrop-filter:blur(4px)"></div>
       </div>
 
       <!-- BEFORE/AFTER COMPARISON -->
-      <div style="font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Comparaison</div>
+      <div style="font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Comparaison avant / après</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
         <div style="border-radius:12px;overflow:hidden;border:1px solid #333;position:relative">
           <img id="demo-before" src="" alt="Avant" style="width:100%;height:150px;object-fit:cover;display:block"/>
@@ -785,9 +791,48 @@ select option{background:#252525;color:#f0f0f0}
       <!-- INFO CARD -->
       <div class="demo-info" id="demo-info-card">
         <div class="demo-info-title" id="demo-info-title"><i class="ti ti-eye"></i> Sans traitement</div>
-        <div class="demo-info-desc" id="demo-info-desc">Vision naturelle sans traitement. Reflets parasites visibles sur le verre, éblouissements en conduite nocturne.</div>
+        <div class="demo-info-desc" id="demo-info-desc">Vision naturelle sans traitement.</div>
         <div class="demo-avs" id="demo-info-avs"></div>
       </div>
+
+      <!-- ── ZONES PROGRESSIF ────────────────────────────────── -->
+      <div style="margin-top:22px;padding-top:18px;border-top:1px solid #2a2a2a">
+        <div style="font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;display:flex;align-items:center;gap:7px">
+          <i class="ti ti-adjustments" style="font-size:14px;color:#9060e0"></i> Zones de vision — Verre progressif
+        </div>
+        <div style="font-size:12px;color:#555;margin-bottom:14px;line-height:1.6">Montrez au patient comment le corridor de vision utile s'élargit avec la montée en gamme. Les zones <span style="color:#e07070">rouges</span> = aberrations (vision floue et déformée).</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" id="prog-grid">
+          <div class="prog-col">
+            <canvas id="prog-entree" width="160" height="230"></canvas>
+            <div class="prog-label" style="background:linear-gradient(135deg,#1a5c3a,#2E8B57)">
+              <i class="ti ti-leaf" style="font-size:12px"></i> Entrée de gamme
+              <div class="prog-sublabel">Corridor étroit · Grandes zones d'aberration</div>
+            </div>
+          </div>
+          <div class="prog-col">
+            <canvas id="prog-milieu" width="160" height="230"></canvas>
+            <div class="prog-label" style="background:linear-gradient(135deg,#082045,#185FA5)">
+              <i class="ti ti-star" style="font-size:12px"></i> Milieu de gamme
+              <div class="prog-sublabel">Corridor modéré · Zones réduites</div>
+            </div>
+          </div>
+          <div class="prog-col">
+            <canvas id="prog-haut" width="160" height="230"></canvas>
+            <div class="prog-label" style="background:linear-gradient(135deg,#23124a,#6B3FA0)">
+              <i class="ti ti-diamond" style="font-size:12px"></i> Haut de gamme
+              <div class="prog-sublabel">Large corridor · Aberrations minimales</div>
+            </div>
+          </div>
+        </div>
+        <!-- Légende -->
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:#1a1a1a;border-radius:10px;font-size:11px">
+          <div style="display:flex;align-items:center;gap:6px"><div style="width:14px;height:14px;border-radius:3px;background:#3070cc"></div><span style="color:#aaa">Zone loin (claire)</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><div style="width:14px;height:14px;border-radius:3px;background:#50a850"></div><span style="color:#aaa">Corridor intermédiaire</span></div>
+          <div style="display:flex;align-items:center;gap=6px"><div style="width:14px;height:14px;border-radius:3px;background:#c8a020"></div><span style="color:#aaa">Zone près (claire)</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><div style="width:14px;height:14px;border-radius:3px;background:#d04040"></div><span style="color:#aaa">Zone d'aberration (floue)</span></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2326,8 +2371,47 @@ const demoTraits = {
     avs:[{t:'UV 100% bloqués',s:'#0a2a10',c:'#70c8a0'},{t:'Adaptation auto',s:'#0a2a10',c:'#70c8a0'},{t:'8 couleurs',s:'#1a1a30',c:'#a0a0f0'}],
     filter:'sepia(0.6) saturate(0.7) brightness(0.7)',
     glare:''
+  },
+  solaire:{
+    title:`Verre solaire standard (catégorie 3)`,
+    icon:'ti-sun-filled',
+    desc:`Verre teinté sombre. Réduit la luminosité de 65 % mais les reflets sur l'eau restent présents — la lumière polarisée horizontalement n'est pas bloquée.`,
+    avs:[{t:`Luminosité −65%`,s:`#2a1800`,c:`#e8b870`},{t:`Reflets présents`,s:`#2a1010`,c:`#e07070`},{t:`UV filtrés`,s:`#0a2a10`,c:`#70c8a0`}],
+    filter:`brightness(0.42) sepia(0.55) saturate(0.7)`,
+    glare:`radial-gradient(ellipse at 50% 38%, rgba(255,200,50,0.28) 0%, rgba(255,200,50,0) 60%)`
+  },
+  polarise:{
+    title:`Verre polarisé`,
+    icon:`ti-polaroid`,
+    desc:`Le filtre polarisant bloque la lumière réfléchie horizontalement. Résultat : reflets sur l'eau totalement supprimés, fond marin visible, contraste remarquable. Idéal pêche, voile, ski.`,
+    avs:[{t:`Reflets supprimés`,s:`#0a2a1a`,c:`#70c8a0`},{t:`Fond visible`,s:`#0a2a1a`,c:`#70c8a0`},{t:`Contraste +40%`,s:`#0a2a1a`,c:`#70c8a0`}],
+    filter:`brightness(0.62) contrast(1.3) saturate(1.15)`,
+    glare:``
   }
 };
+
+// ── Scène eau (SVG générés au runtime) ──────────────────────────
+(function(){
+  function svgB64(svg){ try{ return `data:image/svg+xml;base64,`+btoa(unescape(encodeURIComponent(svg))); }catch(e){ return `data:image/svg+xml,`+encodeURIComponent(svg); } }
+
+  const eauReflets = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3a80cc"/><stop offset="100%" stop-color="#70bce8"/></linearGradient><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1258a0"/><stop offset="100%" stop-color="#06203a"/></linearGradient><radialGradient id="sr" cx="50%" cy="5%" r="60%"><stop offset="0%" stop-color="#fffce0" stop-opacity="1"/><stop offset="18%" stop-color="#ffe860" stop-opacity="0.85"/><stop offset="50%" stop-color="#ffaa00" stop-opacity="0.38"/><stop offset="100%" stop-color="#ff6600" stop-opacity="0"/></radialGradient></defs><rect width="800" height="205" fill="url(#sg)"/><ellipse cx="180" cy="75" rx="80" ry="28" fill="white" opacity="0.85"/><ellipse cx="225" cy="60" rx="60" ry="22" fill="white" opacity="0.9"/><ellipse cx="590" cy="90" rx="70" ry="24" fill="white" opacity="0.7"/><circle cx="400" cy="48" r="34" fill="#FFD700" opacity="0.97"/><circle cx="400" cy="48" r="54" fill="#FFD700" opacity="0.16"/><rect x="0" y="195" width="800" height="205" fill="url(#wg)"/><rect x="0" y="195" width="800" height="205" fill="url(#sr)"/><ellipse cx="400" cy="220" rx="30" ry="10" fill="white" opacity="0.96"/><ellipse cx="400" cy="248" rx="22" ry="7" fill="white" opacity="0.86"/><ellipse cx="400" cy="273" rx="17" ry="5" fill="white" opacity="0.76"/><ellipse cx="400" cy="302" rx="24" ry="7" fill="white" opacity="0.66"/><ellipse cx="400" cy="338" rx="30" ry="9" fill="white" opacity="0.55"/><circle cx="278" cy="238" r="5" fill="white" opacity="0.72"/><circle cx="218" cy="264" r="4" fill="white" opacity="0.62"/><circle cx="522" cy="243" r="5" fill="white" opacity="0.72"/><circle cx="582" cy="268" r="4" fill="white" opacity="0.62"/><circle cx="158" cy="288" r="4" fill="white" opacity="0.55"/><circle cx="642" cy="258" r="5" fill="white" opacity="0.66"/><circle cx="702" cy="298" r="4" fill="white" opacity="0.5"/><circle cx="128" cy="315" r="4" fill="white" opacity="0.46"/><circle cx="672" cy="328" r="4" fill="white" opacity="0.46"/><circle cx="338" cy="292" r="3" fill="white" opacity="0.62"/><circle cx="462" cy="312" r="3" fill="white" opacity="0.56"/><rect x="362" y="265" width="76" height="10" fill="#8B6914" rx="2"/><rect x="376" y="265" width="8" height="58" fill="#7a5a10"/><rect x="416" y="265" width="8" height="58" fill="#7a5a10"/><ellipse cx="78" cy="394" rx="94" ry="22" fill="#4a3a28"/><ellipse cx="722" cy="397" rx="84" ry="18" fill="#4a3a28"/></svg>`;
+
+  const eauPolarise = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><defs><linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3a80cc"/><stop offset="100%" stop-color="#70bce8"/></linearGradient><linearGradient id="wg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1870b8"/><stop offset="100%" stop-color="#083858"/></linearGradient></defs><rect width="800" height="205" fill="url(#sg2)"/><ellipse cx="180" cy="75" rx="80" ry="28" fill="white" opacity="0.85"/><ellipse cx="225" cy="60" rx="60" ry="22" fill="white" opacity="0.9"/><ellipse cx="590" cy="90" rx="70" ry="24" fill="white" opacity="0.7"/><circle cx="400" cy="48" r="34" fill="#FFD700" opacity="0.97"/><rect x="0" y="195" width="800" height="205" fill="url(#wg2)"/><ellipse cx="278" cy="302" rx="30" ry="12" fill="#ff7030" opacity="0.78"/><polygon points="308,302 324,292 324,312" fill="#ff7030" opacity="0.78"/><circle cx="272" cy="298" r="4" fill="white" opacity="0.85"/><circle cx="273" cy="298" r="2" fill="#222" opacity="0.9"/><ellipse cx="524" cy="322" rx="24" ry="10" fill="#28b898" opacity="0.72"/><polygon points="548,322 562,313 562,331" fill="#28b898" opacity="0.72"/><circle cx="518" cy="318" r="3" fill="white" opacity="0.8"/><ellipse cx="388" cy="350" rx="20" ry="8" fill="#7830f8" opacity="0.62"/><polygon points="408,350 420,342 420,358" fill="#7830f8" opacity="0.62"/><ellipse cx="175" cy="372" rx="42" ry="19" fill="#504838" opacity="0.58"/><ellipse cx="602" cy="362" rx="36" ry="16" fill="#504838" opacity="0.52"/><ellipse cx="400" cy="382" rx="62" ry="21" fill="#685848" opacity="0.46"/><path d="M238,400 Q233,366 243,346 Q236,322 241,302" stroke="#28823a" stroke-width="5" fill="none" opacity="0.66"/><path d="M558,400 Q553,360 563,340 Q556,316 561,296" stroke="#28823a" stroke-width="5" fill="none" opacity="0.62"/><path d="M418,400 Q413,368 423,348" stroke="#38924a" stroke-width="4" fill="none" opacity="0.56"/><rect x="362" y="265" width="76" height="10" fill="#8B6914" rx="2"/><rect x="376" y="265" width="8" height="58" fill="#7a5a10"/><rect x="416" y="265" width="8" height="58" fill="#7a5a10"/><ellipse cx="78" cy="394" rx="94" ry="22" fill="#4a3a28"/><ellipse cx="722" cy="397" rx="84" ry="18" fill="#4a3a28"/></svg>`;
+
+  demoScenes.eau = {
+    url: svgB64(eauReflets),
+    urlPolarise: svgB64(eauPolarise),
+    label: `Reflets éblouissants — lac / mer`,
+    traitLabels:{
+      normal:`Reflets intenses — éblouissement total`,
+      ar:`Anti-reflet — légère amélioration`,
+      lb:`Teinte légère — reflets présents`,
+      tr:`Verre assombri — reflets atténués`,
+      solaire:`Teinté — luminosité réduite, reflets présents`,
+      polarise:`Polarisé — reflets supprimés, fond visible !`
+    }
+  };
+})();
 
 let demoScene = 'nuit';
 let demoTrait = 'normal';
@@ -2355,43 +2439,149 @@ function setTrait(t){
 
 function applyFilter(){
   const scene = demoScenes[demoScene];
+  if(!scene) return;
   const trait = demoTraits[demoTrait];
-  const photo = document.getElementById('demo-photo');
+  if(!trait) return;
+  const photo  = document.getElementById('demo-photo');
   const before = document.getElementById('demo-before');
-  const after = document.getElementById('demo-after');
-  const glare = document.getElementById('demo-glare');
-  const label = document.getElementById('demo-photo-label');
-
+  const after  = document.getElementById('demo-after');
+  const glare  = document.getElementById('demo-glare');
+  const label  = document.getElementById('demo-photo-label');
   if(!photo) return;
 
-  // Set images
-  const url = scene.url;
-  photo.src = url;
-  before.src = url;
-  after.src = url;
+  // Polarisé sur scène eau → image sans reflets
+  const url = (demoTrait === 'polarise' && scene.urlPolarise) ? scene.urlPolarise : scene.url;
+  photo.src  = url;
+  before.src = scene.url;   // avant = toujours sans traitement
+  after.src  = url;
 
-  // Apply filter based on trait
   let filter = trait.filter;
   if(demoTrait === 'tr'){
     const sun = trSun/100;
     filter = `sepia(${sun*0.7}) saturate(${1-sun*0.35}) brightness(${1-sun*0.32})`;
   }
-
-  photo.style.filter = filter;
-  after.style.filter = filter;
+  photo.style.filter  = filter;
+  after.style.filter  = filter;
   before.style.filter = 'none';
 
-  // Glare overlay
   glare.style.background = trait.glare || '';
   glare.style.opacity = '1';
+  label.textContent = scene.traitLabels?.[demoTrait] || scene.label;
+}
 
-  // Label
-  label.textContent = scene.traitLabels[demoTrait] || scene.label;
+// ── Dessin des zones progressif ────────────────────────────────
+const _progParams = {
+  entree:{ cpct:0.24, aa:0.78 },
+  milieu:{ cpct:0.42, aa:0.50 },
+  haut:  { cpct:0.66, aa:0.22 },
+};
+
+function drawProgZones(canvasId, gamme){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const {cpct, aa} = _progParams[gamme];
+  const cx = W/2, cy = H/2;
+  const rx = W*0.44, ry = H*0.46;
+
+  const top = cy - ry, bot = cy + ry, th = bot - top;
+  const farH  = th * 0.36;
+  const intH  = th * 0.30;
+  const nearH = th * 0.34;
+  const cw = rx * 2 * cpct; // corridor width in px
+
+  // ─ Clip lens shape
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
+  ctx.clip();
+
+  // 1. Aberration background (lateral)
+  const ag = ctx.createLinearGradient(0, top+farH*0.4, 0, bot-nearH*0.4);
+  ag.addColorStop(0,   `rgba(210,45,45,${aa*0.35})`);
+  ag.addColorStop(0.5, `rgba(210,45,45,${aa})`);
+  ag.addColorStop(1,   `rgba(210,45,45,${aa*0.4})`);
+  ctx.fillStyle = ag;
+  ctx.fillRect(0, top, W, th);
+
+  // 2. Far vision zone (top full-width – usually clean at top)
+  {
+    const g = ctx.createLinearGradient(0,top,0,top+farH);
+    g.addColorStop(0,'rgba(40,105,215,0.9)');
+    g.addColorStop(1,'rgba(35,90,195,0.75)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, top, W, farH);
+  }
+
+  // 3. Intermediate corridor (colored clear zone)
+  {
+    const g = ctx.createLinearGradient(0, top+farH, 0, top+farH+intH);
+    g.addColorStop(0,'rgba(55,170,60,0.85)');
+    g.addColorStop(1,'rgba(45,155,50,0.80)');
+    ctx.fillStyle = g;
+    ctx.fillRect(cx-cw/2, top+farH, cw, intH);
+    // Fade edges of corridor into aberration
+    const lf = ctx.createLinearGradient(cx-cw/2-cw*0.25,0, cx-cw/2,0);
+    lf.addColorStop(0,'rgba(55,170,60,0)'); lf.addColorStop(1,'rgba(55,170,60,0.7)');
+    ctx.fillStyle=lf; ctx.fillRect(cx-cw/2-cw*0.25, top+farH, cw*0.25, intH);
+    const rf = ctx.createLinearGradient(cx+cw/2,0, cx+cw/2+cw*0.25,0);
+    rf.addColorStop(0,'rgba(55,170,60,0.7)'); rf.addColorStop(1,'rgba(55,170,60,0)');
+    ctx.fillStyle=rf; ctx.fillRect(cx+cw/2, top+farH, cw*0.25, intH);
+  }
+
+  // 4. Near vision zone (bottom)
+  {
+    const nw = cw * 0.88;
+    const g = ctx.createLinearGradient(0, top+farH+intH, 0, bot);
+    g.addColorStop(0,'rgba(200,155,15,0.85)');
+    g.addColorStop(1,'rgba(180,138,8,0.78)');
+    ctx.fillStyle = g;
+    ctx.fillRect(cx-nw/2, top+farH+intH, nw, nearH);
+  }
+
+  ctx.restore();
+
+  // ─ Lens border
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
+  ctx.stroke();
+
+  // ─ Labels
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 10px system-ui,sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.fillText('LOIN',  cx, top  + farH  * 0.52);
+  ctx.fillText('INTER', cx, top  + farH  + intH  * 0.52);
+  ctx.fillText('PRÈS',  cx, top  + farH  + intH  + nearH * 0.52);
+
+  // ─ Aberration labels (only if zones are visible)
+  if(cpct < 0.72){
+    const aberX = (rx - cw/2) / 2;
+    ctx.font = 'bold 8px system-ui,sans-serif';
+    ctx.fillStyle = `rgba(255,140,140,${0.6+aa*0.4})`;
+    [-1,1].forEach(side => {
+      const ox = cx + side*(cw/2 + aberX);
+      ctx.fillText('ABER-',  ox, cy - 8);
+      ctx.fillText('RATION', ox, cy + 5);
+    });
+  }
+}
+
+function initProgZones(){
+  drawProgZones('prog-entree', 'entree');
+  drawProgZones('prog-milieu', 'milieu');
+  drawProgZones('prog-haut',   'haut');
 }
 
 function initDemo(){
   setScene('nuit');
   setTrait('normal');
+  setTimeout(initProgZones, 80);
 }
 
 
