@@ -1034,16 +1034,17 @@ const mutuelles = [
 ];
 
 // ─── CATALOGUE VERRES ────────────────────────────────────────
-// indices: prix de vente par indice (null = non dispo)
-// achats:  prix d'achat par indice
-// sphMax:  sphère max supportée (valeur absolue)
-// cylMax:  cylindre max supporté (valeur absolue)
+// indices: prix de vente TTC par indice  (null = non dispo)
+// achats:  prix d'achat HT par indice
+// Formule prix TTC : PA ÷ (1 − 0.68) × 1.055  →  PA × 3.297
+// Marge cible : 68 %  |  TVA verres correcteurs : 5,5 %
+// Classe A = prix réglementés 100% Santé — ne pas modifier
 const catalogue = [
 
   // ══ HAUT DE GAMME — PROGRESSIFS ══
   {id:'h1',nom:'Essilor Varilux XR series',marque:'Essilor',gamme:'haut',
    compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.60':280,'1.67':340,'1.74':420},achats:{'1.60':90,'1.67':115,'1.74':130},
+   indices:{'1.60':297,'1.67':379,'1.74':429},achats:{'1.60':90,'1.67':115,'1.74':130},
    traitements:[
     {nom:'Crizal Rock UV',icon:'ti-shield',desc:`Antireflet ultra-résistant, 3× plus dur qu'un verre standard. Hydrophobe, oléophobe, antistatique. Durée de vie 2× supérieure.`},
     {nom:'Eyezen+ Technology',icon:'ti-device-mobile',desc:`Filtre lumière bleue nocive et soulage les muscles ciliaires lors de l'utilisation prolongée des écrans numériques.`},
@@ -1052,7 +1053,7 @@ const catalogue = [
    ]},
   {id:'h2',nom:'Zeiss Individual 2 Plus',marque:'Zeiss',gamme:'haut',
    compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.60':290,'1.67':360,'1.74':450},achats:{'1.60':100,'1.67':125,'1.74':140},
+   indices:{'1.60':330,'1.67':412,'1.74':462},achats:{'1.60':100,'1.67':125,'1.74':140},
    traitements:[
     {nom:'DuraVision Platinum UV',icon:'ti-shield',desc:`Le traitement antireflet le plus résistant de Zeiss. Couche hydrophobe et oléophobe intégrée, résistance 3×.`},
     {nom:'BlueGuard Technology',icon:'ti-device-desktop',desc:`Protection lumière bleue-violette intégrée dans la masse du verre — permanente et inaltérable.`},
@@ -1061,7 +1062,7 @@ const catalogue = [
    ]},
   {id:'h3',nom:'Shamir Autograph Intelligence',marque:'Shamir',gamme:'haut',
    compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.60':260,'1.67':320,'1.74':400},achats:{'1.60':85,'1.67':105,'1.74':125},
+   indices:{'1.60':280,'1.67':346,'1.74':412},achats:{'1.60':85,'1.67':105,'1.74':125},
    traitements:[
     {nom:'Glacier Plus UV',icon:'ti-shield',desc:`Antireflet premium 7 couches. UV complet, antistatique, résistance aux rayures et aux taches.`},
     {nom:'IntelliCorridor AI',icon:'ti-brain',desc:`IA adapte les corridors progressifs selon données biométriques et comportements visuels du porteur.`},
@@ -1070,7 +1071,7 @@ const catalogue = [
    ]},
   {id:'h4',nom:'Hoya Hoyalux iD MySelf',marque:'Hoya',gamme:'haut',
    compatible:['progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.60':250,'1.67':310,'1.74':390},achats:{'1.60':80,'1.67':100,'1.74':120},
+   indices:{'1.60':264,'1.67':330,'1.74':396},achats:{'1.60':80,'1.67':100,'1.74':120},
    traitements:[
     {nom:'Recharge UV Blue Control',icon:'ti-sun',desc:`Bloque 100 % des UV + filtre 25 % de la lumière bleue nocive. Double protection optimale.`},
     {nom:'HiVision Aqua',icon:'ti-droplets',desc:`Hydrophile haute performance. Résistance à l'eau, aux corps gras et aux empreintes digitales.`},
@@ -1081,7 +1082,7 @@ const catalogue = [
   // ══ HAUT DE GAMME — UNIFOCAUX ══
   {id:'h5',nom:'Zeiss Single Vision Superb',marque:'Zeiss',gamme:'haut',
    compatible:['loin','pres','intermediaire'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.50':160,'1.60':200,'1.67':260,'1.74':340},achats:{'1.50':38,'1.60':52,'1.67':72,'1.74':105},
+   indices:{'1.50':125,'1.60':171,'1.67':237,'1.74':346},achats:{'1.50':38,'1.60':52,'1.67':72,'1.74':105},
    traitements:[
     {nom:'DuraVision Platinum UV',icon:'ti-shield',desc:`Antireflet le plus résistant de Zeiss, couche hydrophobe et oléophobe intégrée.`},
     {nom:'BlueGuard Integrated',icon:'ti-device-desktop',desc:`Filtre lumière bleue dans la masse. Permanent, inaltérable, sans reflet jaune.`},
@@ -1090,7 +1091,7 @@ const catalogue = [
    ]},
   {id:'h6',nom:'Essilor Crizal Forte UV',marque:'Essilor',gamme:'haut',
    compatible:['loin','pres','intermediaire'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.50':165,'1.60':205,'1.67':265,'1.74':345},achats:{'1.50':40,'1.60':55,'1.67':75,'1.74':108},
+   indices:{'1.50':132,'1.60':181,'1.67':247,'1.74':356},achats:{'1.50':40,'1.60':55,'1.67':75,'1.74':108},
    traitements:[
     {nom:'Crizal Forte',icon:'ti-shield',desc:`Antireflet premium : résistance aux rayures, à l'eau et aux taches. Nettoyage ultra-facilité.`},
     {nom:'UV 400 Protection',icon:'ti-sun',desc:`Filtre 100 % UV jusqu'à 400 nm. Protection de la cornée et du cristallin.`},
@@ -1101,7 +1102,7 @@ const catalogue = [
   // ══ MILIEU DE GAMME — PROGRESSIFS ══
   {id:'m1',nom:'Essilor Varilux Comfort Max',marque:'Essilor',gamme:'milieu',
    compatible:['progressif'],sphMax:12,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':160,'1.60':210,'1.67':260},achats:{'1.50':45,'1.60':65,'1.67':85},
+   indices:{'1.50':148,'1.60':214,'1.67':280},achats:{'1.50':45,'1.60':65,'1.67':85},
    traitements:[
     {nom:'Crizal Prevencia',icon:'ti-shield',desc:`Antireflet sélectif : filtre la lumière bleue nocive, laisse passer la bénéfique. Protection unique.`},
     {nom:'W.A.V.E. Technology 2',icon:'ti-wave-sine',desc:`Réduit les aberrations en vision intermédiaire de 30 %. Adaptation rapide au progressif.`},
@@ -1110,7 +1111,7 @@ const catalogue = [
    ]},
   {id:'m2',nom:'Zeiss Progressive Plus 2',marque:'Zeiss',gamme:'milieu',
    compatible:['progressif'],sphMax:12,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':170,'1.60':215,'1.67':270},achats:{'1.50':48,'1.60':68,'1.67':88},
+   indices:{'1.50':158,'1.60':224,'1.67':290},achats:{'1.50':48,'1.60':68,'1.67':88},
    traitements:[
     {nom:'DuraVision BlueProtect',icon:'ti-device-desktop',desc:`Filtre anti-lumière bleue en couche antireflet. Réduit éblouissement des écrans LED.`},
     {nom:'UVProtect Technology',icon:'ti-sun',desc:`UV 400 intégré en masse. Transparent et permanent, aucun entretien.`},
@@ -1119,7 +1120,7 @@ const catalogue = [
    ]},
   {id:'m3',nom:'Nikon Presio Power Smart',marque:'Nikon',gamme:'milieu',
    compatible:['progressif'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':155,'1.60':199,'1.67':249},achats:{'1.50':60,'1.60':90,'1.67':139},
+   indices:{'1.50':198,'1.60':297,'1.67':458},achats:{'1.50':60,'1.60':90,'1.67':139},
    traitements:[
     {nom:'SeeCoat Blue UV (SCB)',icon:'ti-device-desktop',desc:`Antireflet premium SeeCoat Blue — filtre lumière bleue nocive 380-450 nm. Confort écrans renforcé. Résistance aux rayures SCB.`},
     {nom:'SumitechV+ Technology',icon:'ti-cpu',desc:`Surfaçage numérique Nikon — 2 millions de points de calcul. Correction des aberrations en vision périphérique pour une adaptation rapide.`},
@@ -1128,7 +1129,7 @@ const catalogue = [
    ]},
   {id:'m4',nom:'Hoya Lifestyle 3',marque:'Hoya',gamme:'milieu',
    compatible:['progressif'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':150,'1.60':190,'1.67':240},achats:{'1.50':40,'1.60':58,'1.67':75},
+   indices:{'1.50':132,'1.60':191,'1.67':247},achats:{'1.50':40,'1.60':58,'1.67':75},
    traitements:[
     {nom:'iD Technology',icon:'ti-cpu',desc:`Personnalisation numérique selon monture et position de port. 1 million de points de calcul.`},
     {nom:'Recharge UV',icon:'ti-sun',desc:`Bloque 100 % UV. Maintient ses propriétés filtrantes toute la durée de vie du verre.`},
@@ -1139,7 +1140,7 @@ const catalogue = [
   // ══ MILIEU DE GAMME — UNIFOCAUX ══
   {id:'m5',nom:'Hoya Hilux BlueControl',marque:'Hoya',gamme:'milieu',
    compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':110,'1.60':140,'1.67':180},achats:{'1.50':28,'1.60':38,'1.67':52},
+   indices:{'1.50':92,'1.60':125,'1.67':171},achats:{'1.50':28,'1.60':38,'1.67':52},
    traitements:[
     {nom:'BlueControl UV',icon:'ti-device-desktop',desc:`Filtre lumière bleue à 420 nm. Réduit reflets bleutés des écrans, moins de fatigue visuelle.`},
     {nom:'HiVision Aqua',icon:'ti-droplets',desc:`Hydrophobe et oléophobe haute performance. Empreintes glissent facilement.`},
@@ -1148,7 +1149,7 @@ const catalogue = [
    ]},
   {id:'m6',nom:'Essilor Eyezen Start',marque:'Essilor',gamme:'milieu',
    compatible:['loin','pres','intermediaire'],sphMax:8,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':105,'1.60':135,'1.67':170},achats:{'1.50':26,'1.60':35,'1.67':50},
+   indices:{'1.50':86,'1.60':115,'1.67':165},achats:{'1.50':26,'1.60':35,'1.67':50},
    traitements:[
     {nom:'Eyezen+ Focus',icon:'ti-eye',desc:`Légère sur-correction en bas du verre pour soulager les muscles ciliaires lors de la lecture sur écran.`},
     {nom:'Crizal Easy UV',icon:'ti-shield',desc:`Antireflet avec protection UV, antistatique et résistance basique aux rayures.`},
@@ -1159,7 +1160,7 @@ const catalogue = [
   // ══ ENTRÉE DE GAMME ══
   {id:'e1',nom:'BBGR Inov Access Progressif',marque:'BBGR',gamme:'entree',
    compatible:['progressif'],sphMax:8,cylMax:3,aspherique:false,precalibrage:true,
-   indices:{'1.50':100,'1.60':135,'1.67':175},achats:{'1.50':28,'1.60':38,'1.67':52},
+   indices:{'1.50':92,'1.60':125,'1.67':171},achats:{'1.50':28,'1.60':38,'1.67':52},
    traitements:[
     {nom:'AR Premium BBGR',icon:'ti-shield',desc:`Antireflet multicouches avec déperlant. Bonne performance pour usage quotidien standard.`},
     {nom:'UV 380 intégré',icon:'ti-sun',desc:`Protection UV 380 en masse. Filtre les UV proches du visible.`},
@@ -1168,7 +1169,7 @@ const catalogue = [
    ]},
   {id:'e2',nom:'Indo Innova Access',marque:'Indo',gamme:'entree',
    compatible:['progressif'],sphMax:8,cylMax:3,aspherique:false,precalibrage:true,
-   indices:{'1.50':95,'1.60':125,'1.67':165},achats:{'1.50':25,'1.60':35,'1.67':50},
+   indices:{'1.50':82,'1.60':115,'1.67':165},achats:{'1.50':25,'1.60':35,'1.67':50},
    traitements:[
     {nom:'Xtreme Coat',icon:'ti-shield',desc:`Antireflet résistant aux rayures avec couche déperlante intégrée.`},
     {nom:'UV 400',icon:'ti-sun',desc:`Bloque 100 % des UV jusqu'à 400 nm. Protection optimale.`},
@@ -1177,7 +1178,7 @@ const catalogue = [
    ]},
   {id:'e3',nom:'Essilor Airwear Polycarbonate',marque:'Essilor',gamme:'entree',
    compatible:['loin','pres','intermediaire'],sphMax:6,cylMax:2,aspherique:false,precalibrage:true,
-   indices:{'1.59':75,'1.60':85},achats:{'1.59':18,'1.60':22},
+   indices:{'1.59':59,'1.60':73},achats:{'1.59':18,'1.60':22},
    traitements:[
     {nom:'Crizal Easy UV',icon:'ti-shield',desc:`Antireflet d'entrée de gamme avec protection UV basique et réduction des reflets.`},
     {nom:'Polycarbonate IK10',icon:'ti-shield-check',desc:`10× plus résistant aux chocs que le verre minéral. Idéal enfants, sportifs, professions à risque.`},
@@ -1186,7 +1187,7 @@ const catalogue = [
    ]},
   {id:'e4',nom:'BBGR Orma 1.5 Confort',marque:'BBGR',gamme:'entree',
    compatible:['loin','pres','intermediaire'],sphMax:4,cylMax:2,aspherique:false,precalibrage:true,
-   indices:{'1.50':60},achats:{'1.50':15},
+   indices:{'1.50':49},achats:{'1.50':15},
    traitements:[
     {nom:'Ormix AR Standard',icon:'ti-shield',desc:`Antireflet multicouches basique. Réduit les reflets parasites en lumière artificielle.`},
     {nom:'Durcissement Class A',icon:'ti-tool',desc:`Protection antirayures pour usage quotidien soigneux.`},
@@ -1203,7 +1204,7 @@ const catalogue2e = [
   // ── PROGRESSIFS ──────────────────────────────────────────────
   {id:'sg1',nom:'Sign Prosign 15',marque:'Sign by BBGR',gamme:'entree',
    compatible:['progressif'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
-   indices:{'1.50':110,'1.60':138},achats:{'1.50':30.50,'1.60':37},
+   indices:{'1.50':101,'1.60':122},achats:{'1.50':30.50,'1.60':37},
    traitements:[
     {nom:'ARMC — Antireflet Multi-Couches',icon:'ti-sparkles',desc:`Antireflet multicouches standard Sign. Résistant aux rayures, hydrophobe, traitement oléophobe intégré. Livraison J+1 avant 18h30.`},
     {nom:'Corridor 15 mm',icon:'ti-adjustments',desc:`Design progressif corridor 15 mm large. Adaptation rapide, confort en vision intermédiaire. Compatible toutes montures cerclées.`},
@@ -1213,7 +1214,7 @@ const catalogue2e = [
 
   {id:'sg2',nom:'Sign Prosign SD 15',marque:'Sign by BBGR',gamme:'milieu',
    compatible:['progressif'],sphMax:10,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.50':145,'1.60':175,'1.67':215},achats:{'1.50':40.50,'1.60':52,'1.67':62},
+   indices:{'1.50':134,'1.60':171,'1.67':204},achats:{'1.50':40.50,'1.60':52,'1.67':62},
    traitements:[
     {nom:'ARMC+ — Antireflet Premium',icon:'ti-shield',desc:`Traitement ARMC+ ultra-résistant. Couche déperlante, hydrophobe et oléophobe haute performance. Durée de vie prolongée.`},
     {nom:'Superior Design (SD)',icon:'ti-cpu',desc:`Surfaçage numérique avancé — corridor élargi, zones d'aberration latérales réduites. Vision périphérique améliorée vs Prosign standard.`},
@@ -1224,7 +1225,7 @@ const catalogue2e = [
   // ── LUMIÈRE BLEUE ─────────────────────────────────────────────
   {id:'sg3',nom:'Sign Unisign Blue Defender',marque:'Sign by BBGR',gamme:'milieu',
    compatible:['loin','pres','intermediaire','progressif'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
-   indices:{'1.50':95,'1.60':120},achats:{'1.50':34.20,'1.60':42},
+   indices:{'1.50':113,'1.60':138},achats:{'1.50':34.20,'1.60':42},
    traitements:[
     {nom:'Blue Defender — Filtre LB 420 nm',icon:'ti-device-desktop',desc:`Filtre la lumière bleue nocive à 420 nm. Réduit la fatigue visuelle des patients sur écrans. Teinte légèrement ambrée à peine perceptible.`},
     {nom:'ARMC+ intégré',icon:'ti-sparkles',desc:`Traitement antireflet multicouches premium intégré dans le Blue Defender. Résistance aux rayures et aux agents chimiques renforcée.`},
@@ -1235,7 +1236,7 @@ const catalogue2e = [
   // ── SOLAIRE STANDARD ──────────────────────────────────────────
   {id:'sg4',nom:'Sign Unisign Teinté Cat.3',marque:'Sign by BBGR',gamme:'entree',
    compatible:['loin','pres','intermediaire'],sphMax:8,cylMax:3,aspherique:false,precalibrage:false,
-   indices:{'1.50':58,'1.60':72},achats:{'1.50':8,'1.60':12},
+   indices:{'1.50':26,'1.60':40},achats:{'1.50':8,'1.60':12},
    traitements:[
     {nom:`Teinte catégorie 3 — T3`,icon:'ti-sun-filled',desc:`Absorption 82 % de la lumière visible. Idéale pour la conduite, la plage, la montagne. Conforme directive 89/686/CE lunettes de soleil.`},
     {nom:'UV 400 nm',icon:'ti-sun',desc:`Coupure UV 400 nm intégrée dans la masse du verre. Protège contre les UVA/UVB sans traitement supplémentaire.`},
@@ -1245,7 +1246,7 @@ const catalogue2e = [
 
   {id:'sg5',nom:'Sign Prosign 15 Teinté',marque:'Sign by BBGR',gamme:'milieu',
    compatible:['progressif'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
-   indices:{'1.50':118,'1.60':148},achats:{'1.50':30.50,'1.60':37},
+   indices:{'1.50':101,'1.60':122},achats:{'1.50':30.50,'1.60':37},
    traitements:[
     {nom:`Progressif solaire teinté T3`,icon:'ti-sun-filled',desc:`Verre progressif teinté catégorie 3. Correction presbytie complète + protection solaire intégrée. Idéal patient actif dehors.`},
     {nom:'Corridor 15 mm',icon:'ti-adjustments',desc:`Même design de corridor que le Prosign 15 standard. Vision de loin, intermédiaire et de près dans un verre teinté.`},
@@ -1256,7 +1257,7 @@ const catalogue2e = [
   // ── POLARISÉ ──────────────────────────────────────────────────
   {id:'sg6',nom:'Sign Unisign Pola',marque:'Sign by BBGR',gamme:'milieu',
    compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
-   indices:{'1.50':100,'1.60':130},achats:{'1.50':29.20,'1.60':38},
+   indices:{'1.50':96,'1.60':125},achats:{'1.50':29.20,'1.60':38},
    traitements:[
     {nom:'Filtre polarisant — reflets supprimés',icon:'ti-polaroid',desc:`Élimine les reflets horizontaux sur l'eau, la neige, la route mouillée. Vision nette et contrastée. Fond marin visible. Idéal pêche, voile, ski.`},
     {nom:'ARMC antireflet',icon:'ti-sparkles',desc:`Antireflet multicouches résistant intégré. Associé au filtre polarisant pour un maximum de confort et d'esthétique.`},
@@ -1266,7 +1267,7 @@ const catalogue2e = [
 
   {id:'sg7',nom:'Sign Prosign 15 Pola',marque:'Sign by BBGR',gamme:'haut',
    compatible:['progressif'],sphMax:8,cylMax:4,aspherique:false,precalibrage:true,
-   indices:{'1.50':165,'1.60':198},achats:{'1.50':69.90,'1.60':81.10},
+   indices:{'1.50':230,'1.60':267},achats:{'1.50':69.90,'1.60':81.10},
    traitements:[
     {nom:'Progressif polarisé — unique',icon:'ti-polaroid',desc:`Correction presbytie complète + filtre polarisant — les deux en un seul verre. Suppression totale des reflets sur l'eau, la neige et la route.`},
     {nom:'Filtre polarisant 100 %',icon:'ti-wave-sine',desc:`Bloque 100 % de la lumière polarisée horizontalement. Reflets éliminés sur toutes surfaces réfléchissantes — eau, neige, bitume mouillé.`},
