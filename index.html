@@ -615,9 +615,15 @@ select option{background:#252525;color:#f0f0f0}
   .oc-mut-card{border:1.5px solid #eeeeee;border-radius:12px;padding:8px 4px;cursor:pointer;background:white;display:flex;align-items:center;justify-content:center;min-height:60px;transition:border .15s}
   .oc-mut-card:hover:not(.selected){border-color:#aaa}
   .oc-mut-card.selected{border:2.5px solid #1a1a1a}
-  .oc-opt-grid{display:flex;flex-wrap:wrap;gap:8px}
-  .oc-opt-chip{padding:8px 14px;border-radius:20px;border:1.5px solid #e5e5e5;background:white;color:#888;font-size:13px;cursor:pointer;font-family:var(--font);transition:.15s}
-  .oc-opt-chip.active{border-color:#E53935;color:#E53935;background:#fff5f5;font-weight:600}
+  .oc-mont-row{display:flex;gap:8px;flex-wrap:wrap}
+  .oc-mont-btn{flex:1;min-width:80px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;border-radius:14px;border:2px solid #e5e5e5;background:white;color:#888;font-family:var(--font);cursor:pointer;transition:.15s;font-size:12px}
+  .oc-mont-btn i{font-size:20px}
+  .oc-mont-lbl{font-size:13px;font-weight:700;color:#444}
+  .oc-mont-sub{font-size:10px;color:#bbb}
+  .oc-mont-btn.selected{border-color:#1a1a1a;background:#f8f8f8}
+  .oc-mont-btn.selected .oc-mont-lbl{color:#111}
+  .oc-mont-btn.selected i{color:#E53935}
+  .oc-mont-btn:hover:not(.selected){border-color:#ccc;background:#fafafa}
   .oc-back-btn{background:none;border:none;color:#999;font-size:14px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px;padding:14px 0 4px}
   .oc-back-btn:hover{color:#333}
   @media(max-width:600px){#soc{margin:-14px}.oc-row2{grid-template-columns:1fr}.oc-geom-row{flex-wrap:wrap}.oc-mut-grid{grid-template-columns:repeat(3,1fr)}.oc-voir{padding:11px 16px;font-size:14px}}
@@ -724,7 +730,7 @@ select option{background:#252525;color:#f0f0f0}
       <div><h2>Bienvenue</h2><p id="s0-welcome">Choisissez une option pour commencer</p></div>
     </div>
     <div class="home-grid">
-      <div class="home-card hc-blue" onclick="go('0mut')">
+      <div class="home-card hc-blue" onclick="go('oc')">
         <div class="home-card-icon"><i class="ti ti-shield-check"></i></div>
         <div class="home-card-title">Mutuelle</div>
         <div class="home-card-sub">Consultez les verres 100% Santé et tarif libre selon la mutuelle du patient</div>
@@ -734,11 +740,6 @@ select option{background:#252525;color:#f0f0f0}
         <div class="home-card-title">Démonstration verres</div>
         <div class="home-card-sub">Montrez au patient la différence visuelle entre les traitements</div>
       </div>
-    </div>
-    <div style="margin-top:16px">
-      <button class="btn-primary" onclick="go('oc')" style="background:#252525;border:1.5px solid #333;color:#aaa;font-size:14px;font-weight:600">
-        <i class="ti ti-eyeglass"></i> Commencer une vente (sélection complète)
-      </button>
     </div>
     <div style="margin-top:16px">
       <div class="section-label" style="margin-top:0;margin-bottom:10px"><i class="ti ti-tool"></i> Outils patient</div>
@@ -1176,14 +1177,23 @@ select option{background:#252525;color:#f0f0f0}
         <div class="oc-mut-grid" id="oc-mut-grid"></div>
       </div>
       <div class="oc-sect">
-        <div class="oc-sect-title">Option(s)</div>
-        <div class="oc-opt-grid">
-          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">Nylor / Percé</button>
-          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">Anti-fatigue</button>
-          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">Freinateur</button>
-          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">100% Santé</button>
-          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">Individualisé</button>
-          <button class="oc-opt-chip" onclick="this.classList.toggle('active')">Mesures indiv.</button>
+        <div class="oc-sect-title">Type de monture</div>
+        <div class="oc-mont-row">
+          <button class="oc-mont-btn selected" id="ocm-cercle" onclick="selectMontureOC('cercle')">
+            <i class="ti ti-circle"></i>
+            <span class="oc-mont-lbl">Cerclée</span>
+            <span class="oc-mont-sub">Tous indices</span>
+          </button>
+          <button class="oc-mont-btn" id="ocm-nylor" onclick="selectMontureOC('nylor')">
+            <i class="ti ti-minus"></i>
+            <span class="oc-mont-lbl">Nylor</span>
+            <span class="oc-mont-sub">Min. 1.60</span>
+          </button>
+          <button class="oc-mont-btn" id="ocm-percee" onclick="selectMontureOC('percee')">
+            <i class="ti ti-circle-dashed"></i>
+            <span class="oc-mont-lbl">Percée</span>
+            <span class="oc-mont-sub">Min. 1.60</span>
+          </button>
         </div>
       </div>
     </div>
@@ -1251,7 +1261,7 @@ select option{background:#252525;color:#f0f0f0}
           <div class="field-row" id="og-add-row" style="display:none"><label>Addition</label><select id="og-add"></select></div>
         </div>
       </div>
-      <button class="btn-primary" onclick="goMonture()"><i class="ti ti-eyeglass"></i> Choisir la monture</button>
+      <button class="btn-primary" onclick="goMontureFromS3()"><i class="ti ti-arrow-right"></i> Continuer</button>
     </div>
   </div>
 
@@ -1599,8 +1609,9 @@ function getBestIndice(v,rec){
 // ─── STATE & SELECT GENERATORS ───────────────────────────────
 let state={mutuelle:null,vision:null,verre1:null};
 let _backFrom2 = 1;
-let _backFrom3b = '3a';
+let _backFrom3b = '3';
 let _backFrom3 = 2;
+let selectedMonture = 'cercle';
 
 // ─── OC VERRES FUNCTIONS ──────────────────────────────────────────
 let _ocPaire = 1;
@@ -1665,6 +1676,23 @@ function ocVoirVerres(){
   _backFrom3 = 'oc';
   document.getElementById('mut-label-h').textContent = `Mutuelle : ${state.mutuelle.label}`;
   selectVision(vis.id, vis.label);
+}
+
+function selectMontureOC(type){
+  selectedMonture = type;
+  ['cercle','nylor','percee'].forEach(m => {
+    document.getElementById('ocm-'+m)?.classList.toggle('selected', m===type);
+  });
+  if(type === 'nylor' || type === 'percee'){
+    showToast('⚠️ Indice min. 1.60 · Précalibrage obligatoire');
+  }
+}
+
+function goMontureFromS3(){
+  if(!state.vision){ showToast('Veuillez choisir le type de vision'); go(2); return; }
+  if(!selectedMonture) selectedMonture = 'cercle';
+  if(window._priseType === 'sante') selectedMonture = 'cercle';
+  goTraitements();
 }
 
 function genSph(){let o='';for(let v=-20;v<=20;v+=0.25) o+=`<option value="${v}" ${v===0?'selected':''}>${v>0?'+':''}${v.toFixed(2)}</option>`;return o}
@@ -1820,7 +1848,6 @@ function toggleVC(id){document.getElementById('vc-'+id).classList.toggle('open')
 
 // ─── SHOW VERRES ─────────────────────────────────────────────
 // ─── MONTURE ─────────────────────────────────────────────────
-let selectedMonture = null;
 
 function goMonture(){
   // For 100% Sante - no monture choice needed (cerclée forced)
@@ -1876,7 +1903,7 @@ function goTraitements(){
   const isSante = window._priseType === 'sante';
   document.getElementById('tc-lb').style.display = isSante ? 'none' : 'flex';
   document.getElementById('tc-tr').style.display = isSante ? 'none' : 'flex';
-  _backFrom3b = isSante ? '3' : '3a';
+  _backFrom3b = '3';
   if(isSante){
     document.getElementById('multi-hint-text').textContent = `100% Santé : traitement anti-reflet inclus obligatoirement`;
     toggleTrait('ar');
