@@ -511,25 +511,79 @@ select option{background:#252525;color:#f0f0f0}
   .pp-remb{background:#2a1a00;color:#e8b870}
   .panier-sep{height:1px;background:#2a2a2a;margin:6px 0}
 
-  /* DEMO VERRE SCREEN */
-  .demo-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
-  .demo-tab{padding:10px 18px;border-radius:var(--radius-lg);border:1.5px solid #333;background:#252525;color:#aaa;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:0.15s;display:flex;align-items:center;gap:7px}
-  .demo-tab.active{background:#0f1e30;border-color:#378ADD;color:#60aaee}
-  .demo-scene{border-radius:var(--radius-xl);overflow:hidden;border:1px solid #333;position:relative;margin-bottom:14px}
-  .demo-canvas{width:100%;display:block;height:280px}
-  .demo-info{background:#252525;border-radius:var(--radius-lg);padding:16px;margin-bottom:14px}
-  .demo-info-title{font-size:16px;font-weight:700;color:#f0f0f0;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-  .demo-info-desc{font-size:13px;color:#aaa;line-height:1.6}
-  .demo-avs{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
-  .demo-av{font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600}
-  .demo-slider{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .demo-slider label{font-size:13px;color:#aaa;min-width:110px}
-  .demo-slider input{flex:1}
-  .demo-slider span{font-size:13px;font-weight:700;color:#f0f0f0;min-width:50px;text-align:right}
-  .demo-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .demo-cmp{border-radius:var(--radius-lg);overflow:hidden;border:1px solid #333}
-  .demo-cmp-lbl{font-size:11px;font-weight:600;text-align:center;padding:6px;background:#252525;color:#aaa;text-transform:uppercase;letter-spacing:0.05em}
-  .demo-cmp-canvas{width:100%;height:110px;display:block}
+  /* ─── EYESTATION DEMO ──────────────────────────────────────── */
+  .es-bg{min-height:calc(100vh - 70px);background:#0c0c0c;position:relative;overflow:hidden}
+  .es-geo{position:absolute;inset:0;pointer-events:none;z-index:0}
+  .es-wrap{position:relative;z-index:1;padding:20px 16px 90px}
+  .es-back{background:transparent;border:none;color:#888;font-size:14px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:6px;padding:8px 0;margin-bottom:18px}
+  .es-back:hover{color:#ccc}
+  .es-grid{display:flex;flex-direction:column;gap:4px}
+  .es-row{display:grid;gap:4px}
+  .es-row-1{grid-template-columns:1fr}
+  .es-row-4{grid-template-columns:1fr 1fr 1fr 1fr}
+  .es-tile{background:rgba(100,100,100,0.40);border:1px solid rgba(255,255,255,0.05);cursor:pointer;padding:18px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;transition:background 0.2s,transform 0.12s;font-family:var(--font);min-height:118px;justify-content:center}
+  .es-tile:hover{background:rgba(140,140,140,0.55);transform:scale(1.012)}
+  .es-tile-main{min-height:155px;padding:24px 20px}
+  .es-tile-icon{display:flex;align-items:center;justify-content:center}
+  .es-tile-icon svg{stroke:#bbb;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+  .es-tile-label{font-size:12px;font-weight:400;color:#ccc;line-height:1.4}
+  .es-tile-main .es-tile-label{font-size:15px}
+  .es-sub{padding:0}
+  .es-sub-hdr{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid #222}
+  .es-sub-hdr svg{stroke:#888;fill:none;stroke-width:1.4;flex-shrink:0}
+  .es-sub-ttl{font-size:19px;font-weight:300;color:#ddd;letter-spacing:0.03em}
+  .es-panel{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:14px;padding:16px;margin-bottom:12px}
+  .es-scene-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .es-scene-btn{padding:8px 13px;border-radius:10px;border:1.5px solid #2a2a2a;background:#1a1a1a;color:#888;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:0.15s;display:flex;align-items:center;gap:6px}
+  .es-scene-btn.active{border-color:#378ADD;background:#0f1e30;color:#60aaee}
+  .es-ba{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .es-ba-col{border-radius:12px;overflow:hidden;border:1px solid #2a2a2a;position:relative}
+  .es-ba-img{width:100%;height:165px;object-fit:cover;display:block;transition:filter 0.5s}
+  .es-ba-lbl{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:11px;font-weight:700;padding:6px;color:#fff}
+  .es-ba-lbl.bad{background:rgba(180,30,30,0.88)}
+  .es-ba-lbl.good{background:rgba(20,110,50,0.88)}
+  .es-info{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+  .es-info-title{font-size:15px;font-weight:700;color:#f0f0f0;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+  .es-info-desc{font-size:13px;color:#aaa;line-height:1.6}
+  .es-avs{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .es-av{font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600}
+  .es-slider{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .es-slider label{font-size:13px;color:#aaa;min-width:120px}
+  .es-slider input{flex:1}
+  .es-slider span{font-size:13px;font-weight:700;color:#f0f0f0;min-width:55px;text-align:right}
+  .es-tr-band{height:34px;border-radius:10px;background:linear-gradient(to right,#ddd8c8 0%,#b89060 50%,#60381a 100%);position:relative;margin-bottom:10px;border:1px solid #3a3a3a;overflow:hidden}
+  .es-tr-cursor{position:absolute;top:2px;bottom:2px;width:3px;background:#fff;border-radius:2px;box-shadow:0 0 6px rgba(255,255,255,0.9);transition:left 0.2s}
+  .es-def-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .es-def-btn{padding:13px 10px;border-radius:12px;border:1.5px solid #2a2a2a;background:#1a1a1a;color:#888;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:0.15s;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .es-def-btn.active{border-color:#9060e0;background:#1e0a30;color:#c080f0}
+  .es-mat-item{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:10px;border:1px solid #2a2a2a;background:#1a1a1a;margin-bottom:8px;transition:0.15s}
+  .es-mat-item.best{border-color:#378ADD;background:#0a1828}
+  .es-mat-idx{font-size:20px;font-weight:800;color:#60aaee;min-width:48px;text-align:center}
+  .es-mat-bar-wrap{flex:1}
+  .es-mat-name{font-size:11px;color:#666;margin-bottom:5px}
+  .es-mat-bar{height:12px;border-radius:5px;background:linear-gradient(90deg,#185FA5,#60aaee);transition:width 0.7s}
+  .es-mat-thick{font-size:13px;font-weight:700;color:#aaa;min-width:58px;text-align:right}
+  .es-q-step{display:none}
+  .es-q-step.active{display:block;animation:fadeIn 0.2s}
+  .es-q-ttl{font-size:16px;font-weight:300;color:#ddd;line-height:1.5;margin-bottom:18px}
+  .es-q-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .es-q-opt{background:#1e1e1e;border:2px solid #2a2a2a;border-radius:14px;padding:16px 12px;cursor:pointer;text-align:center;transition:0.15s;font-family:var(--font)}
+  .es-q-opt:hover{border-color:#378ADD;background:#0f1e30}
+  .es-q-opt-ico{font-size:24px;margin-bottom:8px}
+  .es-q-opt-lbl{font-size:13px;color:#ccc;font-weight:500;line-height:1.3}
+  .es-reco{background:linear-gradient(135deg,#0e1e38,#162040);border:2px solid #378ADD;border-radius:16px;padding:20px;margin-bottom:12px}
+  .es-reco-title{font-size:18px;font-weight:700;color:#60aaee;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .es-reco-desc{font-size:14px;color:#a0c0e8;line-height:1.6}
+  .es-reco-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .es-reco-tag{font-size:12px;padding:4px 13px;border-radius:20px;background:#0a2858;color:#70b0f0;font-weight:600}
+  .es-prog-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:4px}
+  .es-prog-col{display:flex;flex-direction:column;align-items:center;gap:0}
+  .es-prog-lbl{width:100%;text-align:center;padding:7px 4px;border-radius:0 0 10px 10px;font-size:11px;font-weight:700;color:#fff;line-height:1.3}
+  .es-prog-lbl span{font-size:9px;font-weight:400;opacity:0.8;display:block;margin-top:2px}
+  .es-legend{display:flex;gap:12px;flex-wrap:wrap;padding:9px 12px;background:#1a1a1a;border-radius:10px;font-size:11px;margin-top:8px}
+  .es-legend-item{display:flex;align-items:center;gap:5px;color:#aaa}
+  .es-legend-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+  @media(max-width:540px){.es-row-4{grid-template-columns:1fr 1fr}}
 
 </style>
 </head>
@@ -714,113 +768,294 @@ select option{background:#252525;color:#f0f0f0}
     </div>
   </div>
 
-  <!-- S0-DEMO DEMONSTRATION VERRES -->
+  <!-- S0-DEMO EYESTATION ──────────────────────────────────────── -->
   <div id="s0demo" class="screen">
-    <div class="header-block purple">
-      <div class="header-icon"><i class="ti ti-eye-check"></i></div>
-      <div><h2>Démonstration verres</h2><p>Visualisez la différence en situation réelle</p></div>
+  <div class="es-bg">
+    <svg class="es-geo" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <polygon points="0,0 310,180 0,370" fill="#161616"/>
+      <polygon points="800,0 490,140 800,310" fill="#141414"/>
+      <polygon points="170,0 560,0 370,270" fill="#181818"/>
+      <polygon points="0,600 370,430 800,600" fill="#151515"/>
+      <polygon points="110,600 340,360 630,490 760,600" fill="#131313"/>
+      <polygon points="560,0 800,0 800,240 660,80" fill="#121212"/>
+      <polygon points="350,290 670,200 800,420 540,510" fill="#171717"/>
+    </svg>
+    <div class="es-wrap">
+
+      <!-- ── MENU PRINCIPAL ──────────────────────────────────── -->
+      <div id="es-menu">
+        <button class="es-back" onclick="go('0')"><i class="ti ti-arrow-left"></i> Retour</button>
+        <div class="es-grid">
+          <div class="es-row es-row-4">
+            <button class="es-tile" onclick="esGo('prog')">
+              <div class="es-tile-icon"><svg viewBox="0 0 60 60" width="52" height="52"><ellipse cx="30" cy="30" rx="24" ry="18"/><ellipse cx="30" cy="30" rx="16" ry="9" stroke-dasharray="3,3"/><ellipse cx="30" cy="30" rx="8" ry="4" stroke-dasharray="2,2"/></svg></div>
+              <div class="es-tile-label">Verres<br>progressifs</div>
+            </button>
+            <button class="es-tile" onclick="esGo('uni')">
+              <div class="es-tile-icon"><svg viewBox="0 0 60 60" width="52" height="52"><rect x="8" y="14" width="44" height="32" rx="4"/><line x1="8" y1="23" x2="52" y2="23"/><line x1="8" y1="32" x2="52" y2="32"/><line x1="8" y1="41" x2="52" y2="41"/><line x1="21" y1="14" x2="21" y2="46"/><line x1="39" y1="14" x2="39" y2="46"/></svg></div>
+              <div class="es-tile-label">Verres<br>unifocaux</div>
+            </button>
+            <button class="es-tile" onclick="esGo('ecran')">
+              <div class="es-tile-icon"><svg viewBox="0 0 60 60" width="52" height="52"><rect x="6" y="10" width="48" height="34" rx="3"/><rect x="10" y="14" width="20" height="26" rx="2"/><rect x="34" y="14" width="16" height="12" rx="2"/><line x1="22" y1="44" x2="22" y2="50"/><line x1="14" y1="50" x2="30" y2="50"/></svg></div>
+              <div class="es-tile-label">Gamme Écran<br>Mi-Distance</div>
+            </button>
+            <button class="es-tile" onclick="esGo('mat')">
+              <div class="es-tile-icon"><svg viewBox="0 0 60 60" width="52" height="52"><path d="M8,30 Q30,10 52,30"/><path d="M8,30 Q30,50 52,30"/><line x1="8" y1="30" x2="52" y2="30" stroke-dasharray="4,3"/></svg></div>
+              <div class="es-tile-label">Matériaux</div>
+            </button>
+          </div>
+          <div class="es-row es-row-4">
+            <button class="es-tile" onclick="esGo('ar')">
+              <div class="es-tile-icon"><svg viewBox="0 0 60 60" width="52" height="52"><circle cx="28" cy="30" r="20"/><circle cx="36" cy="22" r="16" stroke-dasharray="2,2" fill="#0c0c0c"/></svg></div>
+              <div class="es-tile-label">Antireflet</div>
+            </button>
+            <button class="es-tile" onclick="esGo('tr')">
+              <div class="es-tile-icon"><svg viewBox="0 0 60 60" width="52" height="52"><circle cx="30" cy="30" r="10"/><line x1="30" y1="5" x2="30" y2="15"/><line x1="30" y1="45" x2="30" y2="55"/><line x1="5" y1="30" x2="15" y2="30"/><line x1="45" y1="30" x2="55" y2="30"/><line x1="11" y1="11" x2="18" y2="18"/><line x1="42" y1="42" x2="49" y2="49"/><line x1="49" y1="11" x2="42" y2="18"/><line x1="18" y1="42" x2="11" y2="49"/></svg></div>
+              <div class="es-tile-label">Verres<br>Transitions</div>
+            </button>
+            <button class="es-tile" onclick="esGo('pol')">
+              <div class="es-tile-icon"><svg viewBox="0 0 60 60" width="52" height="52"><circle cx="30" cy="30" r="10"/><line x1="30" y1="5" x2="30" y2="15"/><line x1="30" y1="45" x2="30" y2="55"/><line x1="5" y1="30" x2="15" y2="30"/><line x1="45" y1="30" x2="55" y2="30"/><line x1="11" y1="11" x2="18" y2="18"/><line x1="42" y1="42" x2="49" y2="49"/><line x1="49" y1="11" x2="42" y2="18"/><line x1="18" y1="42" x2="11" y2="49"/><line x1="12" y1="24" x2="48" y2="24"/><line x1="10" y1="30" x2="50" y2="30"/><line x1="12" y1="36" x2="48" y2="36"/></svg></div>
+              <div class="es-tile-label">Verres<br>polarisants</div>
+            </button>
+            <button class="es-tile" onclick="esGo('def')">
+              <div class="es-tile-icon"><svg viewBox="0 0 60 60" width="52" height="52"><path d="M6,30 Q30,10 54,30 Q30,50 6,30"/><circle cx="30" cy="30" r="9"/><circle cx="30" cy="30" r="4" fill="#bbb"/><path d="M14,44 Q20,40 26,44 Q32,48 38,44 Q44,40 50,44" stroke-width="1.8"/></svg></div>
+              <div class="es-tile-label">Défauts<br>Visuels</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANALYSE ─────────────────────────────────────────── -->
+      <div id="es-analyse" class="es-sub" style="display:none">
+        <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><circle cx="17" cy="17" r="11"/><line x1="25" y1="25" x2="35" y2="35" stroke-width="3"/></svg><span class="es-sub-ttl">Analyse et recommandation</span></div>
+        <div id="es-q1" class="es-q-step active">
+          <div class="es-q-ttl">Quel est l'usage principal du patient ?</div>
+          <div class="es-q-opts">
+            <button class="es-q-opt" onclick="esQAnswer(1,'bureau')"><div class="es-q-opt-ico"><i class="ti ti-device-desktop"></i></div><div class="es-q-opt-lbl">Travail bureau / écran</div></button>
+            <button class="es-q-opt" onclick="esQAnswer(1,'conduite')"><div class="es-q-opt-ico"><i class="ti ti-car"></i></div><div class="es-q-opt-lbl">Conduite automobile</div></button>
+            <button class="es-q-opt" onclick="esQAnswer(1,'exterieur')"><div class="es-q-opt-ico"><i class="ti ti-sun"></i></div><div class="es-q-opt-lbl">Activités extérieures</div></button>
+            <button class="es-q-opt" onclick="esQAnswer(1,'mixte')"><div class="es-q-opt-ico"><i class="ti ti-adjustments"></i></div><div class="es-q-opt-lbl">Usage mixte</div></button>
+          </div>
+        </div>
+        <div id="es-q2" class="es-q-step">
+          <div class="es-q-ttl">Quelle est sa correction ?</div>
+          <div class="es-q-opts">
+            <button class="es-q-opt" onclick="esQAnswer(2,'myopie')"><div class="es-q-opt-ico"><i class="ti ti-eye-off"></i></div><div class="es-q-opt-lbl">Myopie (flou de loin)</div></button>
+            <button class="es-q-opt" onclick="esQAnswer(2,'presby')"><div class="es-q-opt-ico"><i class="ti ti-zoom-in"></i></div><div class="es-q-opt-lbl">Presbytie (flou de près)</div></button>
+            <button class="es-q-opt" onclick="esQAnswer(2,'prog')"><div class="es-q-opt-ico"><i class="ti ti-layers"></i></div><div class="es-q-opt-lbl">Progressif (loin+près)</div></button>
+            <button class="es-q-opt" onclick="esQAnswer(2,'astig')"><div class="es-q-opt-ico"><i class="ti ti-circle-half-2"></i></div><div class="es-q-opt-lbl">Astigmatisme</div></button>
+          </div>
+        </div>
+        <div id="es-q3" class="es-q-step">
+          <div class="es-q-ttl">Sensibilité aux reflets / lumière ?</div>
+          <div class="es-q-opts">
+            <button class="es-q-opt" onclick="esQAnswer(3,'peu')"><div class="es-q-opt-ico"><i class="ti ti-moon"></i></div><div class="es-q-opt-lbl">Peu sensible</div></button>
+            <button class="es-q-opt" onclick="esQAnswer(3,'modere')"><div class="es-q-opt-ico"><i class="ti ti-brightness-half"></i></div><div class="es-q-opt-lbl">Modérément sensible</div></button>
+            <button class="es-q-opt" onclick="esQAnswer(3,'beaucoup')"><div class="es-q-opt-ico"><i class="ti ti-sun-high"></i></div><div class="es-q-opt-lbl">Très sensible aux reflets</div></button>
+            <button class="es-q-opt" onclick="esQAnswer(3,'ecrans')"><div class="es-q-opt-ico"><i class="ti ti-device-laptop"></i></div><div class="es-q-opt-lbl">Fatigue sur écrans</div></button>
+          </div>
+        </div>
+        <div id="es-q-result" class="es-q-step">
+          <div class="es-q-ttl">Recommandation personnalisée</div>
+          <div id="es-reco-box"></div>
+          <button class="btn-primary" style="margin-top:8px" onclick="esQReset()"><i class="ti ti-refresh"></i> Nouvelle analyse</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:16px" id="es-q-dots"></div>
+      </div>
+
+      <!-- ── VERRES PROGRESSIFS ──────────────────────────────── -->
+      <div id="es-prog" class="es-sub" style="display:none">
+        <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><ellipse cx="20" cy="20" rx="16" ry="12"/><ellipse cx="20" cy="20" rx="10" ry="6" stroke-dasharray="2,2"/></svg><span class="es-sub-ttl">Verres progressifs</span></div>
+        <div class="es-info">
+          <div class="es-info-title"><i class="ti ti-layers"></i> Zones de vision selon la gamme</div>
+          <div class="es-info-desc">Le verre progressif contient 3 zones : vision de loin (haut), corridor intermédiaire, vision de près (bas). La largeur du corridor et des zones utiles varie selon la gamme choisie.</div>
+        </div>
+        <div class="es-prog-cols">
+          <div class="es-prog-col">
+            <canvas id="prog-entree" width="160" height="230" style="width:100%;border-radius:12px 12px 0 0;background:#0a0a0a;display:block"></canvas>
+            <div class="es-prog-lbl" style="background:linear-gradient(135deg,#1a5c3a,#2E8B57)"><i class="ti ti-leaf" style="font-size:10px"></i> Entrée de gamme<span>Corridor étroit</span></div>
+          </div>
+          <div class="es-prog-col">
+            <canvas id="prog-milieu" width="160" height="230" style="width:100%;border-radius:12px 12px 0 0;background:#0a0a0a;display:block"></canvas>
+            <div class="es-prog-lbl" style="background:linear-gradient(135deg,#082045,#185FA5)"><i class="ti ti-star" style="font-size:10px"></i> Milieu de gamme<span>Corridor modéré</span></div>
+          </div>
+          <div class="es-prog-col">
+            <canvas id="prog-haut" width="160" height="230" style="width:100%;border-radius:12px 12px 0 0;background:#0a0a0a;display:block"></canvas>
+            <div class="es-prog-lbl" style="background:linear-gradient(135deg,#23124a,#6B3FA0)"><i class="ti ti-diamond" style="font-size:10px"></i> Haut de gamme<span>Large corridor</span></div>
+          </div>
+        </div>
+        <div class="es-legend">
+          <div class="es-legend-item"><div class="es-legend-dot" style="background:#3070cc"></div>Zone loin</div>
+          <div class="es-legend-item"><div class="es-legend-dot" style="background:#50a850"></div>Corridor</div>
+          <div class="es-legend-item"><div class="es-legend-dot" style="background:#c8a020"></div>Zone près</div>
+          <div class="es-legend-item"><div class="es-legend-dot" style="background:#d04040"></div>Aberrations</div>
+        </div>
+        <div class="es-panel" style="margin-top:12px">
+          <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Simuler l'addition (presbytie)</div>
+          <div class="es-slider">
+            <label><i class="ti ti-eye" style="font-size:13px"></i> Addition</label>
+            <input type="range" min="0.75" max="3.5" step="0.25" value="2.0" id="es-add-val" oninput="document.getElementById('es-add-out').textContent='+'+parseFloat(this.value).toFixed(2);initProgZones()"/>
+            <span id="es-add-out">+2.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VERRES UNIFOCAUX ────────────────────────────────── -->
+      <div id="es-uni" class="es-sub" style="display:none">
+        <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><rect x="5" y="9" width="30" height="22" rx="3"/><line x1="5" y1="16" x2="35" y2="16"/><line x1="5" y1="23" x2="35" y2="23"/><line x1="5" y1="30" x2="35" y2="30"/></svg><span class="es-sub-ttl">Verres unifocaux</span></div>
+        <div class="es-scene-row">
+          <button class="es-scene-btn active" onclick="esUniSelect('myopie',this)"><i class="ti ti-eye-off"></i> Myopie</button>
+          <button class="es-scene-btn" onclick="esUniSelect('hyper',this)"><i class="ti ti-zoom-in"></i> Hypermétropie</button>
+          <button class="es-scene-btn" onclick="esUniSelect('astig',this)"><i class="ti ti-adjustments-horizontal"></i> Astigmatisme</button>
+        </div>
+        <div class="es-ba">
+          <div class="es-ba-col"><canvas id="es-uni-before" width="400" height="220" class="es-ba-img" style="height:165px"></canvas><div class="es-ba-lbl bad">Sans correction</div></div>
+          <div class="es-ba-col"><canvas id="es-uni-after" width="400" height="220" class="es-ba-img" style="height:165px"></canvas><div class="es-ba-lbl good">Avec correction</div></div>
+        </div>
+        <div class="es-slider">
+          <label><i class="ti ti-eye" style="font-size:13px"></i> Correction (D)</label>
+          <input type="range" min="-12" max="12" step="0.5" value="-4" id="es-uni-sph" oninput="document.getElementById('es-uni-sph-out').textContent=(+this.value>0?'+':'')+this.value+' D';drawUniCanvas()"/>
+          <span id="es-uni-sph-out">-4.0 D</span>
+        </div>
+        <div class="es-info" id="es-uni-info"></div>
+      </div>
+
+      <!-- ── ÉCRAN MI-DISTANCE ───────────────────────────────── -->
+      <div id="es-ecran" class="es-sub" style="display:none">
+        <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><rect x="4" y="7" width="32" height="22" rx="2"/><rect x="7" y="10" width="12" height="16" rx="1"/><rect x="22" y="10" width="10" height="8" rx="1"/></svg><span class="es-sub-ttl">Gamme Écran Mi-Distance</span></div>
+        <div class="es-info">
+          <div class="es-info-title"><i class="ti ti-device-desktop"></i> Verre dédié bureau &amp; écran</div>
+          <div class="es-info-desc">Optimisé pour les distances 40 cm – 2 m. Large zone intermédiaire et vision de près confortable. Idéal pour le travail sur écran, lecture, et courtes distances.</div>
+          <div class="es-avs"><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Confort écran</span><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Zone inter. large</span><span class="es-av" style="background:#1a0f30;color:#c080f0">40 cm – 2 m</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div><canvas id="es-ecran-prog" width="120" height="200" style="width:100%;border-radius:10px 10px 0 0;background:#0a0a0a;display:block"></canvas><div style="background:#185FA5;color:#fff;font-size:10px;font-weight:700;padding:6px;border-radius:0 0 8px 8px;text-align:center">Progressif</div></div>
+          <div><canvas id="es-ecran-mid" width="120" height="200" style="width:100%;border-radius:10px 10px 0 0;background:#0a0a0a;display:block"></canvas><div style="background:#0F6E56;color:#fff;font-size:10px;font-weight:700;padding:6px;border-radius:0 0 8px 8px;text-align:center">Mi-Distance</div></div>
+          <div><canvas id="es-ecran-uni" width="120" height="200" style="width:100%;border-radius:10px 10px 0 0;background:#0a0a0a;display:block"></canvas><div style="background:#6B3FA0;color:#fff;font-size:10px;font-weight:700;padding:6px;border-radius:0 0 8px 8px;text-align:center">Unifocal</div></div>
+        </div>
+        <div class="es-legend" style="margin-top:8px">
+          <div class="es-legend-item"><div class="es-legend-dot" style="background:#3070cc"></div>Loin</div>
+          <div class="es-legend-item"><div class="es-legend-dot" style="background:#50a850"></div>Intermédiaire</div>
+          <div class="es-legend-item"><div class="es-legend-dot" style="background:#c8a020"></div>Près</div>
+          <div class="es-legend-item"><div class="es-legend-dot" style="background:#666"></div>Non disponible</div>
+        </div>
+      </div>
+
+      <!-- ── MATÉRIAUX ──────────────────────────────────────── -->
+      <div id="es-mat" class="es-sub" style="display:none">
+        <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><path d="M5,20 Q20,6 35,20"/><path d="M5,20 Q20,34 35,20"/><line x1="5" y1="20" x2="35" y2="20" stroke-dasharray="3,2"/></svg><span class="es-sub-ttl">Matériaux</span></div>
+        <div class="es-info">
+          <div class="es-info-title"><i class="ti ti-ruler-measure"></i> Épaisseur selon l'indice de réfraction</div>
+          <div class="es-info-desc">Un indice plus élevé permet un verre plus fin et plus léger à correction égale. Résultat : confort et esthétique améliorés.</div>
+        </div>
+        <div class="es-slider">
+          <label><i class="ti ti-adjustments" style="font-size:13px"></i> Sphère (D)</label>
+          <input type="range" min="-12" max="12" step="0.5" value="-4" id="es-mat-sph" oninput="document.getElementById('es-mat-sph-out').textContent=(+this.value>0?'+':'')+this.value;drawMatBars()"/>
+          <span id="es-mat-sph-out">-4.0</span>
+        </div>
+        <div id="es-mat-list"></div>
+        <div style="background:#0a1e10;border:1px solid #1e4a2a;border-radius:10px;padding:10px 13px;font-size:12px;color:#70c8a0;margin-top:4px"><i class="ti ti-info-circle"></i> Le verre le plus fin est mis en avant selon votre correction.</div>
+      </div>
+
+      <!-- ── ANTIREFLET ─────────────────────────────────────── -->
+      <div id="es-ar" class="es-sub" style="display:none">
+        <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><circle cx="18" cy="20" r="14"/><circle cx="25" cy="14" r="11" fill="#0c0c0c" stroke="#bbb" stroke-dasharray="2,2"/></svg><span class="es-sub-ttl">Antireflet</span></div>
+        <div class="es-scene-row" id="es-ar-scenes">
+          <button class="es-scene-btn active" onclick="esARScene('nuit',this)"><i class="ti ti-moon"></i> Conduite nuit</button>
+          <button class="es-scene-btn" onclick="esARScene('ecran',this)"><i class="ti ti-device-desktop"></i> Écran</button>
+          <button class="es-scene-btn" onclick="esARScene('soleil',this)"><i class="ti ti-sun"></i> Extérieur</button>
+          <button class="es-scene-btn" onclick="esARScene('ville',this)"><i class="ti ti-building"></i> Ville</button>
+        </div>
+        <div class="es-ba">
+          <div class="es-ba-col"><img id="es-ar-before" src="" class="es-ba-img" alt=""/><div class="es-ba-lbl bad">Sans antireflet</div></div>
+          <div class="es-ba-col"><img id="es-ar-after" src="" class="es-ba-img" alt=""/><div class="es-ba-lbl good">Avec antireflet</div></div>
+        </div>
+        <div class="es-info" id="es-ar-info">
+          <div class="es-info-title"><i class="ti ti-sparkles"></i> Traitement antireflet</div>
+          <div class="es-info-desc">Élimine 99% des reflets parasites. Vision nette et contrastée, yeux moins fatigués. Indispensable pour la conduite de nuit et le travail sur écran.</div>
+          <div class="es-avs"><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Reflets supprimés</span><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Contraste +40%</span><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Idéal conduite</span></div>
+        </div>
+      </div>
+
+      <!-- ── VERRES TRANSITIONS ─────────────────────────────── -->
+      <div id="es-tr" class="es-sub" style="display:none">
+        <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><circle cx="20" cy="20" r="7"/><line x1="20" y1="4" x2="20" y2="11"/><line x1="20" y1="29" x2="20" y2="36"/><line x1="4" y1="20" x2="11" y2="20"/><line x1="29" y1="20" x2="36" y2="20"/><line x1="7" y1="7" x2="12" y2="12"/><line x1="28" y1="28" x2="33" y2="33"/><line x1="33" y1="7" x2="28" y2="12"/><line x1="12" y1="28" x2="7" y2="33"/></svg><span class="es-sub-ttl">Verres Transitions</span></div>
+        <div class="es-info">
+          <div class="es-info-title"><i class="ti ti-sun-moon"></i> S'assombrissent automatiquement sous les UV</div>
+          <div class="es-info-desc">Transition en 30 secondes. Retour transparent en 3 minutes en intérieur. Protection UV 100%. Disponibles en 8 couleurs.</div>
+          <div class="es-avs"><span class="es-av" style="background:#0a2a10;color:#70c8a0">UV 100% bloqués</span><span class="es-av" style="background:#0a2a10;color:#70c8a0">Adaptation auto</span><span class="es-av" style="background:#1a1a30;color:#a0a0f0">8 couleurs</span></div>
+        </div>
+        <div class="es-slider">
+          <label><i class="ti ti-sun" style="font-size:13px"></i> Exposition UV</label>
+          <input type="range" min="0" max="100" step="1" value="0" id="es-tr-uv" oninput="esTRUpdate(+this.value)"/>
+          <span id="es-tr-uv-out">0%</span>
+        </div>
+        <div class="es-tr-band"><div class="es-tr-cursor" id="es-tr-cursor" style="left:2px"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:14px"><span>Intérieur (clair)</span><span>Extérieur (teinté)</span></div>
+        <div class="es-ba">
+          <div class="es-ba-col"><img id="es-tr-before" src="" class="es-ba-img" alt=""/><div class="es-ba-lbl" style="background:rgba(20,80,160,0.85)">Intérieur — Clair</div></div>
+          <div class="es-ba-col"><img id="es-tr-after" src="" class="es-ba-img" alt=""/><div class="es-ba-lbl" style="background:rgba(80,50,10,0.85)">Extérieur — Teinté</div></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Teintes disponibles</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div style="width:36px;height:36px;border-radius:50%;background:#404040;border:2px solid #666;cursor:pointer;title='Gris'" onclick="esTRColor('#404040',this)"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#7a4010;border:2px solid #666;cursor:pointer" onclick="esTRColor('#7a4010',this)"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#184060;border:2px solid #666;cursor:pointer" onclick="esTRColor('#184060',this)"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#601828;border:2px solid #666;cursor:pointer" onclick="esTRColor('#601828',this)"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#30508a;border:2px solid #666;cursor:pointer" onclick="esTRColor('#30508a',this)"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#205040;border:2px solid #666;cursor:pointer" onclick="esTRColor('#205040',this)"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#704820;border:2px solid #666;cursor:pointer" onclick="esTRColor('#704820',this)"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:#2a2a3a;border:2px solid #666;cursor:pointer" onclick="esTRColor('#2a2a3a',this)"></div>
+        </div>
+      </div>
+
+      <!-- ── VERRES POLARISANTS ──────────────────────────────── -->
+      <div id="es-pol" class="es-sub" style="display:none">
+        <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><circle cx="20" cy="20" r="7"/><line x1="20" y1="4" x2="20" y2="11"/><line x1="20" y1="29" x2="20" y2="36"/><line x1="4" y1="20" x2="11" y2="20"/><line x1="29" y1="20" x2="36" y2="20"/><line x1="8" y1="14" x2="32" y2="14"/><line x1="6" y1="20" x2="34" y2="20"/><line x1="8" y1="26" x2="32" y2="26"/></svg><span class="es-sub-ttl">Verres polarisants</span></div>
+        <div class="es-info">
+          <div class="es-info-title"><i class="ti ti-polaroid"></i> Filtre polarisant</div>
+          <div class="es-info-desc">Bloque la lumière réfléchie horizontalement. Reflets sur l'eau totalement supprimés, fond marin visible, contraste exceptionnel. Idéal pêche, voile, ski, plage.</div>
+          <div class="es-avs"><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Reflets supprimés</span><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Fond visible</span><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Contraste +40%</span></div>
+        </div>
+        <div class="es-ba">
+          <div class="es-ba-col"><img id="es-pol-before" src="" class="es-ba-img" alt=""/><div class="es-ba-lbl bad">Solaire standard — Reflets présents</div></div>
+          <div class="es-ba-col"><img id="es-pol-after" src="" class="es-ba-img" alt=""/><div class="es-ba-lbl good">Polarisé — Reflets supprimés</div></div>
+        </div>
+        <div style="background:#0a1e10;border:1px solid #1a4a28;border-radius:12px;padding:12px 14px;font-size:13px;color:#70c8a0"><strong style="color:#50d880"><i class="ti ti-fish"></i> Idéal pour :</strong> Pêche, voile, ski alpin, plage, conduite ensoleillée.</div>
+      </div>
+
+      <!-- ── DÉFAUTS VISUELS ─────────────────────────────────── -->
+      <div id="es-def" class="es-sub" style="display:none">
+        <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><path d="M4,20 Q20,7 36,20 Q20,33 4,20"/><circle cx="20" cy="20" r="6"/><circle cx="20" cy="20" r="3" fill="#bbb"/><path d="M9,30 Q14,26 18,30 Q22,34 26,30 Q30,26 35,30"/></svg><span class="es-sub-ttl">Défauts Visuels</span></div>
+        <div class="es-def-grid">
+          <button class="es-def-btn active" id="esd-myopie" onclick="esDefSelect('myopie')"><i class="ti ti-eye-off" style="font-size:20px"></i>Myopie</button>
+          <button class="es-def-btn" id="esd-hyper" onclick="esDefSelect('hyper')"><i class="ti ti-zoom-in" style="font-size:20px"></i>Hypermétropie</button>
+          <button class="es-def-btn" id="esd-presby" onclick="esDefSelect('presby')"><i class="ti ti-zoom-check" style="font-size:20px"></i>Presbytie</button>
+          <button class="es-def-btn" id="esd-astig" onclick="esDefSelect('astig')"><i class="ti ti-adjustments-horizontal" style="font-size:20px"></i>Astigmatisme</button>
+        </div>
+        <div class="es-slider">
+          <label><i class="ti ti-adjustments" style="font-size:13px"></i> Degré</label>
+          <input type="range" min="0" max="100" step="5" value="60" id="es-def-deg" oninput="drawDefCanvas()"/>
+          <span id="es-def-deg-out">Modéré</span>
+        </div>
+        <div class="es-ba">
+          <div class="es-ba-col"><canvas id="es-def-before" width="400" height="220" class="es-ba-img" style="height:165px"></canvas><div class="es-ba-lbl bad">Sans correction</div></div>
+          <div class="es-ba-col"><canvas id="es-def-after" width="400" height="220" class="es-ba-img" style="height:165px"></canvas><div class="es-ba-lbl good">Avec correction</div></div>
+        </div>
+        <div class="es-info" id="es-def-info"></div>
+      </div>
+
     </div>
-    <div class="card">
-      <button class="btn-back" onclick="go('0')"><i class="ti ti-arrow-left"></i> Retour</button>
-
-      <!-- SCENE SELECTOR -->
-      <div style="font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Choisir une scène</div>
-      <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap" id="scene-tabs">
-        <button class="demo-tab active" onclick="setScene('nuit')" id="stab-nuit"><i class="ti ti-moon"></i> Conduite de nuit</button>
-        <button class="demo-tab" onclick="setScene('ecran')" id="stab-ecran"><i class="ti ti-device-desktop"></i> Écran / bureau</button>
-        <button class="demo-tab" onclick="setScene('soleil')" id="stab-soleil"><i class="ti ti-sun"></i> Plein soleil</button>
-        <button class="demo-tab" onclick="setScene('ville')" id="stab-ville"><i class="ti ti-building"></i> Ville / rue</button>
-        <button class="demo-tab" onclick="setScene('eau')" id="stab-eau" style="border-color:#1a5a8a;color:#60aaee"><i class="ti ti-ripple"></i> Eau / Lac</button>
-      </div>
-
-      <!-- TREATMENT SELECTOR -->
-      <div style="font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Traitement du verre</div>
-      <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap" id="trait-tabs">
-        <button class="demo-tab active" onclick="setTrait('normal')" id="ttab-normal"><i class="ti ti-eye"></i> Sans traitement</button>
-        <button class="demo-tab" onclick="setTrait('ar')" id="ttab-ar"><i class="ti ti-sparkles"></i> Anti-reflet</button>
-        <button class="demo-tab" onclick="setTrait('lb')" id="ttab-lb"><i class="ti ti-device-desktop"></i> Lumière bleue</button>
-        <button class="demo-tab" onclick="setTrait('tr')" id="ttab-tr"><i class="ti ti-sun-moon"></i> Transitions</button>
-        <button class="demo-tab" onclick="setTrait('solaire')" id="ttab-solaire" style="border-color:#5a3000;color:#e8b870"><i class="ti ti-sun-filled"></i> Solaire standard</button>
-        <button class="demo-tab" onclick="setTrait('polarise')" id="ttab-polarise" style="border-color:#1a4a3a;color:#70c8a0"><i class="ti ti-polaroid"></i> Polarisé</button>
-      </div>
-
-      <!-- SLIDER FOR TRANSITIONS -->
-      <div id="demo-tr-slider" style="display:none;margin-bottom:14px">
-        <div class="demo-slider">
-          <label><i class="ti ti-sun" style="font-size:14px"></i> Exposition soleil</label>
-          <input type="range" min="0" max="100" value="0" step="1" id="tr-slider-val"
-            oninput="trSun=+this.value;document.getElementById('tr-slider-out').textContent=this.value+'%';applyFilter()"/>
-          <span id="tr-slider-out" style="min-width:40px;text-align:right;font-size:13px;font-weight:700;color:#f0f0f0">0%</span>
-        </div>
-      </div>
-
-      <!-- IMAGE VIEWER with CSS filter -->
-      <div style="position:relative;border-radius:16px;overflow:hidden;border:1px solid #333;margin-bottom:14px">
-        <img id="demo-photo" src="" alt="Simulation verre"
-          style="width:100%;height:300px;object-fit:cover;display:block;transition:filter 0.4s ease"/>
-        <div id="demo-glare" style="position:absolute;inset:0;pointer-events:none;transition:opacity 0.4s"></div>
-        <div id="demo-photo-label" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:#fff;font-size:13px;font-weight:600;padding:6px 16px;border-radius:20px;white-space:nowrap;backdrop-filter:blur(4px)"></div>
-      </div>
-
-      <!-- BEFORE/AFTER COMPARISON -->
-      <div style="font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Comparaison avant / après</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-        <div style="border-radius:12px;overflow:hidden;border:1px solid #333;position:relative">
-          <img id="demo-before" src="" alt="Avant" style="width:100%;height:150px;object-fit:cover;display:block"/>
-          <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(180,40,40,0.85);color:#fff;font-size:12px;font-weight:700;text-align:center;padding:5px">Sans traitement</div>
-        </div>
-        <div style="border-radius:12px;overflow:hidden;border:1px solid #333;position:relative">
-          <img id="demo-after" src="" alt="Après" style="width:100%;height:150px;object-fit:cover;display:block;transition:filter 0.4s"/>
-          <div id="demo-after-label" style="position:absolute;bottom:0;left:0;right:0;background:rgba(20,100,50,0.85);color:#fff;font-size:12px;font-weight:700;text-align:center;padding:5px">Anti-reflet</div>
-        </div>
-      </div>
-
-      <!-- INFO CARD -->
-      <div class="demo-info" id="demo-info-card">
-        <div class="demo-info-title" id="demo-info-title"><i class="ti ti-eye"></i> Sans traitement</div>
-        <div class="demo-info-desc" id="demo-info-desc">Vision naturelle sans traitement.</div>
-        <div class="demo-avs" id="demo-info-avs"></div>
-      </div>
-
-      <!-- ── ZONES PROGRESSIF ────────────────────────────────── -->
-      <div style="margin-top:22px;padding-top:18px;border-top:1px solid #2a2a2a">
-        <div style="font-size:12px;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;display:flex;align-items:center;gap:7px">
-          <i class="ti ti-adjustments" style="font-size:14px;color:#9060e0"></i> Zones de vision — Verre progressif
-        </div>
-        <div style="font-size:12px;color:#555;margin-bottom:14px;line-height:1.6">Montrez au patient comment le corridor de vision utile s'élargit avec la montée en gamme. Les zones <span style="color:#e07070">rouges</span> = aberrations (vision floue et déformée).</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" id="prog-grid">
-          <div class="prog-col">
-            <canvas id="prog-entree" width="160" height="230"></canvas>
-            <div class="prog-label" style="background:linear-gradient(135deg,#1a5c3a,#2E8B57)">
-              <i class="ti ti-leaf" style="font-size:12px"></i> Entrée de gamme
-              <div class="prog-sublabel">Corridor étroit · Grandes zones d'aberration</div>
-            </div>
-          </div>
-          <div class="prog-col">
-            <canvas id="prog-milieu" width="160" height="230"></canvas>
-            <div class="prog-label" style="background:linear-gradient(135deg,#082045,#185FA5)">
-              <i class="ti ti-star" style="font-size:12px"></i> Milieu de gamme
-              <div class="prog-sublabel">Corridor modéré · Zones réduites</div>
-            </div>
-          </div>
-          <div class="prog-col">
-            <canvas id="prog-haut" width="160" height="230"></canvas>
-            <div class="prog-label" style="background:linear-gradient(135deg,#23124a,#6B3FA0)">
-              <i class="ti ti-diamond" style="font-size:12px"></i> Haut de gamme
-              <div class="prog-sublabel">Large corridor · Aberrations minimales</div>
-            </div>
-          </div>
-        </div>
-        <!-- Légende -->
-        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:#1a1a1a;border-radius:10px;font-size:11px">
-          <div style="display:flex;align-items:center;gap:6px"><div style="width:14px;height:14px;border-radius:3px;background:#3070cc"></div><span style="color:#aaa">Zone loin (claire)</span></div>
-          <div style="display:flex;align-items:center;gap:6px"><div style="width:14px;height:14px;border-radius:3px;background:#50a850"></div><span style="color:#aaa">Corridor intermédiaire</span></div>
-          <div style="display:flex;align-items:center;gap=6px"><div style="width:14px;height:14px;border-radius:3px;background:#c8a020"></div><span style="color:#aaa">Zone près (claire)</span></div>
-          <div style="display:flex;align-items:center;gap:6px"><div style="width:14px;height:14px;border-radius:3px;background:#d04040"></div><span style="color:#aaa">Zone d'aberration (floue)</span></div>
-        </div>
-      </div>
-
-    </div>
+  </div>
   </div>
 
   <!-- S1 MUTUELLE -->
@@ -2330,56 +2565,6 @@ const demoScenes = {
   }
 };
 
-const demoTraits = {
-  normal:{
-    title:'Sans traitement',
-    icon:'ti-eye',
-    desc:'Vision naturelle sans traitement. Reflets parasites visibles, éblouissement en conduite nocturne, fatigue oculaire plus rapide.',
-    avs:[{t:'Reflets visibles',s:'#2a1010',c:'#ff8080'},{t:'Éblouissement',s:'#2a1010',c:'#ff8080'},{t:'Fatigue rapide',s:'#2a1010',c:'#ff8080'}],
-    filter:'none',
-    glare:'radial-gradient(ellipse at 30% 35%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 50%), radial-gradient(ellipse at 70% 20%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 40%)'
-  },
-  ar:{
-    title:'Anti-reflet',
-    icon:'ti-sparkles',
-    desc:'Élimine 99% des reflets parasites. Vision nette et contrastée, yeux moins fatigués. Indispensable pour la conduite de nuit et le travail sur écran.',
-    avs:[{t:'Reflets supprimés',s:'#0a2a1a',c:'#70c8a0'},{t:'Contraste +40%',s:'#0a2a1a',c:'#70c8a0'},{t:'Idéal conduite',s:'#0a2a1a',c:'#70c8a0'}],
-    filter:'contrast(1.08) brightness(1.04)',
-    glare:''
-  },
-  lb:{
-    title:'Filtre lumière bleue',
-    icon:'ti-device-desktop',
-    desc:`Bloque les longueurs d'onde nocives des écrans. Réduit la fatigue visuelle de 30%, améliore le sommeil. Légère teinte ambrée à peine perceptible.`,
-    avs:[{t:'Fatigue -30%',s:'#1a0f30',c:'#c080f0'},{t:'Meilleur sommeil',s:'#1a0f30',c:'#c080f0'},{t:'Protection rétine',s:'#1a0f30',c:'#c080f0'}],
-    filter:'sepia(0.18) saturate(0.95) brightness(0.98)',
-    glare:''
-  },
-  tr:{
-    title:'Verres Transitions',
-    icon:'ti-sun-moon',
-    desc:`S'assombrissent automatiquement sous les UV en 30 secondes. Retour transparent en 3 minutes en intérieur. Protection UV 100%. 8 couleurs disponibles.`,
-    avs:[{t:'UV 100% bloqués',s:'#0a2a10',c:'#70c8a0'},{t:'Adaptation auto',s:'#0a2a10',c:'#70c8a0'},{t:'8 couleurs',s:'#1a1a30',c:'#a0a0f0'}],
-    filter:'sepia(0.6) saturate(0.7) brightness(0.7)',
-    glare:''
-  },
-  solaire:{
-    title:`Verre solaire standard (catégorie 3)`,
-    icon:'ti-sun-filled',
-    desc:`Verre teinté sombre. Réduit la luminosité de 65 % mais les reflets sur l'eau restent présents — la lumière polarisée horizontalement n'est pas bloquée.`,
-    avs:[{t:`Luminosité −65%`,s:`#2a1800`,c:`#e8b870`},{t:`Reflets présents`,s:`#2a1010`,c:`#e07070`},{t:`UV filtrés`,s:`#0a2a10`,c:`#70c8a0`}],
-    filter:`brightness(0.42) sepia(0.55) saturate(0.7)`,
-    glare:`radial-gradient(ellipse at 50% 38%, rgba(255,200,50,0.28) 0%, rgba(255,200,50,0) 60%)`
-  },
-  polarise:{
-    title:`Verre polarisé`,
-    icon:`ti-polaroid`,
-    desc:`Le filtre polarisant bloque la lumière réfléchie horizontalement. Résultat : reflets sur l'eau totalement supprimés, fond marin visible, contraste remarquable. Idéal pêche, voile, ski.`,
-    avs:[{t:`Reflets supprimés`,s:`#0a2a1a`,c:`#70c8a0`},{t:`Fond visible`,s:`#0a2a1a`,c:`#70c8a0`},{t:`Contraste +40%`,s:`#0a2a1a`,c:`#70c8a0`}],
-    filter:`brightness(0.62) contrast(1.3) saturate(1.15)`,
-    glare:``
-  }
-};
 
 // ── Scène eau (SVG générés au runtime) ──────────────────────────
 (function(){
@@ -2404,60 +2589,279 @@ const demoTraits = {
   };
 })();
 
-let demoScene = 'nuit';
-let demoTrait = 'normal';
-let trSun = 0;
+// ─── EYESTATION MODULES ───────────────────────────────────────────
 
-function setScene(s){
-  demoScene = s;
-  document.querySelectorAll('#scene-tabs .demo-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('stab-'+s).classList.add('active');
-  applyFilter();
+function esGo(module){
+  document.getElementById('es-menu').style.display='none';
+  document.querySelectorAll('.es-sub').forEach(el=>el.style.display='none');
+  const el=document.getElementById('es-'+module);
+  if(!el)return;
+  el.style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(module==='prog')  setTimeout(initProgZones,80);
+  if(module==='mat')   drawMatBars();
+  if(module==='ar')    esARScene('nuit',document.querySelector('#es-ar-scenes .es-scene-btn'));
+  if(module==='tr')    {esTRInitImages();esTRUpdate(0);}
+  if(module==='pol')   esPolInit();
+  if(module==='uni')   esUniInit();
+  if(module==='ecran') setTimeout(drawEcranZones,80);
+  if(module==='def')   esDefSelect('myopie');
+  if(module==='analyse') esQReset();
 }
 
-function setTrait(t){
-  demoTrait = t;
-  document.querySelectorAll('#trait-tabs .demo-tab').forEach(tab=>tab.classList.remove('active'));
-  document.getElementById('ttab-'+t).classList.add('active');
-  document.getElementById('demo-tr-slider').style.display = t==='tr'?'block':'none';
-  const td = demoTraits[t];
-  document.getElementById('demo-info-title').innerHTML = `<i class="ti ${td.icon}"></i> ${td.title}`;
-  document.getElementById('demo-info-desc').textContent = td.desc;
-  document.getElementById('demo-info-avs').innerHTML = td.avs.map(a=>`<span class="demo-av" style="background:${a.s};color:${a.c}">${a.t}</span>`).join('');
-  document.getElementById('demo-after-label').textContent = td.title;
-  applyFilter();
+function esBack(){
+  document.querySelectorAll('.es-sub').forEach(el=>el.style.display='none');
+  document.getElementById('es-menu').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function applyFilter(){
-  const scene = demoScenes[demoScene];
-  if(!scene) return;
-  const trait = demoTraits[demoTrait];
-  if(!trait) return;
-  const photo  = document.getElementById('demo-photo');
-  const before = document.getElementById('demo-before');
-  const after  = document.getElementById('demo-after');
-  const glare  = document.getElementById('demo-glare');
-  const label  = document.getElementById('demo-photo-label');
-  if(!photo) return;
+// ── Analyse ────────────────────────────────────────────────────────
+const _esQA={};
+function esQAnswer(step,val){
+  _esQA[step]=val;
+  document.querySelectorAll('.es-q-step').forEach(s=>s.classList.remove('active'));
+  if(step<3){document.getElementById('es-q'+(step+1)).classList.add('active');}
+  else{document.getElementById('es-q-result').classList.add('active');document.getElementById('es-reco-box').innerHTML=esGenReco();}
+  _esQDots();
+}
+function esQReset(){
+  Object.keys(_esQA).forEach(k=>delete _esQA[k]);
+  document.querySelectorAll('.es-q-step').forEach(s=>s.classList.remove('active'));
+  const q1=document.getElementById('es-q1');if(q1)q1.classList.add('active');
+  _esQDots();
+}
+function _esQDots(){
+  const d=document.getElementById('es-q-dots');if(!d)return;
+  const step=Object.keys(_esQA).length;
+  d.innerHTML=[1,2,3].map(i=>`<div style="width:8px;height:8px;border-radius:50%;background:${i<=step?'#378ADD':'#2a2a2a'}"></div>`).join('');
+}
+function esGenReco(){
+  const u=_esQA[1],c=_esQA[2],s=_esQA[3];
+  let verre,desc,tags=[];
+  if(c==='prog'){verre='Verre Progressif Haut de Gamme';desc='Large corridor de vision pour un confort optimal. Correction complète loin, intermédiaire et près.';}
+  else if(c==='presby'){verre='Verre Progressif ou Mi-Distance';desc='La presbytie nécessite une correction de près. Un verre mi-distance est idéal pour le bureau.';}
+  else if(c==='astig'){verre='Verre Torique Unifocal';desc='Correction précise de l\'astigmatisme sur toute la surface du verre.';}
+  else{verre='Verre Unifocal';desc='Correction simple et efficace. Vision nette à la distance cible.';}
+  tags.push(verre.split(' ').slice(0,2).join(' '));
+  if(u==='bureau'||s==='ecrans')tags.push('Filtre Lumière Bleue');
+  if(s==='beaucoup'||s==='modere'||u==='conduite')tags.push('Antireflet Premium');
+  else tags.push('Antireflet Standard');
+  if(u==='exterieur')tags.push(c==='prog'?'Verres Transitions':'Verres Polarisants');
+  if(u==='conduite')tags.push('Antireflet Conduite Nuit');
+  return `<div class="es-reco"><div class="es-reco-title"><i class="ti ti-award"></i> ${verre}</div><div class="es-reco-desc">${desc}</div><div class="es-reco-tags">${tags.map(t=>`<span class="es-reco-tag">${t}</span>`).join('')}</div></div>`;
+}
 
-  // Polarisé sur scène eau → image sans reflets
-  const url = (demoTrait === 'polarise' && scene.urlPolarise) ? scene.urlPolarise : scene.url;
-  photo.src  = url;
-  before.src = scene.url;   // avant = toujours sans traitement
-  after.src  = url;
+// ── Canvas city scene ──────────────────────────────────────────────
+function _drawCity(ctx,W,H){
+  const sky=ctx.createLinearGradient(0,0,0,H*0.55);
+  sky.addColorStop(0,'#2a5890');sky.addColorStop(1,'#5888be');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H*0.55);
+  ctx.fillStyle='#587a38';ctx.fillRect(0,H*0.55,W,H*0.45);
+  ctx.fillStyle='#5a5a5a';ctx.fillRect(W*0.32,H*0.55,W*0.36,H*0.45);
+  ctx.fillStyle='#fff';
+  [[0.49,0.6],[0.49,0.73],[0.49,0.86]].forEach(([x,y])=>ctx.fillRect(W*x,H*y,W*0.02,H*0.07));
+  const bs=[{x:10,y:0.15,w:55,c:'#3a3a52'},{x:80,y:0.08,w:68,c:'#2e3a4a'},{x:200,y:0.18,w:58,c:'#3c3c4e'},{x:310,y:0.1,w:42,c:'#2a3040'},{x:630,y:0.12,w:62,c:'#363550'},{x:710,y:0.06,w:74,c:'#303045'}];
+  bs.forEach(b=>{
+    ctx.fillStyle=b.c;ctx.fillRect(b.x,H*b.y,b.w,H*(0.55-b.y));
+    ctx.fillStyle='rgba(255,225,80,0.7)';
+    for(let wy=H*(b.y+0.04);wy<H*0.5;wy+=H*0.065)
+      for(let wx=b.x+6;wx<b.x+b.w-8;wx+=13)ctx.fillRect(wx,wy,7,5);
+  });
+  ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(W*0.82,H*0.12,16,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.88)';
+  ctx.font=`bold ${H*0.07|0}px Arial`;ctx.textAlign='center';
+  ctx.fillText('Vision Test',W/2,H*0.72);
+  ctx.font=`${H*0.048|0}px Arial`;ctx.fillText('AABCDE 12345',W/2,H*0.86);
+}
 
-  let filter = trait.filter;
-  if(demoTrait === 'tr'){
-    const sun = trSun/100;
-    filter = `sepia(${sun*0.7}) saturate(${1-sun*0.35}) brightness(${1-sun*0.32})`;
+// ── Unifocaux ──────────────────────────────────────────────────────
+let _esUniMode='myopie';
+function esUniInit(){esUniSelect('myopie',document.querySelector('#es-uni .es-scene-btn'));}
+function esUniSelect(mode,btn){
+  _esUniMode=mode;
+  document.querySelectorAll('#es-uni .es-scene-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const info={
+    myopie:{sph:-4,desc:'Le myope voit nettement de près mais flou de loin. Le verre divergent (−) ramène le foyer sur la rétine.'},
+    hyper:{sph:3,desc:'L\'hypermétrope converge derrière la rétine. Fatigue visuelle et maux de tête. Verre convergent (+).'},
+    astig:{sph:-2,desc:'Cornée asymétrique → vision floue et déformée dans toutes les directions. Verre torique.'}
+  };
+  const d=info[mode]||info.myopie;
+  const sphIn=document.getElementById('es-uni-sph');
+  if(sphIn){sphIn.value=d.sph;document.getElementById('es-uni-sph-out').textContent=(d.sph>0?'+':'')+d.sph+' D';}
+  document.getElementById('es-uni-info').innerHTML=`<div class="es-info-title"><i class="ti ti-info-circle"></i> ${mode.charAt(0).toUpperCase()+mode.slice(1)}</div><div class="es-info-desc">${d.desc}</div>`;
+  drawUniCanvas();
+}
+function drawUniCanvas(){
+  const sph=parseFloat(document.getElementById('es-uni-sph')?.value||-4);
+  const blur=Math.abs(sph)*0.55;
+  ['before','after'].forEach(side=>{
+    const c=document.getElementById('es-uni-'+side);if(!c)return;
+    const ctx=c.getContext('2d');
+    ctx.clearRect(0,0,c.width,c.height);
+    if(side==='before'){ctx.filter=`blur(${blur}px)`;_drawCity(ctx,c.width,c.height);ctx.filter='none';}
+    else{_drawCity(ctx,c.width,c.height);}
+  });
+}
+
+// ── Écran Mi-Distance ──────────────────────────────────────────────
+function drawEcranZones(){
+  _drawEcranCanvas('es-ecran-prog','prog');
+  _drawEcranCanvas('es-ecran-mid','mid');
+  _drawEcranCanvas('es-ecran-uni','uni');
+}
+function _drawEcranCanvas(id,type){
+  const canvas=document.getElementById(id);if(!canvas)return;
+  const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,rx=W*0.44,ry=H*0.46;
+  ctx.save();ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.clip();
+  function fz(x,y,w,h,col,al){ctx.globalAlpha=al;ctx.fillStyle=col;ctx.fillRect(x,y,w,h);ctx.globalAlpha=1;}
+  const top=cy-ry,bot=cy+ry,th=bot-top;
+  if(type==='prog'){
+    fz(0,top,W,th*0.12,'#d04040',0.45);
+    fz(0,top+th*0.12,W,th*0.32,'#3070cc',0.85);
+    const iw=W*0.55;
+    fz((W-iw)/2,top+th*0.44,iw,th*0.26,'#50a850',0.85);
+    fz(0,top+th*0.44,(W-iw)/2,th*0.26,'#d04040',0.45);
+    fz((W+iw)/2,top+th*0.44,(W-iw)/2,th*0.26,'#d04040',0.45);
+    const nw=W*0.40;
+    fz((W-nw)/2,top+th*0.70,nw,th*0.30,'#c8a020',0.85);
+    fz(0,top+th*0.70,(W-nw)/2,th*0.30,'#d04040',0.45);
+    fz((W+nw)/2,top+th*0.70,(W-nw)/2,th*0.30,'#d04040',0.45);
+  } else if(type==='mid'){
+    fz(0,top,W,th*0.1,'#555',0.3);
+    const iw=W*0.90;
+    fz((W-iw)/2,top+th*0.1,iw,th*0.48,'#50a850',0.9);
+    fz(0,top+th*0.1,(W-iw)/2,th*0.48,'#d04040',0.35);
+    fz((W+iw)/2,top+th*0.1,(W-iw)/2,th*0.48,'#d04040',0.35);
+    const nw=W*0.84;
+    fz((W-nw)/2,top+th*0.58,nw,th*0.42,'#c8a020',0.9);
+    fz(0,top+th*0.58,(W-nw)/2,th*0.42,'#d04040',0.35);
+    fz((W+nw)/2,top+th*0.58,(W-nw)/2,th*0.42,'#d04040',0.35);
+  } else {
+    fz(0,top,W,th,'#3070cc',0.85);
   }
-  photo.style.filter  = filter;
-  after.style.filter  = filter;
-  before.style.filter = 'none';
+  ctx.restore();
+  ctx.strokeStyle='#4a4a4a';ctx.lineWidth=2;
+  ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.stroke();
+}
 
-  glare.style.background = trait.glare || '';
-  glare.style.opacity = '1';
-  label.textContent = scene.traitLabels?.[demoTrait] || scene.label;
+// ── Matériaux ──────────────────────────────────────────────────────
+function drawMatBars(){
+  const sph=parseFloat(document.getElementById('es-mat-sph')?.value||-4);
+  document.getElementById('es-mat-sph-out').textContent=(sph>0?'+':'')+sph;
+  const mats=[
+    {idx:1.50,name:'Organique standard',nM1:0.50},
+    {idx:1.56,name:'Polycarbonate',nM1:0.56},
+    {idx:1.60,name:'Mince',nM1:0.60},
+    {idx:1.67,name:'Très mince',nM1:0.67},
+    {idx:1.74,name:'Ultra-mince',nM1:0.74},
+  ];
+  const t=m=>{const sp=Math.abs(sph);return Math.round((sp*0.7/m.nM1+0.5)*10)/10;};
+  const vals=mats.map(m=>({...m,t:t(m)}));
+  const maxT=Math.max(...vals.map(v=>v.t)),minT=Math.min(...vals.map(v=>v.t));
+  document.getElementById('es-mat-list').innerHTML=vals.map(m=>
+    `<div class="es-mat-item${m.t===minT?' best':''}">
+      <div class="es-mat-idx">${m.idx}</div>
+      <div class="es-mat-bar-wrap">
+        <div class="es-mat-name">${m.name}${m.t===minT?' <strong style="color:#60aaee">★ Plus fin</strong>':''}</div>
+        <div class="es-mat-bar" style="width:${Math.round(m.t/maxT*100)}%"></div>
+      </div>
+      <div class="es-mat-thick">${m.t} mm</div>
+    </div>`).join('');
+}
+
+// ── Antireflet ─────────────────────────────────────────────────────
+function esARScene(scene,btn){
+  document.querySelectorAll('#es-ar-scenes .es-scene-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const sc=demoScenes[scene];if(!sc)return;
+  const before=document.getElementById('es-ar-before'),after=document.getElementById('es-ar-after');
+  before.src=sc.url;after.src=sc.url;
+  before.style.filter='brightness(0.88) contrast(0.85)';
+  after.style.filter='contrast(1.1) brightness(1.04)';
+}
+
+// ── Transitions ────────────────────────────────────────────────────
+let _esTRColor='#404040';
+function esTRInitImages(){
+  const sc1=demoScenes['ecran'],sc2=demoScenes['soleil'];
+  if(!sc1||!sc2)return;
+  document.getElementById('es-tr-before').src=sc1.url;
+  document.getElementById('es-tr-before').style.filter='none';
+  document.getElementById('es-tr-after').src=sc2.url;
+}
+function esTRUpdate(val){
+  document.getElementById('es-tr-uv-out').textContent=val+'%';
+  const cursor=document.getElementById('es-tr-cursor');
+  if(cursor)cursor.style.left=(val*0.96+2)+'%';
+  const after=document.getElementById('es-tr-after');if(!after)return;
+  const sun=val/100;
+  after.style.filter=`sepia(${(sun*0.6).toFixed(2)}) saturate(${(1-sun*0.38).toFixed(2)}) brightness(${(1-sun*0.36).toFixed(2)})`;
+}
+function esTRColor(hex,el){
+  _esTRColor=hex;
+  document.querySelectorAll('#es-tr .es-tile-icon ~ div > div, #es-tr div[onclick]').forEach(d=>d.style.border='2px solid #666');
+  if(el)el.style.border='2px solid #fff';
+  esTRUpdate(parseInt(document.getElementById('es-tr-uv')?.value||0));
+}
+
+// ── Polarisants ────────────────────────────────────────────────────
+function esPolInit(){
+  const sc=demoScenes['eau'];if(!sc)return;
+  document.getElementById('es-pol-before').src=sc.url;
+  document.getElementById('es-pol-before').style.filter='brightness(0.55) contrast(1.15) saturate(0.9)';
+  document.getElementById('es-pol-after').src=sc.urlPolarise||sc.url;
+  document.getElementById('es-pol-after').style.filter='brightness(0.62) contrast(1.3) saturate(1.15)';
+}
+
+// ── Défauts Visuels ────────────────────────────────────────────────
+let _esDefMode='myopie';
+const _esDefInfos={
+  myopie:{title:'Myopie',icon:'ti-eye-off',desc:'Le myope voit nettement de près mais flou de loin. Le cristallin focalise en avant de la rétine. Correction par verre divergent (−).',avs:[{t:'Flou ≥ 6 m',s:'#2a1010',c:'#ff8080'},{t:'Vision de près OK',s:'#0a2a1a',c:'#70c8a0'},{t:'Verre concave (−)',s:'#0a2a10',c:'#70c8a0'}]},
+  hyper:{title:'Hypermétropie',icon:'ti-zoom-in',desc:'Convergence derrière la rétine. Le patient force l\'accommodation en permanence → fatigue visuelle et maux de tête. Correction par verre convergent (+).',avs:[{t:'Fatigue oculaire',s:'#2a1010',c:'#ff8080'},{t:'Maux de tête',s:'#2a1010',c:'#ff8080'},{t:'Verre convexe (+)',s:'#0a2a10',c:'#70c8a0'}]},
+  presby:{title:'Presbytie',icon:'ti-zoom-check',desc:'Dès 40-45 ans le cristallin perd son élasticité. La vision de près devient floue progressivement. Solution : verre progressif ou lecture.',avs:[{t:'Dès 40 ans',s:'#2a1510',c:'#e8b870'},{t:'Flou de près',s:'#2a1010',c:'#ff8080'},{t:'Verre progressif',s:'#0a2a10',c:'#70c8a0'}]},
+  astig:{title:'Astigmatisme',icon:'ti-adjustments-horizontal',desc:'Cornée en forme de ballon de rugby → vision floue et déformée dans toutes les directions à toutes les distances. Correction par verre torique.',avs:[{t:'Vision déformée',s:'#2a1010',c:'#ff8080'},{t:'Toutes distances',s:'#2a1010',c:'#ff8080'},{t:'Verre torique',s:'#0a2a10',c:'#70c8a0'}]}
+};
+function esDefSelect(mode){
+  _esDefMode=mode;
+  document.querySelectorAll('.es-def-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('esd-'+mode);if(btn)btn.classList.add('active');
+  const info=_esDefInfos[mode];
+  if(info)document.getElementById('es-def-info').innerHTML=`<div class="es-info-title"><i class="ti ${info.icon}"></i> ${info.title}</div><div class="es-info-desc">${info.desc}</div><div class="es-avs">${info.avs.map(a=>`<span class="es-av" style="background:${a.s};color:${a.c}">${a.t}</span>`).join('')}</div>`;
+  drawDefCanvas();
+}
+function drawDefCanvas(){
+  const deg=parseInt(document.getElementById('es-def-deg')?.value||60);
+  const labels=['Léger','Modéré','Sévère'];
+  document.getElementById('es-def-deg-out').textContent=labels[deg<35?0:deg<65?1:2];
+  const blur=deg/100*8;
+  ['before','after'].forEach(side=>{
+    const c=document.getElementById('es-def-'+side);if(!c)return;
+    const ctx=c.getContext('2d');
+    ctx.clearRect(0,0,c.width,c.height);
+    if(side==='before'){
+      if(_esDefMode==='presby'){
+        _drawCity(ctx,c.width,c.height);
+        const tmp=document.createElement('canvas');tmp.width=c.width;tmp.height=c.height;
+        const tctx=tmp.getContext('2d');tctx.filter=`blur(${blur}px)`;_drawCity(tctx,c.width,c.height);
+        ctx.save();
+        const g=ctx.createLinearGradient(0,c.height*0.45,0,c.height);
+        g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,1)');
+        ctx.globalCompositeOperation='destination-out';ctx.fillStyle=g;ctx.fillRect(0,c.height*0.45,c.width,c.height*0.55);
+        ctx.restore();
+        ctx.drawImage(tmp,0,c.height*0.45,c.width,c.height*0.55,0,c.height*0.45,c.width,c.height*0.55);
+      } else {
+        const blurVal = _esDefMode==='astig' ? blur*0.6 : blur;
+        ctx.filter = `blur(${blurVal}px)`;
+        _drawCity(ctx,c.width,c.height);
+        ctx.filter='none';
+      }
+    } else {
+      _drawCity(ctx,c.width,c.height);
+    }
+  });
 }
 
 // ── Dessin des zones progressif ────────────────────────────────
@@ -2570,9 +2974,7 @@ function initProgZones(){
 }
 
 function initDemo(){
-  setScene('nuit');
-  setTrait('normal');
-  setTimeout(initProgZones, 80);
+  esQReset();
 }
 
 
