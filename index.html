@@ -1117,14 +1117,14 @@ const catalogue = [
     {nom:'Digital Lens Technology',icon:'ti-device-laptop',desc:`Zone intermédiaire élargie pour les utilisateurs d'écrans. Passage fluide loin/écran/lecture.`},
     {nom:'EasyClean Coating',icon:'ti-droplets',desc:`Surface hydrophobe et oléophobe. Les taches s'essuient en un seul geste.`}
    ]},
-  {id:'m3',nom:'Nikon Presio Power',marque:'Nikon',gamme:'milieu',
+  {id:'m3',nom:'Nikon Presio Power Smart',marque:'Nikon',gamme:'milieu',
    compatible:['progressif'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
-   indices:{'1.50':155,'1.60':195,'1.67':245},achats:{'1.50':42,'1.60':60,'1.67':78},
+   indices:{'1.50':155,'1.60':199,'1.67':249},achats:{'1.50':60,'1.60':90,'1.67':139},
    traitements:[
-    {nom:'SeeCoat Blue UV',icon:'ti-device-desktop',desc:`Antireflet avec filtre lumière bleue intégré. Réduction de 30 % entre 380-500 nm.`},
-    {nom:'ECC Technology',icon:'ti-eye',desc:`Eye-Correction Compensation : corrige les aberrations propres à l'œil du porteur.`},
-    {nom:'Balanced View',icon:'ti-adjustments-horizontal',desc:`Équilibre la vision binoculaire, réduit la fatigue au passage entre zones de vision.`},
-    {nom:'HardShield Treatment',icon:'ti-shield',desc:`Résistance aux rayures 2× supérieure aux verres durcis classiques.`}
+    {nom:'SeeCoat Blue UV (SCB)',icon:'ti-device-desktop',desc:`Antireflet premium SeeCoat Blue — filtre lumière bleue nocive 380-450 nm. Confort écrans renforcé. Résistance aux rayures SCB.`},
+    {nom:'SumitechV+ Technology',icon:'ti-cpu',desc:`Surfaçage numérique Nikon — 2 millions de points de calcul. Correction des aberrations en vision périphérique pour une adaptation rapide.`},
+    {nom:'Balanced View Binoculaire',icon:'ti-adjustments-horizontal',desc:`Équilibre binoculaire optimisé. Réduit la fatigue au passage loin/intermédiaire/près. Vision fluide en toutes conditions.`},
+    {nom:'Pure Blue UV disponible',icon:'ti-shield',desc:`Version Pure Blue UV disponible — antireflet avec filtrage lumière bleue-violette renforcé. Compatible Transitions Gen S et XTRActive.`}
    ]},
   {id:'m4',nom:'Hoya Lifestyle 3',marque:'Hoya',gamme:'milieu',
    compatible:['progressif'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
@@ -1195,43 +1195,83 @@ const catalogue = [
    ]},
 ];
 
-// Verres 2e paire
+// ─── 2EME PAIRE — CATALOGUE SIGN BY BBGR (Avril 2026) ────────
+// Prix achat = tarifs HT opticien Sign avril 2026
+// Prix vente = tarif conseillé TTC opticien
 const catalogue2e = [
-  {id:'p1',nom:'Hoya Sync III',marque:'Hoya',gamme:'milieu',
-   compatible:['loin','pres','intermediaire','progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.60':160,'1.67':200},achats:{'1.60':38,'1.67':52},
+
+  // ── PROGRESSIFS ──────────────────────────────────────────────
+  {id:'sg1',nom:'Sign Prosign 15',marque:'Sign by BBGR',gamme:'entree',
+   compatible:['progressif'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
+   indices:{'1.50':110,'1.60':138},achats:{'1.50':30.50,'1.60':37},
    traitements:[
-    {nom:'Boost Zone',icon:'ti-zoom-in',desc:`+0.58 D en vision de près pour réduire la fatigue des personnes travaillant sur écran toute la journée.`},
-    {nom:'HiVision Aqua UV',icon:'ti-droplets',desc:`Traitement hydrophobe et oléophobe de haute performance. Résistance à l'eau et aux corps gras.`},
-    {nom:'BlueControl UV',icon:'ti-device-desktop',desc:`Filtre lumière bleue 420 nm. Réduit les reflets bleutés des écrans numériques.`},
-    {nom:'Tac Hard Coat',icon:'ti-shield',desc:`Durcissement par immersion TAC, couverture totale et uniforme des deux faces.`}
+    {nom:'ARMC — Antireflet Multi-Couches',icon:'ti-sparkles',desc:`Antireflet multicouches standard Sign. Résistant aux rayures, hydrophobe, traitement oléophobe intégré. Livraison J+1 avant 18h30.`},
+    {nom:'Corridor 15 mm',icon:'ti-adjustments',desc:`Design progressif corridor 15 mm large. Adaptation rapide, confort en vision intermédiaire. Compatible toutes montures cerclées.`},
+    {nom:'Blue Defender disponible',icon:'ti-device-desktop',desc:`Version Prosign 15 Blue Defender disponible : filtre lumière bleue intégré + ARMC. Idéal patient sur écrans.`},
+    {nom:'UV 380 nm',icon:'ti-sun',desc:`Protection UV 380 nm intégrée dans la masse. Filtre les ultraviolets proches du visible.`}
    ]},
-  {id:'p2',nom:'Zeiss Digital Lens',marque:'Zeiss',gamme:'milieu',
-   compatible:['loin','pres','intermediaire','progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.60':170,'1.67':215},achats:{'1.60':42,'1.67':58},
+
+  {id:'sg2',nom:'Sign Prosign SD 15',marque:'Sign by BBGR',gamme:'milieu',
+   compatible:['progressif'],sphMax:10,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.50':145,'1.60':175,'1.67':215},achats:{'1.50':40.50,'1.60':52,'1.67':62},
    traitements:[
-    {nom:'Digital Inside 2.0',icon:'ti-cpu',desc:`Optimise les zones de vision intermédiaire et de près pour les utilisateurs numériques intensifs.`},
-    {nom:'BlueGuard Integrated',icon:'ti-device-desktop',desc:`Protection lumière bleue dans la masse du verre. Permanente, inaltérable.`},
-    {nom:'DuraVision BlueProtect UV',icon:'ti-shield',desc:`Antireflet avec couche antistatique, déperlante et filtrante lumière bleue. 5 ans de garantie.`},
-    {nom:'UVProtect 400',icon:'ti-sun',desc:`UV 400 transparent en masse, efficace sur toute la surface y compris les tranches.`}
+    {nom:'ARMC+ — Antireflet Premium',icon:'ti-shield',desc:`Traitement ARMC+ ultra-résistant. Couche déperlante, hydrophobe et oléophobe haute performance. Durée de vie prolongée.`},
+    {nom:'Superior Design (SD)',icon:'ti-cpu',desc:`Surfaçage numérique avancé — corridor élargi, zones d'aberration latérales réduites. Vision périphérique améliorée vs Prosign standard.`},
+    {nom:'Digicali + Digifit',icon:'ti-arrows-cross',desc:`Options de centrage numérique disponibles : Digicali (mesures biométriques) et Digifit (centrage en condition de port).`},
+    {nom:'Pola disponible',icon:'ti-polaroid',desc:`Version Prosign SD Pola disponible pour patients actifs — pêche, voile, ski nautique. Antireflet polarisant premium.`}
    ]},
-  {id:'p3',nom:'BBGR Inov Blue Light',marque:'BBGR',gamme:'entree',
-   compatible:['loin','pres','intermediaire','progressif'],sphMax:20,cylMax:6,aspherique:false,precalibrage:true,
-   indices:{'1.50':90,'1.60':115},achats:{'1.50':20,'1.60':28},
+
+  // ── LUMIÈRE BLEUE ─────────────────────────────────────────────
+  {id:'sg3',nom:'Sign Unisign Blue Defender',marque:'Sign by BBGR',gamme:'milieu',
+   compatible:['loin','pres','intermediaire','progressif'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
+   indices:{'1.50':95,'1.60':120},achats:{'1.50':34.20,'1.60':42},
    traitements:[
-    {nom:'Blue Light Filter 35%',icon:'ti-device-desktop',desc:`Filtre 35 % de la lumière bleue nocive. Idéal patients utilisateurs d'écrans toute la journée.`},
-    {nom:'Antireflet Premium',icon:'ti-shield',desc:`Antireflet multicouches renforcé avec couche déperlante et oléophobe.`},
-    {nom:'Durcissement renforcé',icon:'ti-tool',desc:`Surface durcie 2× plus résistante aux rayures qu'un traitement standard.`},
-    {nom:'UV 400 intégré',icon:'ti-sun',desc:`Protection UV complète jusqu'à 400 nm intégrée dans la masse du verre.`}
+    {nom:'Blue Defender — Filtre LB 420 nm',icon:'ti-device-desktop',desc:`Filtre la lumière bleue nocive à 420 nm. Réduit la fatigue visuelle des patients sur écrans. Teinte légèrement ambrée à peine perceptible.`},
+    {nom:'ARMC+ intégré',icon:'ti-sparkles',desc:`Traitement antireflet multicouches premium intégré dans le Blue Defender. Résistance aux rayures et aux agents chimiques renforcée.`},
+    {nom:'UV 400 nm',icon:'ti-sun',desc:`Protection UV 400 nm complète dans la masse. Bloque 100 % des UVA et UVB pour protéger cornée et cristallin.`},
+    {nom:'Stock 24h',icon:'ti-truck',desc:`Disponible en stock avec livraison 24h (commande avant 18h30). Pas d'attente de fabrication pour les corrections courantes.`}
    ]},
-  {id:'p4',nom:'Essilor Eyezen Sun',marque:'Essilor',gamme:'milieu',
-   compatible:['loin','pres','intermediaire','progressif'],sphMax:20,cylMax:6,aspherique:true,precalibrage:false,
-   indices:{'1.60':155,'1.67':195},achats:{'1.60':36,'1.67':50},
+
+  // ── SOLAIRE STANDARD ──────────────────────────────────────────
+  {id:'sg4',nom:'Sign Unisign Teinté Cat.3',marque:'Sign by BBGR',gamme:'entree',
+   compatible:['loin','pres','intermediaire'],sphMax:8,cylMax:3,aspherique:false,precalibrage:false,
+   indices:{'1.50':58,'1.60':72},achats:{'1.50':8,'1.60':12},
    traitements:[
-    {nom:'Eyezen+ Focus',icon:'ti-eye',desc:`Sur-correction de base pour soulager la fatigue lors de l'utilisation intensive des écrans.`},
-    {nom:'Crizal Sun UV',icon:'ti-sun',desc:`Antireflet spécial soleil avec protection UV renforcée E-SPF 25.`},
-    {nom:'Xperio Sun',icon:'ti-sun-moon',desc:`Traitement photochromique solaire : s'adapte aux conditions lumineuses extérieures.`},
-    {nom:'Light Scan',icon:'ti-brightness',desc:`Filtre sélectif des longueurs d'onde bleues nocives.`}
+    {nom:`Teinte catégorie 3 — T3`,icon:'ti-sun-filled',desc:`Absorption 82 % de la lumière visible. Idéale pour la conduite, la plage, la montagne. Conforme directive 89/686/CE lunettes de soleil.`},
+    {nom:'UV 400 nm',icon:'ti-sun',desc:`Coupure UV 400 nm intégrée dans la masse du verre. Protège contre les UVA/UVB sans traitement supplémentaire.`},
+    {nom:'Coloris brun 3, gris 3, gris US',icon:'ti-palette',desc:`Trois coloris disponibles en stock. Brun : renforce les contrastes. Gris : rendu des couleurs naturel. Gris US : confort maximal en soleil fort.`},
+    {nom:'Stock J+1',icon:'ti-truck',desc:`Disponible en stock — livraison lendemain pour commandes avant 18h30. Solution économique 2ème paire solaire.`}
+   ]},
+
+  {id:'sg5',nom:'Sign Prosign 15 Teinté',marque:'Sign by BBGR',gamme:'milieu',
+   compatible:['progressif'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
+   indices:{'1.50':118,'1.60':148},achats:{'1.50':30.50,'1.60':37},
+   traitements:[
+    {nom:`Progressif solaire teinté T3`,icon:'ti-sun-filled',desc:`Verre progressif teinté catégorie 3. Correction presbytie complète + protection solaire intégrée. Idéal patient actif dehors.`},
+    {nom:'Corridor 15 mm',icon:'ti-adjustments',desc:`Même design de corridor que le Prosign 15 standard. Vision de loin, intermédiaire et de près dans un verre teinté.`},
+    {nom:'Coloris brun, gris, gris US',icon:'ti-palette',desc:`Teinte uniforme intégrée dans la masse. Disponible brun 3, gris 3 et gris US. Rendu des couleurs stable en toutes conditions.`},
+    {nom:`Option Autonight (Photo1)`,icon:'ti-sun-moon',desc:`Version photochromique disponible — transparent en intérieur, teinté automatiquement en extérieur en 30 secondes.`}
+   ]},
+
+  // ── POLARISÉ ──────────────────────────────────────────────────
+  {id:'sg6',nom:'Sign Unisign Pola',marque:'Sign by BBGR',gamme:'milieu',
+   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
+   indices:{'1.50':100,'1.60':130},achats:{'1.50':29.20,'1.60':38},
+   traitements:[
+    {nom:'Filtre polarisant — reflets supprimés',icon:'ti-polaroid',desc:`Élimine les reflets horizontaux sur l'eau, la neige, la route mouillée. Vision nette et contrastée. Fond marin visible. Idéal pêche, voile, ski.`},
+    {nom:'ARMC antireflet',icon:'ti-sparkles',desc:`Antireflet multicouches résistant intégré. Associé au filtre polarisant pour un maximum de confort et d'esthétique.`},
+    {nom:'UV 400 nm + polarisant',icon:'ti-sun',desc:`Double protection : UV 400 nm + filtre polarisant. Indispensable pour les activités nautiques et les sports d'hiver.`},
+    {nom:'Gris US polarisé disponible',icon:'ti-palette',desc:`Coloris brun polarisé et gris polarisé. Le gris US polarisé offre le meilleur rendu des contrastes sous l'eau pour la pêche.`}
+   ]},
+
+  {id:'sg7',nom:'Sign Prosign 15 Pola',marque:'Sign by BBGR',gamme:'haut',
+   compatible:['progressif'],sphMax:8,cylMax:4,aspherique:false,precalibrage:true,
+   indices:{'1.50':165,'1.60':198},achats:{'1.50':69.90,'1.60':81.10},
+   traitements:[
+    {nom:'Progressif polarisé — unique',icon:'ti-polaroid',desc:`Correction presbytie complète + filtre polarisant — les deux en un seul verre. Suppression totale des reflets sur l'eau, la neige et la route.`},
+    {nom:'Filtre polarisant 100 %',icon:'ti-wave-sine',desc:`Bloque 100 % de la lumière polarisée horizontalement. Reflets éliminés sur toutes surfaces réfléchissantes — eau, neige, bitume mouillé.`},
+    {nom:'ARMC+ premium',icon:'ti-shield',desc:`Antireflet multicouches premium intégré. Résistance accrue aux rayures et aux agents chimiques (crèmes solaires, solvants).`},
+    {nom:'UV 400 nm',icon:'ti-sun',desc:`Protection UV 400 nm totale. Correction presbytie + protection solaire polarisante = solution complète pour patient actif en extérieur.`}
    ]},
 ];
 
