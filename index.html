@@ -77,6 +77,9 @@ select option{background:#252525;color:#f0f0f0}
 .mut-card:hover{border-color:var(--blue-400);background:#2a3a50;transform:translateY(-1px)}
 .mut-card .label{font-size:14px;font-weight:700;color:#f0f0f0;margin:8px 0 3px}
 .mut-card .sub{font-size:11px;color:#aaa;line-height:1.4}
+/* Badge remise monture sur carte mutuelle */
+.mut-logo-card{position:relative}
+.mut-remise-badge{position:absolute;top:5px;right:5px;background:#e65c00;color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:20px;letter-spacing:.3px;pointer-events:none}
 
 /* VISION CARDS */
 .grid-4{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1452,16 +1455,16 @@ select option{background:#252525;color:#f0f0f0}
 // ─── MUTUELLES ───────────────────────────────────────────────
 const mutuelles = [
   // ── Sous Contrat ─────────────────────────────────────────────
-  {id:'kalixia', label:'Kalixia',       section:'sous', lastMaj:'27/04/2026', plafond_monture:130, plafond_verre:200},
-  {id:'cb',      label:'Carte Blanche', section:'sous', lastMaj:'09/01/2026', plafond_monture:150, plafond_verre:250},
-  {id:'sc',      label:'Santéclair',    section:'sous', lastMaj:'07/01/2026', plafond_monture:120, plafond_verre:220},
-  {id:'itelis',  label:'Itelis',        section:'sous', lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220},
-  {id:'seveane', label:'Séveane',       section:'sous', lastMaj:'07/01/2026', plafond_monture:130, plafond_verre:200},
-  {id:'optilys', label:'Optilys',       section:'sous', lastMaj:'19/05/2025', plafond_monture:130, plafond_verre:210},
+  {id:'kalixia', label:'Kalixia',       section:'sous', lastMaj:'27/04/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20},
+  {id:'cb',      label:'Carte Blanche', section:'sous', lastMaj:'09/01/2026', plafond_monture:150, plafond_verre:250, remiseMonture:0},
+  {id:'sc',      label:'Santéclair',    section:'sous', lastMaj:'07/01/2026', plafond_monture:120, plafond_verre:220, remiseMonture:10},
+  {id:'itelis',  label:'Itelis',        section:'sous', lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:0},
+  {id:'seveane', label:'Séveane',       section:'sous', lastMaj:'07/01/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20},
+  {id:'optilys', label:'Optilys',       section:'sous', lastMaj:'19/05/2025', plafond_monture:130, plafond_verre:210, remiseMonture:0},
   // ── Sans Contrat ─────────────────────────────────────────────
-  {id:'actil',   label:'Actil',         section:'sans', lastMaj:'16/04/2026', plafond_monture:100, plafond_verre:180},
+  {id:'actil',   label:'Actil',         section:'sans', lastMaj:'16/04/2026', plafond_monture:100, plafond_verre:180, remiseMonture:0},
   // ── Hors OCAM ────────────────────────────────────────────────
-  {id:'horsocam',label:'Hors OCAM',     section:'hors', lastMaj:'17/04/2026', plafond_monture:0,   plafond_verre:0},
+  {id:'horsocam',label:'Hors OCAM',     section:'hors', lastMaj:'17/04/2026', plafond_monture:0,   plafond_verre:0,   remiseMonture:0},
 ];
 
 // ─── CATALOGUE VERRES ────────────────────────────────────────
@@ -1954,6 +1957,7 @@ function _renderMutGrid(containerId, onClickFn, f=''){
     <div class="mut-logo-grid">
       ${items.map(m => `
         <div class="mut-logo-card${s.key==='sans'?' sans-contrat':s.key==='hors'?' hors-ocam':''}" onclick="${onClickFn}('${m.id}')">
+          ${m.remiseMonture > 0 ? `<div class="mut-remise-badge">-${m.remiseMonture}% monture</div>` : ''}
           <div>${mutLogos[m.id]||''}</div>
           <div class="mut-maj">Dernière maj : ${m.lastMaj||''}</div>
         </div>`).join('')}
@@ -2275,7 +2279,8 @@ function showVerres(){
     <div class="summary-row"><span class="key">OD</span><span class="val">${odSph||'—'} / ${odCyl||'0'} / ${odAxe||'—'}°${odAdd?' add +'+odAdd:''}</span></div>
     <div class="summary-row"><span class="key">OG</span><span class="val">${ogSph||'—'} / ${ogCyl||'0'} / ${ogAxe||'—'}°${ogAdd?' add +'+ogAdd:''}</span></div>
     <div class="summary-row"><span class="key"><i class="ti ti-stack-2" style="font-size:14px"></i> Indice recommandé</span><span class="val" style="color:#f0c040" id="indice-recap-val">${getIndiceLabel(indiceRec)}</span></div>
-    ${(state.mutuelle.id==='cb'||state.mutuelle.id==='actil')?`<div class="summary-row"><span class="key"><i class="ti ti-building-store" style="font-size:14px"></i> Mode tarif</span><span class="val" style="color:#70d090">${state.mutuelle.id==='cb'?'Tarif réseau Carte Blanche':'Tarif réseau Actil'}</span></div>`:''}`;
+    ${(state.mutuelle.id==='cb'||state.mutuelle.id==='actil')?`<div class="summary-row"><span class="key"><i class="ti ti-building-store" style="font-size:14px"></i> Mode tarif</span><span class="val" style="color:#70d090">${state.mutuelle.id==='cb'?'Tarif réseau Carte Blanche':'Tarif réseau Actil'}</span></div>`:''}
+    ${state.mutuelle.remiseMonture > 0 ? `<div class="summary-row" style="background:#1f1408;border-left:3px solid #e65c00;padding-left:10px;border-radius:4px"><span class="key"><i class="ti ti-tag" style="font-size:14px;color:#e65c00"></i>&nbsp;<strong style="color:#e65c00">Remise monture obligatoire</strong></span><span class="val" style="color:#ffaa44;font-weight:800">${state.mutuelle.remiseMonture}% sur le prix public</span></div>` : ''}`;
 
   // Conseils
   const conseils=getConseils(sphMax,cylMax,state.vision.id);
