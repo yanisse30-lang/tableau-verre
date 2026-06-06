@@ -387,6 +387,11 @@ select option{background:#fff;color:var(--txt-primary)}
 .admin-msg{font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:14px;display:none;text-align:center}
 .admin-msg.ok{background:#F0FDF4;border:1px solid #BBF7D0;color:#16A34A;display:block}
 .admin-msg.err{background:#FFF1F2;border:1px solid #FECDD3;color:#E11D48;display:block}
+.role-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px}
+.role-btn{padding:10px 8px;border-radius:10px;border:2px solid var(--bdr-medium);background:var(--surf-secondary);color:var(--txt-secondary);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:0.15s}
+.role-btn:hover{border-color:var(--blue-600);color:var(--blue-600);background:#EFF6FF}
+.role-btn.sel-collab{border-color:#185FA5;background:#EFF6FF;color:#185FA5}
+.role-btn.sel-admin{border-color:#7C3AED;background:#F5F3FF;color:#7C3AED}
 .btn-admin-close{background:var(--surf-secondary);border:1px solid var(--bdr-light);color:var(--txt-secondary);border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:16px;font-family:inherit}
 .btn-admin-close:hover{background:var(--bdr-light)}
 .admin-btn-top{background:var(--surf-secondary);border:1px solid var(--bdr-light);color:var(--txt-secondary);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;position:absolute;top:16px;right:16px}
@@ -738,6 +743,14 @@ select option{background:#fff;color:var(--txt-primary)}
       <div class="admin-field"><label><i class="ti ti-user" style="font-size:11px"></i> Identifiant</label><input type="text" id="new-user" placeholder="ex: opticien3" autocomplete="off"/></div>
       <div class="admin-field"><label><i class="ti ti-id-badge" style="font-size:11px"></i> Prénom / Nom affiché</label><input type="text" id="new-nom" placeholder="ex: Marie Dupont" autocomplete="off"/></div>
       <div class="admin-field"><label><i class="ti ti-lock" style="font-size:11px"></i> Mot de passe</label><input type="password" id="new-pass" placeholder="Minimum 6 caractères" autocomplete="off"/></div>
+      <div class="admin-field">
+        <label><i class="ti ti-shield" style="font-size:11px"></i> Rôle du compte</label>
+        <div class="role-pick">
+          <button type="button" class="role-btn sel-collab" id="role-btn-collab" onclick="selectRole('collab')"><i class="ti ti-user"></i> Collaborateur</button>
+          <button type="button" class="role-btn" id="role-btn-admin" onclick="selectRole('admin')"><i class="ti ti-crown"></i> Administrateur</button>
+        </div>
+        <div style="margin-top:6px;font-size:11px;color:var(--txt-muted)" id="role-desc">Accès aux fonctionnalités standard uniquement.</div>
+      </div>
       <button class="btn-admin-add" onclick="addCompte()"><i class="ti ti-plus"></i> Créer le compte</button>
       <div class="admin-list">
         <div class="admin-list-title">Comptes existants</div>
@@ -2454,7 +2467,7 @@ async function doLogin(){
       err.style.display='none';
       document.getElementById('logout-bar').style.display='flex';
       document.getElementById('user-display-name').textContent=currentUser.nom;
-      document.getElementById('user-role-badge').textContent=currentUser.admin?'👑 Admin':'Opticien';
+      document.getElementById('user-role-badge').textContent=currentUser.admin?'👑 Admin':'Collaborateur';
       if(currentUser.admin){ document.getElementById('admin-btn').style.display='flex'; document.getElementById('verres-admin-btn').style.display='flex'; }
       showToast('Bienvenue, ' + currentUser.nom + ' !');
     } else {
@@ -2497,7 +2510,7 @@ async function renderAdminListe(){
       <div class="admin-compte">
         <div>
           <div class="admin-compte-info"><i class="ti ti-user" style="font-size:13px;margin-right:4px"></i>${c.nom} <span style="color:#aaa;font-weight:400">(${c.username})</span></div>
-          <div class="admin-compte-role">${c.admin?'<span style="color:#60aaee">👑 Administrateur</span>':'Opticien'}</div>
+          <div class="admin-compte-role">${c.admin?'<span style="color:#7C3AED;font-weight:700">👑 Administrateur</span>':'<span style="color:#185FA5;font-weight:600">👤 Collaborateur</span>'}</div>
         </div>
         <button class="btn-del" onclick="delCompte('${c.id}','${c.username}')" ${c.admin?'disabled':''} title="${c.admin?'Compte admin non supprimable':'Supprimer'}">
           <i class="ti ti-trash"></i> ${c.admin?'Admin':'Supprimer'}
@@ -2508,25 +2521,40 @@ async function renderAdminListe(){
   }
 }
 
+let _newRole = 'collab'; // 'collab' ou 'admin'
+function selectRole(role){
+  _newRole = role;
+  const btnC = document.getElementById('role-btn-collab');
+  const btnA = document.getElementById('role-btn-admin');
+  const desc = document.getElementById('role-desc');
+  btnC.className = 'role-btn' + (role==='collab' ? ' sel-collab' : '');
+  btnA.className = 'role-btn' + (role==='admin' ? ' sel-admin' : '');
+  desc.textContent = role==='admin'
+    ? 'Accès complet : gestion des comptes, des verres et toutes les fonctionnalités.'
+    : 'Accès aux fonctionnalités standard uniquement.';
+}
+
 async function addCompte(){
   const u = document.getElementById('new-user').value.trim().toLowerCase();
   const n = document.getElementById('new-nom').value.trim();
   const p = document.getElementById('new-pass').value;
   if(!u||!n||!p){ showAdminMsg('Remplissez tous les champs.','err'); return; }
   if(p.length<6){ showAdminMsg('Mot de passe trop court (6 caractères min).','err'); return; }
+  const isAdmin = _newRole === 'admin';
   const btn = document.querySelector('.btn-admin-add');
   btn.disabled=true;
   btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Création...';
   try{
     await sbFetch('/rest/v1/comptes', {
       method:'POST',
-      body: JSON.stringify({username:u, password:p, nom:n, admin:false})
+      body: JSON.stringify({username:u, password:p, nom:n, admin:isAdmin})
     });
     document.getElementById('new-user').value='';
     document.getElementById('new-nom').value='';
     document.getElementById('new-pass').value='';
+    selectRole('collab'); // reset role selector
     await renderAdminListe();
-    showAdminMsg('Compte "'+n+'" créé avec succès !','ok');
+    showAdminMsg('Compte "'+n+'" créé ('+(isAdmin?'Administrateur':'Collaborateur')+') !','ok');
   } catch(e){
     if(e.message.includes('duplicate')) showAdminMsg('Cet identifiant existe déjà.','err');
     else showAdminMsg('Erreur : '+e.message,'err');
