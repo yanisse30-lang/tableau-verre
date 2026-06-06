@@ -1455,16 +1455,18 @@ select option{background:#252525;color:#f0f0f0}
 // ─── MUTUELLES ───────────────────────────────────────────────
 const mutuelles = [
   // ── Sous Contrat ─────────────────────────────────────────────
-  {id:'kalixia', label:'Kalixia',       section:'sous', lastMaj:'27/04/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20},
-  {id:'cb',      label:'Carte Blanche', section:'sous', lastMaj:'09/01/2026', plafond_monture:150, plafond_verre:250, remiseMonture:0},
-  {id:'sc',      label:'Santéclair',    section:'sous', lastMaj:'07/01/2026', plafond_monture:120, plafond_verre:220, remiseMonture:10},
-  {id:'itelis',  label:'Itelis',        section:'sous', lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:0},
-  {id:'seveane', label:'Séveane',       section:'sous', lastMaj:'07/01/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20},
-  {id:'optilys', label:'Optilys',       section:'sous', lastMaj:'19/05/2025', plafond_monture:130, plafond_verre:210, remiseMonture:0},
+  // prixPrecalibrage = prix Optislim Nikon par réseau (mémos Dec 2024 / Mars 2025)
+  // optislimInclus = true → Optislim déjà inclus dans le Px Vente TTC (Avec), pas de surcoût patient
+  {id:'kalixia', label:'Kalixia',       section:'sous', lastMaj:'27/04/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20, prixPrecalibrage:12, optislimInclus:false},
+  {id:'cb',      label:'Carte Blanche', section:'sous', lastMaj:'09/01/2026', plafond_monture:150, plafond_verre:250, remiseMonture:0,  prixPrecalibrage:20, optislimInclus:false},
+  {id:'sc',      label:'Santéclair',    section:'sous', lastMaj:'07/01/2026', plafond_monture:120, plafond_verre:220, remiseMonture:10, prixPrecalibrage:0,  optislimInclus:true},
+  {id:'itelis',  label:'Itelis',        section:'sous', lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:0,  prixPrecalibrage:10, optislimInclus:false},
+  {id:'seveane', label:'Séveane',       section:'sous', lastMaj:'07/01/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20, prixPrecalibrage:0,  optislimInclus:true},
+  {id:'optilys', label:'Optilys',       section:'sous', lastMaj:'19/05/2025', plafond_monture:130, plafond_verre:210, remiseMonture:0,  prixPrecalibrage:15, optislimInclus:false},
   // ── Sans Contrat ─────────────────────────────────────────────
-  {id:'actil',   label:'Actil',         section:'sans', lastMaj:'16/04/2026', plafond_monture:100, plafond_verre:180, remiseMonture:0},
+  {id:'actil',   label:'Actil',         section:'sans', lastMaj:'16/04/2026', plafond_monture:100, plafond_verre:180, remiseMonture:0,  prixPrecalibrage:15, optislimInclus:false},
   // ── Hors OCAM ────────────────────────────────────────────────
-  {id:'horsocam',label:'Hors OCAM',     section:'hors', lastMaj:'17/04/2026', plafond_monture:0,   plafond_verre:0,   remiseMonture:0},
+  {id:'horsocam',label:'Hors OCAM',     section:'hors', lastMaj:'17/04/2026', plafond_monture:0,   plafond_verre:0,   remiseMonture:0,  prixPrecalibrage:15, optislimInclus:false},
 ];
 
 // ─── CATALOGUE VERRES ────────────────────────────────────────
@@ -2082,7 +2084,13 @@ function renderVerreLigne(v){
   const isReseau = (mutId==='cb'||mutId==='actil') && v.tarifsReseau
     && (mutId==='cb' ? v.tarifsReseau.cb?.[v.indiceChoisi] : v.tarifsReseau.actil?.[v.indiceChoisi]);
   const gcColor = v.gamme==='haut'?'#9060e0':v.gamme==='milieu'?'#378ADD':'#3B6D11';
-  const precalSaisie = v.precalibrage ? '+15 €' : '—';
+  const _precalPrix    = state.mutuelle?.prixPrecalibrage ?? 15;
+  const _precalInclus  = state.mutuelle?.optislimInclus  ?? false;
+  const precalSaisie   = v.precalibrage
+    ? (_precalInclus
+        ? `<span style="color:#50d080;font-size:11px;font-weight:700">Inclus tarif</span>`
+        : `+${_precalPrix} €`)
+    : '—';
   const margeClass = taux >= 45 ? 'high' : '';
   const trHTML = v.traitements.slice(0,3).map(t =>
     `<div class="vt-trait"><strong><i class="ti ${t.icon}" style="margin-right:4px;color:#378ADD"></i>${t.nom}</strong>${t.desc.substring(0,90)}…</div>`
@@ -2280,7 +2288,10 @@ function showVerres(){
     <div class="summary-row"><span class="key">OG</span><span class="val">${ogSph||'—'} / ${ogCyl||'0'} / ${ogAxe||'—'}°${ogAdd?' add +'+ogAdd:''}</span></div>
     <div class="summary-row"><span class="key"><i class="ti ti-stack-2" style="font-size:14px"></i> Indice recommandé</span><span class="val" style="color:#f0c040" id="indice-recap-val">${getIndiceLabel(indiceRec)}</span></div>
     ${(state.mutuelle.id==='cb'||state.mutuelle.id==='actil')?`<div class="summary-row"><span class="key"><i class="ti ti-building-store" style="font-size:14px"></i> Mode tarif</span><span class="val" style="color:#70d090">${state.mutuelle.id==='cb'?'Tarif réseau Carte Blanche':'Tarif réseau Actil'}</span></div>`:''}
-    ${state.mutuelle.remiseMonture > 0 ? `<div class="summary-row" style="background:#1f1408;border-left:3px solid #e65c00;padding-left:10px;border-radius:4px"><span class="key"><i class="ti ti-tag" style="font-size:14px;color:#e65c00"></i>&nbsp;<strong style="color:#e65c00">Remise monture obligatoire</strong></span><span class="val" style="color:#ffaa44;font-weight:800">${state.mutuelle.remiseMonture}% sur le prix public</span></div>` : ''}`;
+    ${state.mutuelle.remiseMonture > 0 ? `<div class="summary-row" style="background:#1f1408;border-left:3px solid #e65c00;padding-left:10px;border-radius:4px"><span class="key"><i class="ti ti-tag" style="font-size:14px;color:#e65c00"></i>&nbsp;<strong style="color:#e65c00">Remise monture obligatoire</strong></span><span class="val" style="color:#ffaa44;font-weight:800">${state.mutuelle.remiseMonture}% sur le prix public</span></div>` : ''}
+    ${state.mutuelle.optislimInclus
+      ? `<div class="summary-row" style="background:#0a1e14;border-left:3px solid #50d080;padding-left:10px;border-radius:4px"><span class="key"><i class="ti ti-tool" style="font-size:14px;color:#50d080"></i>&nbsp;<strong style="color:#50d080">Précalibrage Optislim</strong></span><span class="val" style="color:#80f0b0;font-weight:700">Inclus dans le tarif verre</span></div>`
+      : `<div class="summary-row"><span class="key"><i class="ti ti-tool" style="font-size:14px"></i> Précalibrage (si applicable)</span><span class="val" style="color:#c8c8c8">+${state.mutuelle.prixPrecalibrage ?? 15} € / verre</span></div>`}`;
 
   // Conseils
   const conseils=getConseils(sphMax,cylMax,state.vision.id);
