@@ -2090,7 +2090,7 @@ function renderVerreLigne(v){
     ? (_precalInclus
         ? `<span style="display:inline-block;background:#0a2e1a;color:#50f0a0;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;border:1.5px solid #1a6040">Inclus</span>`
         : `<span style="display:inline-block;background:#1a1040;color:#c080ff;font-size:12px;font-weight:800;padding:3px 9px;border-radius:20px;border:1.5px solid #5030a0">+${_precalPrix} €</span>`)
-    : '<span style="color:#444">—</span>';
+    : `<span style="display:inline-block;background:#1a1200;color:#f0b030;font-size:10px;font-weight:700;padding:3px 7px;border-radius:20px;border:1.5px solid #5a4000;line-height:1.3;text-align:center">💡 Conseillé<br><strong style="font-size:11px">+${_precalPrix} €</strong></span>`;
   const margeClass = taux >= 45 ? 'high' : '';
   const trHTML = v.traitements.slice(0,3).map(t =>
     `<div class="vt-trait"><strong><i class="ti ${t.icon}" style="margin-right:4px;color:#378ADD"></i>${t.nom}</strong>${t.desc.substring(0,90)}…</div>`
