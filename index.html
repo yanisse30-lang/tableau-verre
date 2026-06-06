@@ -2493,6 +2493,7 @@ async function doLogin(){
 }
 
 function openAdmin(){
+  if(!currentUser || !currentUser.admin){ showToast('Accès réservé aux administrateurs.'); return; }
   document.getElementById('admin-screen').classList.add('open');
   renderAdminListe();
 }
@@ -2521,7 +2522,7 @@ async function renderAdminListe(){
   }
 }
 
-let _newRole = 'collab'; // 'collab' ou 'admin'
+let _newRole = 'collab'; // 'collab' ou 'admin' — réservé aux admins
 function selectRole(role){
   _newRole = role;
   const btnC = document.getElementById('role-btn-collab');
@@ -2535,6 +2536,7 @@ function selectRole(role){
 }
 
 async function addCompte(){
+  if(!currentUser || !currentUser.admin){ showAdminMsg('Action réservée aux administrateurs.','err'); return; }
   const u = document.getElementById('new-user').value.trim().toLowerCase();
   const n = document.getElementById('new-nom').value.trim();
   const p = document.getElementById('new-pass').value;
