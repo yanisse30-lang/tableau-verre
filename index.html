@@ -153,8 +153,10 @@ select option{background:#252525;color:#f0f0f0}
 .vt-prix{font-size:14px;font-weight:800;color:#f0f0f0;white-space:nowrap}
 .vt-prix.reseau{color:#50e090}
 .vt-saisie{font-size:13px;color:#bbb;text-align:right;white-space:nowrap}
-.vt-marge{font-size:13px;font-weight:800;color:#60aaee;text-align:right;white-space:nowrap}
-.vt-marge.high{color:#50d080}
+.vt-marge{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.vt-marge-pct{font-size:16px;font-weight:900;color:#60aaee;line-height:1}
+.vt-marge.high .vt-marge-pct{color:#50d080}
+.vt-marge-detail{font-size:10px;color:#666;white-space:nowrap}
 .vt-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:0}
 .vt-detail{display:none;background:#141414;border-bottom:1px solid #252525}
 .vt-detail.open{display:table-row}
@@ -1919,7 +1921,7 @@ function renderVerreLigne(v){
       <td class="vt-saisie">${v.vente} €</td>
       <td class="vt-saisie">${precalSaisie}</td>
       <td class="vt-saisie">—</td>
-      <td><span class="vt-marge ${margeClass}">+${marge} €<br><span style="font-size:10px;opacity:0.7">${taux} % · +${marge*2} €/paire</span></span></td>
+      <td style="text-align:right"><div class="vt-marge ${margeClass}"><span class="vt-marge-pct">${taux}%</span><span class="vt-marge-detail">+${marge} € / verre · +${marge*2} € / paire</span></div></td>
     </tr>
     <tr class="vt-detail" id="vt-${v.id}">
       <td colspan="8">
