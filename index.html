@@ -1472,77 +1472,209 @@ const mutuelles = [
 // Classe A = prix réglementés 100% Santé — ne pas modifier
 const catalogue = [
 
-  // ── HAUT DE GAMME — PROGRESSIF ──────────────────────────
-  {id:'nk_h1',nom:'Nikon Presio Infinite',marque:'Nikon',gamme:'haut',
-   compatible:['progressif'],sphMax:16,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.50':373,'1.60':455,'1.67':551},achats:{'1.50':113,'1.60':138,'1.67':167},
-   // CB: P.Mast Z FP 12 SCCNextUV | Actil: D1 base + Design9(165) + SAR HD(35) + UV surface(8) + précalibrage(15)
-   tarifsReseau:{cb:{'1.50':326,'1.60':361,'1.67':378},actil:{'1.50':318,'1.60':333,'1.67':358}},
+  // ── HAUT DE GAMME ─────────────────────────────────────────
+  // Presio Master Z 12 ECC+UV | achat:145.50/170 | CB:285/308 | marge:48.9%/44.8%
+  {id:'nk_h1',nom:'Nikon Presio Master Z 12',marque:'Nikon',gamme:'haut',
+   compatible:['progressif'],sphMax:14,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.50':342,'1.60':370},achats:{'1.50':145.50,'1.60':170},
+   tarifsReseau:{cb:{'1.50':285,'1.60':308},actil:{'1.50':269,'1.60':290}},
+   tags:['ar'],
    traitements:[
-    {nom:'SeeCoat Next UV (SCCNext)',icon:'ti-shield',desc:`Antireflet premium Nikon — résistance maximale aux rayures, déperlant haute performance, UV 400nm. Garantie 5 ans. Livré avec carte d'authenticité.`},
-    {nom:'ECC+ Technology',icon:'ti-cpu',desc:`Eye-Curvature Compensation Plus. Correction des aberrations binoculaires propres à chaque œil. Personnalisation totale selon la géométrie cornéenne du patient.`},
-    {nom:'DigiFit Personalization',icon:'ti-arrows-cross',desc:`Mesure en conditions de port réel — posture, angle panoramique, distance vertex. Le corridor est calculé pour CE patient avec CETTE monture.`},
-    {nom:'Polashade & Transitions disponibles',icon:'ti-sun-moon',desc:'Versions Polashade polarise (reflets eau supprimes) et Transitions Gen S / XTRActive NG disponibles en option.'}
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon — Eye-Curvature Compensation. Résistance maximale aux rayures, super-hydrophobe, UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'SumitechV Ultra Freeform',icon:'ti-cpu',desc:'Surfaçage numérique ultra-précis. Design Master Z : corridor extra-large, zones de vision intermédiaire et rapprochée élargies.'},
+    {nom:'DigiFit — Mesure en conditions de port',icon:'ti-arrows-cross',desc:`Mesure du corridor en situation réelle — posture, angle panoramique, distance vertex. Calculé pour CE patient avec CETTE monture.`},
+    {nom:'Transitions Gen S & Polashade disponibles',icon:'ti-sun-moon',desc:'Versions Transitions Gen S (photochromique) et Polashade (polarisé) disponibles sur demande.'}
    ]},
-  // ── HAUT DE GAMME — UNIFOCAL ─────────────────────────────
-  {id:'nk_h2',nom:'Nikon SCC+ UV NG',marque:'Nikon',gamme:'haut',
-   compatible:['loin','pres','intermediaire'],sphMax:19,cylMax:9,aspherique:true,precalibrage:true,
-   indices:{'1.50':185,'1.60':205,'1.67':251,'1.74':304},achats:{'1.50':56,'1.60':62,'1.67':76,'1.74':92},
-   // CB: Nikon As SCC+UV NG | Actil: base(32/52/66/76) + asph(15) + SAR HD(35) + UV surface(8)
+
+  // Presio Clear P 13 Transitions Gen S | achat:135/155 | CB:269/302 | marge:49.8%/48.7%
+  {id:'nk_h2',nom:'Nikon Presio Clear P 13 Transitions Gen S',marque:'Nikon',gamme:'haut',
+   compatible:['progressif'],sphMax:14,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.50':325,'1.60':365},achats:{'1.50':135,'1.60':155},
+   tarifsReseau:{cb:{'1.50':269,'1.60':302},actil:{'1.50':254,'1.60':285}},
+   tags:['ar','tr'],
+   traitements:[
+    {nom:'Transitions Gen S',icon:'ti-sun-moon',desc:'Transitions Gen S — photochromie nouvelle génération. Transparent en intérieur, teinte foncée en 30 secondes en extérieur. Protection UV 400nm complète. Disponible en brun ou gris.'},
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon sur les deux faces. Résistance maximale aux rayures, super-hydrophobe, UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'Design Corridor P 13',icon:'ti-adjustments-horizontal',desc:'Corridor progressif 13 mm personnalisable — adaptation rapide, vision intermédiaire élargie, champ de lecture confortable.'},
+    {nom:'Polashade disponible',icon:'ti-polaroid',desc:'Version Polashade polarisé disponible pour les patients actifs (pêche, voile, conduite).'}
+   ]},
+
+  // Presio Clear P 13 ECC+UV | achat:117/135 | CB:223/248 | marge:47.5%/45.6%
+  {id:'nk_h3',nom:'Nikon Presio Clear P 13',marque:'Nikon',gamme:'haut',
+   compatible:['progressif'],sphMax:14,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.50':268,'1.60':298},achats:{'1.50':117,'1.60':135},
+   tarifsReseau:{cb:{'1.50':223,'1.60':248},actil:{'1.50':210,'1.60':235}},
+   tags:['ar'],
+   traitements:[
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon — résistance maximale aux rayures, super-hydrophobe, UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'Design Corridor Personnalisable',icon:'ti-cpu',desc:'Corridor 13 mm adaptatif — zones loin/intermédiaire/près équilibrées. Personnalisation selon la monture et les habitudes visuelles.'},
+    {nom:'SumitechV Premium Freeform',icon:'ti-adjustments-horizontal',desc:'Surfaçage numérique premium — correction des aberrations de 4e ordre. Vision nette du centre à la périphérie sans voile ni distorsion.'},
+    {nom:'Transitions Gen S disponible',icon:'ti-sun-moon',desc:'Version Transitions Gen S disponible (voir Presio Clear P 13 Transitions Gen S).'}
+   ]},
+
+  // SCC+UV NG Asphérique unifocal | achat:63.10/69.10/83/99.10 | CB:99/110/125/143
+  {id:'nk_h4',nom:'Nikon SCC+UV NG',marque:'Nikon',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:19,cylMax:9,aspherique:true,precalibrage:false,
+   indices:{'1.50':185,'1.60':205,'1.67':251,'1.74':304},
+   achats:{'1.50':63.10,'1.60':69.10,'1.67':83,'1.74':99.10},
    tarifsReseau:{cb:{'1.50':99,'1.60':110,'1.67':125,'1.74':143},actil:{'1.50':90,'1.60':110,'1.67':124,'1.74':134}},
+   tags:['ar'],
    traitements:[
-    {nom:'SeeCoat Clear+ UV NG',icon:'ti-shield',desc:'Antireflet nouvelle generation Nikon — resistance maximale, couche antistatique integree, super-hydrophobe, oleophobe. UV 400nm transparent en masse.'},
-    {nom:"Carte d'authenticite Nikon",icon:'ti-certificate',desc:'Chaque verre livre avec certificat d authenticite Nikon. Garantie qualite, tracabilite totale, remplacement assure en cas de defaut.'},
-    {nom:'Aspherique biface',icon:'ti-maximize',desc:'Surfaces aspheriques avant et arriere. Verre plus plat, plus leger, vision nette et sans distorsion du centre a la peripherie.'},
-    {nom:'Pure Blue UV & Polashade disponibles',icon:'ti-device-desktop',desc:'Version Pure Blue UV (filtre lumiere bleue 380-460nm) et Polashade (polarise) disponibles sur demande.'}
+    {nom:'SCC+UV NG',icon:'ti-shield',desc:`SeeCoat Clear+ UV New Generation — antireflet de dernière génération Nikon. Résistance maximale aux rayures, couche antistatique intégrée, super-hydrophobe, oléophobe. UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'Asphérique biface',icon:'ti-maximize',desc:'Surfaces asphériques avant et arrière — verre plus plat, plus léger. Vision nette sans distorsion du centre à la périphérie, même en forte correction.'},
+    {nom:'Indices 1.50 à 1.74',icon:'ti-stack-2',desc:'Disponible en 1.50 — 1.60 — 1.67 — 1.74. Indice ultra-mince 1.74 recommandé pour les corrections supérieures à 7 dioptries.'},
+    {nom:'Pure Blue UV & Polashade disponibles',icon:'ti-device-desktop',desc:'Versions Pure Blue UV (filtre lumière bleue) et Polashade (polarisé) disponibles sur demande.'}
    ]},
-  // ── MILIEU DE GAMME — PROGRESSIF ─────────────────────────
-  {id:'nk_m1',nom:'Nikon Presio Power Smart',marque:'Nikon',gamme:'milieu',
+
+  // SeeCoat Blue UV Asphérique unifocal LB | achat:65.10/71.10/85.10 | CB:110/115/130
+  {id:'nk_h5',nom:'Nikon SeeCoat Blue UV',marque:'Nikon',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:14,cylMax:8,aspherique:true,precalibrage:false,
+   indices:{'1.50':195,'1.60':210,'1.67':248},
+   achats:{'1.50':65.10,'1.60':71.10,'1.67':85.10},
+   tarifsReseau:{cb:{'1.50':110,'1.60':115,'1.67':130},actil:{'1.50':114,'1.60':124,'1.67':138}},
+   tags:['ar','lb'],
+   traitements:[
+    {nom:'SeeCoat Blue UV',icon:'ti-device-desktop',desc:'SeeCoat Blue UV — filtre lumière bleue nocive 380-460nm intégré au traitement antireflet. Réduit la fatigue oculaire liée aux écrans LED/OLED. UV 400nm.'},
+    {nom:'ECC+UV antireflet',icon:'ti-shield',desc:`Traitement antireflet ECC+UV Nikon intégré. Résistance maximale aux rayures, super-hydrophobe, oléophobe. Carte d'authenticité incluse.`},
+    {nom:'Asphérique haute définition',icon:'ti-maximize',desc:'Surface asphérique biface — verre ultra-plat, ultra-léger. Meilleure esthétique en monture fine.'},
+    {nom:'Idéal patients écrans',icon:'ti-device-laptop',desc:'Recommandé pour les patients exposés aux écrans plus de 4h/jour. Réduit la fatigue visuelle en fin de journée.'}
+   ]},
+
+  // ── MILIEU DE GAMME ────────────────────────────────────────
+  // Presio Power Z 12 ECC+UV | achat:138/160 | CB:256/285 | marge:46.1%/43.9%
+  {id:'nk_m1',nom:'Nikon Presio Power Z 12',marque:'Nikon',gamme:'milieu',
    compatible:['progressif'],sphMax:12,cylMax:6,aspherique:true,precalibrage:true,
-   indices:{'1.50':198,'1.60':297,'1.67':458},achats:{'1.50':60,'1.60':90,'1.67':139},
-   // CB: P.Power Z 12 SCBUV | Actil: D1 base + Design7(110) + SAR HD(35) + LB matière(8) + précalibrage(15)
-   tarifsReseau:{cb:{'1.50':277,'1.60':312,'1.67':329},actil:{'1.50':263,'1.60':278,'1.67':303}},
+   indices:{'1.50':308,'1.60':344},achats:{'1.50':138,'1.60':160},
+   tarifsReseau:{cb:{'1.50':256,'1.60':285},actil:{'1.50':242,'1.60':268}},
+   tags:['ar'],
    traitements:[
-    {nom:'SeeCoat Blue UV (SCB)',icon:'ti-device-desktop',desc:'Antireflet SeeCoat Blue — filtre lumiere bleue nocive 380-460nm integre. Confort ecrans renforce. UV 400nm. Resistance aux rayures SeeCoat certifiee.'},
-    {nom:'SumitechV+ Technology',icon:'ti-cpu',desc:'Surfacage numerique Nikon — 2 millions de points de calcul. Correction des aberrations peripheriques, adaptation rapide, confort binoculaire.'},
-    {nom:'Balanced View Binoculaire',icon:'ti-adjustments-horizontal',desc:'Vision binoculaire optimisee. Equilibre parfait entre les deux yeux, reduction de la fatigue au passage loin / intermediaire / pres.'},
-    {nom:'Transitions XTRActive disponible',icon:'ti-sun-moon',desc:'Versions Transitions Gen S et XTRActive NG disponibles — photochromique transparent en interieur, teinte en exterieur en 30 secondes.'}
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon — résistance maximale aux rayures, super-hydrophobe, UV 400nm. Carte d'authenticité Nikon incluse.`},
+    {nom:'Design Power Z 12',icon:'ti-cpu',desc:'Corridor 12 mm, design Power Z — zones de vision intermédiaire et rapprochée renforcées pour les hypermétropes et forts presbytes. Profil Z équilibré.'},
+    {nom:'SumitechV+ Freeform',icon:'ti-adjustments-horizontal',desc:'Surfaçage numérique SumitechV+ — personnalisé selon la correction, la monture et la hauteur de montage. Adaptation rapide.'},
+    {nom:'Transitions Gen S disponible',icon:'ti-sun-moon',desc:'Version Transitions Gen S disponible — photochromique transparent en intérieur, teinte en extérieur.'}
    ]},
-  // ── MILIEU DE GAMME — UNIFOCAL ───────────────────────────
-  {id:'nk_m2',nom:'Nikon Pure Blue UV',marque:'Nikon',gamme:'milieu',
-   compatible:['loin','pres','intermediaire'],sphMax:14,cylMax:8,aspherique:true,precalibrage:true,
-   indices:{'1.50':145,'1.60':165,'1.67':211},achats:{'1.50':44,'1.60':50,'1.67':64},
-   // CB: Nikon As PurBlueUV SCC+UV NG | Actil: base(32/52/66) + asph(15) + SAR HD(35) + LB matière(8)
-   tarifsReseau:{cb:{'1.50':106,'1.60':117,'1.67':132},actil:{'1.50':90,'1.60':110,'1.67':124}},
+
+  // Presio Clear 13 ECC+UV | achat:98/118 | CB:199/226 | marge:50.8%/47.8%
+  {id:'nk_m2',nom:'Nikon Presio Clear 13',marque:'Nikon',gamme:'milieu',
+   compatible:['progressif'],sphMax:12,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.50':240,'1.60':272},achats:{'1.50':98,'1.60':118},
+   tarifsReseau:{cb:{'1.50':199,'1.60':226},actil:{'1.50':188,'1.60':212}},
+   tags:['ar'],
    traitements:[
-    {nom:'Pure Blue UV Filter',icon:'ti-device-desktop',desc:'Filtre dedie lumiere bleue nocive — bloque les longueurs d onde nocives 380-460nm. Reduit la fatigue oculaire lors de l utilisation intensive d ecrans LED/OLED.'},
-    {nom:'ECC+ UV (SeeCoat Clear)',icon:'ti-shield',desc:'Antireflet ECC+ UV integre — resistance aux rayures renforcee, UV 400nm transparent. Carte d authenticite Nikon incluse.'},
-    {nom:'Aspherique',icon:'ti-maximize',desc:'Surface aspherique pour un verre plus plat et plus leger. Vision nette et confortable, meme en vision peripherique et en forte correction.'},
-    {nom:'Polashade disponible',icon:'ti-polaroid',desc:'Version Polashade disponible — filtre polarisant + Pure Blue UV dans le meme verre. Ideal peche, voile, conduite.'}
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon — résistance maximale aux rayures, super-hydrophobe, UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'Design Corridor 13',icon:'ti-cpu',desc:'Corridor progressif 13 mm — large zone de vision intermédiaire. Adapté à tous types de presbytes, de la presbytie débutante à confirmée.'},
+    {nom:'Personnalisation Freeform',icon:'ti-adjustments-horizontal',desc:'Surfaçage numérique selon la correction et la monture. Adaptation rapide, vision binoculaire harmonieuse.'},
+    {nom:'SCC+UV NG & Transitions Gen S disponibles',icon:'ti-sparkles',desc:'Upgrade disponible vers SCC+UV NG (antireflet premium) ou version Transitions Gen S (photochromique).'}
    ]},
-  // ── ENTREE DE GAMME — PROGRESSIF ─────────────────────────
-  {id:'nk_e1',nom:'Nikon Presio Smart',marque:'Nikon',gamme:'entree',
-   compatible:['progressif'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
-   indices:{'1.50':112,'1.60':181},achats:{'1.50':34,'1.60':55},
-   // CB: Nikon P.Clear 13 HCC (design 4) | Actil: D1 base + Design4(50) + SAR HD(35) + précalibrage(15)
-   tarifsReseau:{cb:{'1.50':181,'1.60':215,'1.67':229},actil:{'1.50':195,'1.60':210}},
+
+  // Presio i Focus 13 ECC+UV | achat:89/105 | CB:166/188 | marge:46.4%/44.1%
+  {id:'nk_m3',nom:'Nikon Presio i Focus 13',marque:'Nikon',gamme:'milieu',
+   compatible:['progressif'],sphMax:10,cylMax:4,aspherique:true,precalibrage:true,
+   indices:{'1.50':200,'1.60':226},achats:{'1.50':89,'1.60':105},
+   tarifsReseau:{cb:{'1.50':166,'1.60':188},actil:{'1.50':157,'1.60':177}},
+   tags:['ar'],
    traitements:[
-    {nom:'HCC — Antireflet multi-couches',icon:'ti-sparkles',desc:'Antireflet multi-couches standard Nikon. Resistance aux rayures, reduction des reflets. Carte d authenticite incluse. Livraison J+1 avant 18h30.'},
-    {nom:'SumitechV Freeform',icon:'ti-cpu',desc:'Surfacage numerique de base — calcul personnalise selon l ordonnance et la monture. Corridor progressif accessible, adaptation rapide pour le patient.'},
-    {nom:'UV 380 nm',icon:'ti-sun',desc:'Protection UV 380nm integree dans la masse. Inclus sans supplement sur tous les verres Nikon de la gamme.'},
-    {nom:'Transitions Gen S disponible',icon:'ti-sun-moon',desc:'Version photochromique Transitions Gen S disponible en option — ideal pour les patients souhaitant eviter de changer de lunettes.'}
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon — résistance aux rayures renforcée, hydrophobe, UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'Design i Focus 13',icon:'ti-cpu',desc:'Corridor 13 mm, design i Focus — équilibre vision loin/intermédiaire/près. Zones de lecture larges, adaptation rapide pour les nouveaux porteurs de progressifs.'},
+    {nom:'Surfaçage numérique personnalisé',icon:'ti-adjustments-horizontal',desc:'Calcul selon la correction et la monture. Idéal pour la presbytie débutante à modérée.'},
+    {nom:'Transitions Gen S disponible',icon:'ti-sun-moon',desc:'Version Transitions Gen S disponible en option.'}
    ]},
-  // ── ENTREE DE GAMME — UNIFOCAL ───────────────────────────
-  {id:'nk_e2',nom:'Nikon Blanc HCC',marque:'Nikon',gamme:'entree',
-   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:6,aspherique:false,precalibrage:true,
-   indices:{'1.50':128,'1.60':148,'1.67':194,'1.74':237},achats:{'1.50':39,'1.60':45,'1.67':59,'1.74':72},
-   // CB: Nikon As HCC (HCC non dispo 1.74 CB) | Actil: base unifocal(32/52/66/76) + SAR HD(35)
+
+  // ECC+UV Asphérique unifocal | achat:45.10/51.10/70.10 | CB:96/107/125 | marge:53%/52.2%/43.9%
+  {id:'nk_m4',nom:'Nikon ECC+UV Asphérique',marque:'Nikon',gamme:'milieu',
+   compatible:['loin','pres','intermediaire'],sphMax:19,cylMax:9,aspherique:true,precalibrage:false,
+   indices:{'1.50':168,'1.60':188,'1.67':228},
+   achats:{'1.50':45.10,'1.60':51.10,'1.67':70.10},
+   tarifsReseau:{cb:{'1.50':96,'1.60':107,'1.67':125},actil:{'1.50':90,'1.60':110,'1.67':124}},
+   tags:['ar'],
+   traitements:[
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon — résistance aux rayures renforcée, super-hydrophobe, UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'Asphérique biface',icon:'ti-maximize',desc:'Surface asphérique avant et arrière — verre plus plat, plus léger. Réduction des déformations périphériques pour les fortes corrections.'},
+    {nom:'Indices 1.50 — 1.60 — 1.67',icon:'ti-stack-2',desc:'Disponible en trois indices. Le 1.67 ultra-mince est recommandé pour les corrections fortes (équivalent sphérique > 4.5 D).'},
+    {nom:'Upgrade SCC+UV NG ou Pure Blue UV',icon:'ti-sparkles',desc:'Montée en gamme vers SCC+UV NG (antireflet premium) ou Pure Blue UV (filtre lumière bleue) disponible.'}
+   ]},
+
+  // Pure Blue UV Asphérique unifocal LB | achat:65.10/71.10/85.10 | CB:106/117/132
+  {id:'nk_m5',nom:'Nikon Pure Blue UV',marque:'Nikon',gamme:'milieu',
+   compatible:['loin','pres','intermediaire'],sphMax:14,cylMax:8,aspherique:true,precalibrage:false,
+   indices:{'1.50':165,'1.60':188,'1.67':228},
+   achats:{'1.50':65.10,'1.60':71.10,'1.67':85.10},
+   tarifsReseau:{cb:{'1.50':106,'1.60':117,'1.67':132},actil:{'1.50':100,'1.60':115,'1.67':128}},
+   tags:['ar','lb'],
+   traitements:[
+    {nom:'Pure Blue UV',icon:'ti-device-desktop',desc:'Pure Blue UV — filtre dédié lumière bleue nocive 380-460nm dans la masse du verre. Réduit la fatigue oculaire des patients sur écrans intensifs.'},
+    {nom:'ECC+UV antireflet',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon intégré. Résistance aux rayures, UV 400nm, super-hydrophobe. Carte d'authenticité Nikon incluse.`},
+    {nom:'Asphérique',icon:'ti-maximize',desc:'Surface asphérique — verre plus plat, plus léger. Vision nette du centre à la périphérie.'},
+    {nom:'Indices 1.50 — 1.60 — 1.67',icon:'ti-stack-2',desc:'Recommandé pour tous les patients avec forte utilisation des écrans. Disponible en 1.50, 1.60 et 1.67.'}
+   ]},
+
+  // ── ENTRÉE DE GAMME ────────────────────────────────────────
+  // Presio Touch Transitions Gen S | achat:99/120 | CB:183/212 | marge:45.9%/43.4%
+  {id:'nk_e1',nom:'Nikon Presio Touch Transitions Gen S',marque:'Nikon',gamme:'entree',
+   compatible:['progressif'],sphMax:8,cylMax:4,aspherique:false,precalibrage:true,
+   indices:{'1.50':220,'1.60':255},achats:{'1.50':99,'1.60':120},
+   tarifsReseau:{cb:{'1.50':183,'1.60':212},actil:{'1.50':172,'1.60':200}},
+   tags:['ar','tr'],
+   traitements:[
+    {nom:'Transitions Gen S',icon:'ti-sun-moon',desc:'Transitions Gen S — photochromie nouvelle génération. Transparent en intérieur, teinte foncée en 30 secondes en extérieur. Protection UV 400nm. Brun ou gris au choix.'},
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon — résistance aux rayures, UV 400nm, super-hydrophobe. Carte d'authenticité incluse.`},
+    {nom:'Corridor Touch accessible',icon:'ti-adjustments',desc:'Corridor progressif accessible — adaptation rapide, idéal nouveaux porteurs ou budgets maîtrisés.'},
+    {nom:'Livraison J+2',icon:'ti-truck',desc:'Délai de fabrication standard : livraison en 2 jours ouvrés pour les corrections courantes.'}
+   ]},
+
+  // Presio Touch ECC+UV | achat:80/102.50 | CB:132/152 | marge:39.4%/32.6%
+  {id:'nk_e2',nom:'Nikon Presio Touch',marque:'Nikon',gamme:'entree',
+   compatible:['progressif'],sphMax:8,cylMax:4,aspherique:false,precalibrage:true,
+   indices:{'1.50':159,'1.60':183},achats:{'1.50':80,'1.60':102.50},
+   tarifsReseau:{cb:{'1.50':132,'1.60':152},actil:{'1.50':125,'1.60':143}},
+   tags:['ar'],
+   traitements:[
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon — résistance aux rayures renforcée, UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'Design Corridor Touch',icon:'ti-adjustments',desc:'Corridor progressif accessible — bonne vision de loin et de près pour la presbytie débutante à modérée.'},
+    {nom:'Surfaçage numérique',icon:'ti-cpu',desc:'Calcul numérique selon la correction et la monture. Meilleure précision que les progressifs conventionnels, à prix accessible.'},
+    {nom:'Transitions Gen S disponible',icon:'ti-sun-moon',desc:'Version Transitions Gen S disponible (voir Presio Touch Transitions Gen S).'}
+   ]},
+
+  // ECC+UV Sphérique stock unifocal | achat:21.30/31/40/52 | CB:57/63/82/100 | marge:62.6%/50.8%
+  {id:'nk_e3',nom:'Nikon ECC+UV Sphérique',marque:'Nikon',gamme:'entree',
+   compatible:['loin','pres','intermediaire'],sphMax:16,cylMax:4,aspherique:false,precalibrage:false,
+   indices:{'1.50':99,'1.60':109,'1.67':145,'1.74':178},
+   achats:{'1.50':21.30,'1.60':31,'1.67':40,'1.74':52},
+   tarifsReseau:{cb:{'1.50':57,'1.60':63,'1.67':82,'1.74':100},actil:{'1.50':75,'1.60':87,'1.67':101,'1.74':111}},
+   tags:['ar'],
+   traitements:[
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon — résistance aux rayures renforcée, UV 400nm, super-hydrophobe. Carte d'authenticité Nikon incluse.`},
+    {nom:'Stock J+1',icon:'ti-truck',desc:'Disponible en stock pour les corrections courantes. Livraison J+1 pour commandes avant 18h30. Idéal pour les urgences.'},
+    {nom:'Indices 1.50 à 1.74',icon:'ti-stack-2',desc:'Disponible en 4 indices : 1.50 standard, 1.60 aminci, 1.67 mince, 1.74 ultra-mince. Indice adapté automatiquement selon la correction.'},
+    {nom:'Upgrade asphérique disponible',icon:'ti-sparkles',desc:'Montée en gamme vers ECC+UV Asphérique (meilleure vision périphérique, verre plus plat) disponible.'}
+   ]},
+
+  // HCC Asphérique unifocal | achat:39/45/59/72 | CB:76/88/103 | marge:48.7%/48.9%/42.7%
+  {id:'nk_e4',nom:'Nikon HCC Asphérique',marque:'Nikon',gamme:'entree',
+   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:6,aspherique:true,precalibrage:false,
+   indices:{'1.50':128,'1.60':148,'1.67':194,'1.74':237},
+   achats:{'1.50':39,'1.60':45,'1.67':59,'1.74':72},
    tarifsReseau:{cb:{'1.50':76,'1.60':88,'1.67':103},actil:{'1.50':67,'1.60':87,'1.67':101,'1.74':111}},
+   tags:['ar'],
    traitements:[
-    {nom:'HCC — Antireflet basique',icon:'ti-shield',desc:'Antireflet multi-couches economique Nikon. Resistance basique aux rayures, reduction efficace des reflets. Solution accessible pour corrections courantes.'},
-    {nom:'UV 380nm de serie',icon:'ti-sun',desc:'Protection UV 380nm dans la masse sur tous les verres Nikon — inclus sans supplement dans le HCC.'},
-    {nom:'Stock J+1',icon:'ti-truck',desc:'Disponible en stock pour les corrections courantes — livraison J+1 pour commandes avant 18h30. Ideal pour les urgences et les remplacements rapides.'},
-    {nom:'Transitions Gen S disponible',icon:'ti-sun-moon',desc:'Version Transitions Gen S disponible en 1.50 — verre photochromique : blanc en interieur, teinte en exterieur.'}
+    {nom:'HCC',icon:'ti-shield',desc:'HCC — antireflet multi-couches standard Nikon. Résistance basique aux rayures, réduction efficace des reflets, UV 380nm.'},
+    {nom:'Asphérique',icon:'ti-maximize',desc:'Surface asphérique — verre plus plat et plus léger que le sphérique standard. Meilleure vision périphérique.'},
+    {nom:'Prix accessible',icon:'ti-coins',desc:'Option économique pour les patients avec budget restreint ou remboursement limité. Bonne qualité optique Nikon.'},
+    {nom:'Upgrade ECC+UV disponible',icon:'ti-sparkles',desc:'Montée en gamme vers ECC+UV (antireflet renforcé + UV 400nm) disponible sans changer de design.'}
+   ]},
+
+  // Pure Blue UV Sphérique stock LB | achat:41.10/51 | CB:70/80 | marge:41.3%/36.3%
+  {id:'nk_e5',nom:'Nikon Pure Blue UV Sphérique',marque:'Nikon',gamme:'entree',
+   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:4,aspherique:false,precalibrage:false,
+   indices:{'1.50':128,'1.60':145},
+   achats:{'1.50':41.10,'1.60':51},
+   tarifsReseau:{cb:{'1.50':70,'1.60':80},actil:{'1.50':83,'1.60':95}},
+   tags:['ar','lb'],
+   traitements:[
+    {nom:'Pure Blue UV',icon:'ti-device-desktop',desc:'Pure Blue UV — filtre lumière bleue nocive 380-460nm dans la masse du verre. Solution accessible pour les patients sur écrans avec budget maîtrisé.'},
+    {nom:'ECC+UV antireflet',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon intégré. Résistance aux rayures, UV 400nm. Carte d'authenticité Nikon.`},
+    {nom:'Stock J+1',icon:'ti-truck',desc:'Disponible en stock en 1.50 et 1.60. Livraison J+1 pour commandes avant 18h30.'},
+    {nom:'Upgrade SeeCoat Blue UV disponible',icon:'ti-sparkles',desc:'Montée en gamme vers SeeCoat Blue UV Asphérique disponible.'}
    ]},
 ]
 
@@ -2091,13 +2223,16 @@ function showVerresFromTrait(){
   }
 }
 
-// Map traits to treatment keywords for filtering
+// Map traits to treatment tags — Nikon nomenclature exacte
+// ar  = ECC+UV, SCC+UV NG, SeeCoat Next UV, HCC → tous les verres Nikon
+// lb  = Pure Blue UV, SeeCoat Blue UV → filtre lumière bleue
+// tr  = Transitions Gen S → photochromique
+// Le filtre utilise directement le champ tags[] de chaque verre du catalogue
 function getTraitKeywords(){
   const map = {
-    ar: ['antireflet','crizal','dura','hivision','seecoat','glacier','xtreme','ormix','ar'],
-    lb: ['blue','bleu','lumière','blueguard','blueprotect','bluecontrol','light scan','prevencia'],
-    tr: ['transitions','photochrom','xperio','sun','soleil'],
-
+    ar: ['ECC+UV','SCC+UV NG','SeeCoat Next UV','HCC','antireflet'],
+    lb: ['Pure Blue UV','SeeCoat Blue UV','lumière bleue'],
+    tr: ['Transitions Gen S','photochromique'],
   };
   const keywords = new Set();
   selectedTraits.forEach(t => {
@@ -2161,6 +2296,14 @@ function showVerres(){
     if(sphMax>v.sphMax) return false;
     if(cylMax>v.cylMax) return false;
     if(forcePrecalibrage && !v.precalibrage) return false;
+    // Filtre par traitement sélectionné (lb = lumière bleue, tr = photochromique)
+    if(selectedTraits.size > 0){
+      const specific=[...(selectedTraits)].filter(t=>t!=='ar');
+      if(specific.length>0){
+        if(!v.tags) return false;
+        if(!specific.every(t=>v.tags.includes(t))) return false;
+      }
+    }
     return true;
   }).map(v=>{
     const ind=getBestIndice(v,indiceRec);
