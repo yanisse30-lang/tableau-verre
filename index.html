@@ -165,6 +165,42 @@ select option{background:#252525;color:#f0f0f0}
 .vt-trait{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:8px;padding:9px 12px;font-size:12px;color:#b0b0b0;flex:1;min-width:180px}
 .vt-trait strong{display:block;color:#d0d0d0;margin-bottom:3px;font-size:12px}
 
+/* ── PROG2 demo ── */
+.es-prog2{display:flex;gap:12px;align-items:flex-start;margin-top:8px}
+.es-prog2-panel{width:178px;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+.es-p2g{background:#161616;border:2px solid #242424;border-radius:10px;padding:7px 10px;cursor:pointer;text-align:left;font-family:var(--font);display:block;width:100%;transition:.12s}
+.es-p2g:hover{background:#1a1a1a}
+.es-p2g.sel{border-color:var(--gc,#888);background:#14100a}
+.es-p2g-name{font-size:9.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--gc,#888)}
+.es-p2g-sub{font-size:8.5px;color:#484848;margin-top:1px}
+.es-p2g-benef{background:#13100a;border:1px solid #2c1e0a;border-radius:10px;padding:10px 11px;margin-top:6px}
+.es-p2g-bhdr{font-size:8.5px;font-weight:900;color:#b08028;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.es-p2g-bnm{font-size:8.5px;font-weight:800;margin-bottom:6px}
+.es-p2g-benef ul{padding-left:10px;list-style:disc}
+.es-p2g-benef li{font-size:10px;color:#b0a090;margin-bottom:2px;line-height:1.4}
+.es-prog2-view{flex:1;min-width:0}
+#prog2-cv{display:block;width:100%;border-radius:10px;background:#0a0a0a;border:1px solid #1e1e1e}
+/* ── SOLAR demo ── */
+.es-sol{display:flex;gap:12px;align-items:flex-start;margin-top:8px}
+.es-sol-panel{width:142px;flex-shrink:0}
+.es-sol-ttl{font-size:8.5px;font-weight:700;color:#484848;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;margin-top:10px}
+.es-sol-ttl:first-child{margin-top:0}
+.es-sol-swatches{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:2px}
+.es-sol-sw{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px;border-radius:7px;border:2px solid transparent;transition:.12s}
+.es-sol-sw.sel{border-color:#a08028;background:#141008}
+.es-sol-sw-dot{width:30px;height:30px;border-radius:50%;box-shadow:inset 0 -3px 6px rgba(0,0,0,.4)}
+.es-sol-sw-lbl{font-size:8.5px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em}
+.es-sol-row{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:2px}
+.es-sol-obtn{padding:6px 3px;background:#161616;border:2px solid #242424;border-radius:7px;font-size:9.5px;font-weight:800;color:#484848;font-family:var(--font);cursor:pointer;text-align:center;transition:.12s;line-height:1.25}
+.es-sol-obtn.sel{background:#141008;border-color:#a08028;color:#d0a038}
+.es-sol-obtn:hover:not(.sel){border-color:#383838;color:#a8a8a8}
+.es-sol-view{flex:1;min-width:0}
+.es-sol-slider{position:relative;width:100%;border-radius:10px;overflow:hidden;background:#0a0a0a;border:1px solid #1e1e1e;cursor:ew-resize;touch-action:none;user-select:none}
+#sol-cv{display:block;width:100%}
+.es-sol-sline{position:absolute;top:0;bottom:0;width:2px;background:rgba(210,165,38,.8);pointer-events:none;transform:translateX(-50%)}
+.es-sol-shandle{position:absolute;top:50%;width:36px;height:36px;border-radius:50%;background:#c8a028;display:flex;align-items:center;justify-content:center;font-size:14px;color:#0e0800;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 2px 12px rgba(0,0,0,.6);font-weight:900}
+.es-sol-labels{display:flex;justify-content:space-between;padding:4px 10px 0}
+.es-sol-labels span{font-size:11px;font-weight:700;color:#606060}
 /* VERRE CARDS (kept for 2eme paire) */
 .verre-card{background:#1e1e1e;border:1.5px solid #333;border-radius:var(--radius-xl);margin-bottom:12px;overflow:hidden;transition:border-color 0.15s,box-shadow 0.15s}
 .verre-card:hover{box-shadow:0 2px 16px rgba(55,138,221,0.18)}
@@ -948,37 +984,9 @@ select option{background:#252525;color:#f0f0f0}
       <div id="es-prog" class="es-sub" style="display:none">
         <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
         <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><ellipse cx="20" cy="20" rx="16" ry="12"/><ellipse cx="20" cy="20" rx="10" ry="6" stroke-dasharray="2,2"/></svg><span class="es-sub-ttl">Verres progressifs</span></div>
-        <div class="es-info">
-          <div class="es-info-title"><i class="ti ti-layers"></i> Zones de vision selon la gamme</div>
-          <div class="es-info-desc">Le verre progressif contient 3 zones : vision de loin (haut), corridor intermédiaire, vision de près (bas). La largeur du corridor et des zones utiles varie selon la gamme choisie.</div>
-        </div>
-        <div class="es-prog-cols">
-          <div class="es-prog-col">
-            <canvas id="prog-entree" width="160" height="230" style="width:100%;border-radius:12px 12px 0 0;background:#0a0a0a;display:block"></canvas>
-            <div class="es-prog-lbl" style="background:linear-gradient(135deg,#1a5c3a,#2E8B57)"><i class="ti ti-leaf" style="font-size:10px"></i> Entrée de gamme<span>Corridor étroit</span></div>
-          </div>
-          <div class="es-prog-col">
-            <canvas id="prog-milieu" width="160" height="230" style="width:100%;border-radius:12px 12px 0 0;background:#0a0a0a;display:block"></canvas>
-            <div class="es-prog-lbl" style="background:linear-gradient(135deg,#082045,#185FA5)"><i class="ti ti-star" style="font-size:10px"></i> Milieu de gamme<span>Corridor modéré</span></div>
-          </div>
-          <div class="es-prog-col">
-            <canvas id="prog-haut" width="160" height="230" style="width:100%;border-radius:12px 12px 0 0;background:#0a0a0a;display:block"></canvas>
-            <div class="es-prog-lbl" style="background:linear-gradient(135deg,#23124a,#6B3FA0)"><i class="ti ti-diamond" style="font-size:10px"></i> Haut de gamme<span>Large corridor</span></div>
-          </div>
-        </div>
-        <div class="es-legend">
-          <div class="es-legend-item"><div class="es-legend-dot" style="background:#3070cc"></div>Zone loin</div>
-          <div class="es-legend-item"><div class="es-legend-dot" style="background:#50a850"></div>Corridor</div>
-          <div class="es-legend-item"><div class="es-legend-dot" style="background:#c8a020"></div>Zone près</div>
-          <div class="es-legend-item"><div class="es-legend-dot" style="background:#d04040"></div>Aberrations</div>
-        </div>
-        <div class="es-panel" style="margin-top:12px">
-          <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Simuler l'addition (presbytie)</div>
-          <div class="es-slider">
-            <label><i class="ti ti-eye" style="font-size:13px"></i> Addition</label>
-            <input type="range" min="0.75" max="3.5" step="0.25" value="2.0" id="es-add-val" oninput="document.getElementById('es-add-out').textContent='+'+parseFloat(this.value).toFixed(2);initProgZones()"/>
-            <span id="es-add-out">+2.00</span>
-          </div>
+        <div class="es-prog2">
+          <div class="es-prog2-panel" id="p2-panel"><!-- généré JS --></div>
+          <div class="es-prog2-view"><canvas id="prog2-cv" width="600" height="380"></canvas></div>
         </div>
       </div>
 
@@ -1099,17 +1107,31 @@ select option{background:#252525;color:#f0f0f0}
       <!-- ── VERRES POLARISANTS ──────────────────────────────── -->
       <div id="es-pol" class="es-sub" style="display:none">
         <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
-        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><circle cx="20" cy="20" r="7"/><line x1="20" y1="4" x2="20" y2="11"/><line x1="20" y1="29" x2="20" y2="36"/><line x1="4" y1="20" x2="11" y2="20"/><line x1="29" y1="20" x2="36" y2="20"/><line x1="8" y1="14" x2="32" y2="14"/><line x1="6" y1="20" x2="34" y2="20"/><line x1="8" y1="26" x2="32" y2="26"/></svg><span class="es-sub-ttl">Verres polarisants</span></div>
-        <div class="es-info">
-          <div class="es-info-title"><i class="ti ti-polaroid"></i> Filtre polarisant</div>
-          <div class="es-info-desc">Bloque la lumière réfléchie horizontalement. Reflets sur l'eau totalement supprimés, fond marin visible, contraste exceptionnel. Idéal pêche, voile, ski, plage.</div>
-          <div class="es-avs"><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Reflets supprimés</span><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Fond visible</span><span class="es-av" style="background:#0a2a1a;color:#70c8a0">Contraste +40%</span></div>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><circle cx="20" cy="20" r="7"/><line x1="20" y1="4" x2="20" y2="11"/><line x1="20" y1="29" x2="20" y2="36"/><line x1="4" y1="20" x2="11" y2="20"/><line x1="29" y1="20" x2="36" y2="20"/><line x1="8" y1="14" x2="32" y2="14"/><line x1="6" y1="20" x2="34" y2="20"/><line x1="8" y1="26" x2="32" y2="26"/></svg><span class="es-sub-ttl">Verres solaires &amp; polarisants</span></div>
+        <div class="es-sol">
+          <div class="es-sol-panel">
+            <div class="es-sol-ttl">Teinte</div>
+            <div class="es-sol-swatches" id="sol-swatches"><!-- JS --></div>
+            <div class="es-sol-ttl">Filtre polarisant</div>
+            <div class="es-sol-row">
+              <button class="es-sol-obtn" data-v="sans" onclick="esSolPol(false)">Sans<br>Polarisant</button>
+              <button class="es-sol-obtn sel" data-v="avec" onclick="esSolPol(true)">Avec<br>Polarisant</button>
+            </div>
+            <div class="es-sol-ttl">Saison</div>
+            <div class="es-sol-row">
+              <button class="es-sol-obtn sel" data-s="ete" onclick="esSolSaison('ete')">ÉTÉ</button>
+              <button class="es-sol-obtn" data-s="hiver" onclick="esSolSaison('hiver')">HIVER</button>
+            </div>
+          </div>
+          <div class="es-sol-view">
+            <div class="es-sol-slider" id="sol-slider">
+              <canvas id="sol-cv" width="600" height="380"></canvas>
+              <div class="es-sol-sline" id="sol-sline" style="left:50%"></div>
+              <div class="es-sol-shandle" id="sol-shandle" style="left:50%">⟺</div>
+            </div>
+            <div class="es-sol-labels"><span>Protégé</span><span>Verre de base</span></div>
+          </div>
         </div>
-        <div class="es-ba">
-          <div class="es-ba-col"><img id="es-pol-before" src="" class="es-ba-img" alt=""/><div class="es-ba-lbl bad">Solaire standard — Reflets présents</div></div>
-          <div class="es-ba-col"><img id="es-pol-after" src="" class="es-ba-img" alt=""/><div class="es-ba-lbl good">Polarisé — Reflets supprimés</div></div>
-        </div>
-        <div style="background:#0a1e10;border:1px solid #1a4a28;border-radius:12px;padding:12px 14px;font-size:13px;color:#70c8a0"><strong style="color:#50d880"><i class="ti ti-fish"></i> Idéal pour :</strong> Pêche, voile, ski alpin, plage, conduite ensoleillée.</div>
       </div>
 
       <!-- ── DÉFAUTS VISUELS ─────────────────────────────────── -->
@@ -2966,11 +2988,11 @@ function esGo(module){
   if(!el)return;
   el.style.display='block';
   window.scrollTo({top:0,behavior:'smooth'});
-  if(module==='prog')  setTimeout(initProgZones,80);
+  if(module==='prog')  setTimeout(initProg2,80);
   if(module==='mat')   drawMatBars();
   if(module==='ar')    esARScene('nuit',document.querySelector('#es-ar-scenes .es-scene-btn'));
   if(module==='tr')    {esTRInitImages();esTRUpdate(0);}
-  if(module==='pol')   esPolInit();
+  if(module==='pol')   esSolInit();
   if(module==='uni')   esUniInit();
   if(module==='ecran') setTimeout(drawEcranZones,80);
   if(module==='def')   esDefSelect('myopie');
@@ -3176,12 +3198,149 @@ function esTRColor(hex,el){
 }
 
 // ── Polarisants ────────────────────────────────────────────────────
-function esPolInit(){
-  const sc=demoScenes['eau'];if(!sc)return;
-  document.getElementById('es-pol-before').src=sc.url;
-  document.getElementById('es-pol-before').style.filter='brightness(0.55) contrast(1.15) saturate(0.9)';
-  document.getElementById('es-pol-after').src=sc.urlPolarise||sc.url;
-  document.getElementById('es-pol-after').style.filter='brightness(0.62) contrast(1.3) saturate(1.15)';
+// ── SOLAR DEMO V2 ─────────────────────────────────────────────
+const _solCols=[
+  {id:'brun',  lbl:'BRUN',   hex:'#6B4426',rgb:[107,68,38]},
+  {id:'noir',  lbl:'NOIR',   hex:'#1e1e1e',rgb:[30,30,30]},
+  {id:'gris',  lbl:'GRIS',   hex:'#606870',rgb:[96,104,112]},
+  {id:'grisus',lbl:'GRIS US',hex:'#909898',rgb:[144,152,152]},
+];
+let _solSt={color:'brun',pol:true,saison:'ete',split:.50};
+let _solBaseImg=null,_solPolImg=null,_solDragging=false;
+
+function _svgB64(s){try{return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(s)));}catch(e){return 'data:image/svg+xml,'+encodeURIComponent(s);}}
+
+function _solBuildPanel(){
+  const sw=document.getElementById('sol-swatches');
+  if(sw) sw.innerHTML=_solCols.map(c=>`<div class="es-sol-sw ${c.id===_solSt.color?'sel':''}" onclick="esSolColor('${c.id}')"><div class="es-sol-sw-dot" style="background:${c.hex}"></div><div class="es-sol-sw-lbl">${c.lbl}</div></div>`).join('');
+  document.querySelectorAll('.es-sol-obtn[data-v]').forEach(b=>b.classList.toggle('sel',(b.dataset.v==='avec')===_solSt.pol));
+  document.querySelectorAll('.es-sol-obtn[data-s]').forEach(b=>b.classList.toggle('sel',b.dataset.s===_solSt.saison));
+}
+function esSolColor(id){_solSt.color=id;_solBuildPanel();_solDraw();}
+function esSolPol(v){_solSt.pol=v;_solBuildPanel();_solDraw();}
+function esSolSaison(v){_solSt.saison=v;_solBuildPanel();_solDraw();}
+
+function _solSceneSVG(pol){
+  const wc=pol?'#06a878':'#28a8c8', wd=pol?'#048068':'#1888b0';
+  const sp=!pol?`<ellipse cx="310" cy="232" rx="4" ry="2" fill="white" opacity=".8"/>
+<ellipse cx="278" cy="250" rx="5" ry="2" fill="white" opacity=".75"/>
+<ellipse cx="352" cy="220" rx="3" ry="1.5" fill="white" opacity=".85"/>
+<ellipse cx="294" cy="268" rx="4" ry="1.8" fill="white" opacity=".7"/>
+<ellipse cx="332" cy="278" rx="3.5" ry="1.5" fill="white" opacity=".8"/>
+<ellipse cx="258" cy="282" rx="5" ry="2" fill="white" opacity=".72"/>
+<ellipse cx="376" cy="248" rx="4" ry="1.8" fill="white" opacity=".76"/>
+<ellipse cx="346" cy="292" rx="3" ry="1.5" fill="white" opacity=".7"/>
+<ellipse cx="268" cy="312" rx="6" ry="2.5" fill="white" opacity=".65"/>
+<ellipse cx="382" cy="308" rx="5" ry="2" fill="white" opacity=".68"/>`:'' ;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380"><defs>
+<linearGradient id="cs" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#48a0d8"/><stop offset="100%" stop-color="#78bce5"/></linearGradient>
+<linearGradient id="cw" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${wc}"/><stop offset="100%" stop-color="${wd}"/></linearGradient></defs>
+<rect width="600" height="158" fill="url(#cs)"/>
+<ellipse cx="382" cy="50" rx="70" ry="20" fill="white" opacity=".88"/>
+<ellipse cx="418" cy="38" rx="50" ry="17" fill="white" opacity=".85"/>
+<line x1="248" y1="22" x2="582" y2="65" stroke="white" stroke-width="1.8" opacity=".55"/>
+<line x1="251" y1="26" x2="585" y2="69" stroke="white" stroke-width="1.2" opacity=".35"/>
+<rect x="0" y="148" width="600" height="232" fill="url(#cw)"/>
+<path d="M0,0 L0,380 L215,380 L228,312 L252,268 L270,230 L250,190 L224,160 L196,128 L166,98 L140,70 L110,48 L80,28 L50,14 L18,4 Z" fill="#888070"/>
+<path d="M50,14 L82,38 L112,66 L145,98 L198,160 L260,228" stroke="#706858" stroke-width="2" fill="none" opacity=".6"/>
+<ellipse cx="88" cy="70" rx="16" ry="11" fill="#3a6420" opacity=".8"/>
+<ellipse cx="136" cy="96" rx="14" ry="10" fill="#3a6420" opacity=".75"/>
+<ellipse cx="66" cy="108" rx="11" ry="7" fill="#2a5218" opacity=".8"/>
+<rect x="58" y="40" width="4" height="22" fill="#402c10"/>
+<polygon points="48,44 60,18 72,44" fill="#1c4c14"/>
+<polygon points="50,36 60,14 70,36" fill="#226018"/>
+<rect x="103" y="58" width="4" height="20" fill="#402c10"/>
+<polygon points="93,62 105,38 117,62" fill="#1c4c14"/>
+<polygon points="95,54 105,34 115,54" fill="#226018"/>
+<path d="M600,0 L600,380 L378,380 L362,318 L344,274 L332,234 L348,194 L370,162 L394,134 L418,106 L444,80 L466,56 L490,38 L518,20 L550,10 Z" fill="#989088"/>
+<path d="M518,20 L490,52 L466,80 L420,108 L370,165 L340,238" stroke="#807868" stroke-width="2" fill="none" opacity=".55"/>
+<ellipse cx="494" cy="58" rx="15" ry="10" fill="#3a6420" opacity=".75"/>
+<ellipse cx="462" cy="84" rx="12" ry="8" fill="#3a6420" opacity=".8"/>
+<rect x="478" y="42" width="4" height="20" fill="#402c10"/>
+<polygon points="468,46 480,22 492,46" fill="#1c4c14"/>
+<polygon points="470,38 480,18 490,38" fill="#226018"/>
+<ellipse cx="300" cy="296" rx="76" ry="50" fill="#888070"/>
+<path d="M224,320 Q242,274 278,257 Q300,246 322,256 Q356,270 380,312 Q373,362 300,374 Q230,370 224,320Z" fill="#909080"/>
+<rect x="260" y="238" width="4" height="26" fill="#3c2810"/>
+<polygon points="250,242 262,214 274,242" fill="#1a4812"/>
+<polygon points="252,234 262,208 272,234" fill="#226018"/>
+<rect x="282" y="232" width="4" height="30" fill="#3c2810"/>
+<polygon points="271,236 284,204 297,236" fill="#1a4812"/>
+<polygon points="273,228 284,200 295,228" fill="#226018"/>
+<rect x="308" y="235" width="4" height="28" fill="#3c2810"/>
+<polygon points="297,240 310,210 323,240" fill="#1a4812"/>
+<polygon points="299,231 310,205 321,231" fill="#226018"/>
+<rect x="332" y="240" width="4" height="24" fill="#3c2810"/>
+<polygon points="321,245 334,218 347,245" fill="#1a4812"/>
+<polygon points="323,237 334,214 345,237" fill="#226018"/>
+<path d="M246,166 Q270,156 294,163 Q318,174 310,250 Q294,280 252,286 Q218,270 224,232Z" fill="url(#cw)" opacity=".95"/>
+<path d="M358,170 Q382,160 408,166 Q430,180 420,256 Q406,284 370,288 Q340,274 344,237Z" fill="url(#cw)" opacity=".95"/>
+<rect x="222" y="320" width="156" height="60" fill="url(#cw)" opacity=".9"/>
+${sp}</svg>`;
+}
+
+function _solDraw(){
+  const cv=document.getElementById('sol-cv');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  const splitPx=Math.round(_solSt.split*W);
+  const col=_solCols.find(c=>c.id===_solSt.color)||_solCols[0];
+  const alpha=_solSt.saison==='ete'?.55:.38;
+  const [r,g,b]=col.rgb;
+  ctx.clearRect(0,0,W,H);
+  if(_solBaseImg) ctx.drawImage(_solBaseImg,0,0,W,H);
+  else{ctx.fillStyle='#1a3040';ctx.fillRect(0,0,W,H);}
+  ctx.save();
+  _solLensPath(ctx,W,H,splitPx);
+  ctx.clip();
+  const src=(_solSt.pol&&_solPolImg)?_solPolImg:_solBaseImg;
+  if(src) ctx.drawImage(src,0,0,W,H);
+  ctx.fillStyle=`rgba(${r},${g},${b},${alpha})`;ctx.fillRect(0,0,W,H);
+  ctx.restore();
+  ctx.save();
+  _solLensPath(ctx,W,H,splitPx);
+  ctx.strokeStyle='rgba(160,138,88,.85)';ctx.lineWidth=13;ctx.stroke();
+  ctx.restore();
+  const line=document.getElementById('sol-sline'),handle=document.getElementById('sol-shandle');
+  const pct=(_solSt.split*100)+'%';
+  if(line) line.style.left=pct;if(handle) handle.style.left=pct;
+}
+
+function _solLensPath(ctx,W,H,sx){
+  const m=12;
+  ctx.beginPath();
+  ctx.moveTo(m+W*.10,m);
+  ctx.bezierCurveTo(W*.30,m-6,sx*.72,m-4,sx-14,m+16);
+  ctx.bezierCurveTo(sx+12,m+24,sx+12,m+H*.55,sx-14,H-m-16);
+  ctx.bezierCurveTo(sx*.72,H-m+7,W*.22,H-m+6,m+W*.07,H-m-H*.09);
+  ctx.bezierCurveTo(m-7,m+H*.67,m-9,m+H*.35,m+2,m+H*.18);
+  ctx.bezierCurveTo(m+2,m+6,m+W*.05,m,m+W*.10,m);
+  ctx.closePath();
+}
+
+function _solInitDrag(){
+  const wrap=document.getElementById('sol-slider');
+  if(!wrap||wrap._dragBound) return;
+  wrap._dragBound=true;
+  const getX=e=>{
+    const rect=wrap.getBoundingClientRect();
+    const cx=e.touches?e.touches[0].clientX:e.clientX;
+    return Math.max(.15,Math.min(.85,(cx-rect.left)/rect.width));
+  };
+  wrap.addEventListener('mousedown',e=>{_solDragging=true;_solSt.split=getX(e);_solDraw();});
+  wrap.addEventListener('touchstart',e=>{_solDragging=true;_solSt.split=getX(e);_solDraw();},{passive:true});
+  window.addEventListener('mousemove',e=>{if(_solDragging){_solSt.split=getX(e);_solDraw();}});
+  window.addEventListener('touchmove',e=>{if(_solDragging){_solSt.split=getX(e);_solDraw();}},{passive:true});
+  window.addEventListener('mouseup',()=>{_solDragging=false;});
+  window.addEventListener('touchend',()=>{_solDragging=false;});
+}
+
+function esSolInit(){
+  _solSt={color:'brun',pol:true,saison:'ete',split:.50};
+  _solBuildPanel();
+  const i1=new Image();i1.onload=()=>{_solBaseImg=i1;_solDraw();};i1.src=_svgB64(_solSceneSVG(false));
+  const i2=new Image();i2.onload=()=>{_solPolImg=i2;_solDraw();};i2.src=_svgB64(_solSceneSVG(true));
+  _solInitDrag();
 }
 
 // ── Défauts Visuels ────────────────────────────────────────────────
@@ -3232,14 +3391,157 @@ function drawDefCanvas(){
   });
 }
 
-// ── Dessin des zones progressif ────────────────────────────────
-const _progParams = {
-  entree:{ cpct:0.24, aa:0.78 },
-  milieu:{ cpct:0.42, aa:0.50 },
-  haut:  { cpct:0.66, aa:0.22 },
-};
+// ── PROG2 demo V2 ─────────────────────────────────────────────
+const _p2Data=[
+  {id:'entree',label:'ENTRÉE DE GAMME',sub:'Corridor étroit · Aberrations marquées',color:'#2E8B57',corr:.25,aber:.62,
+   benef:['Vision nette à toutes les distances','Bon rapport qualité / prix','Idéal pour les nouvelles presbyties','Faibles additions']},
+  {id:'milieu',label:'MILIEU DE GAMME',sub:'Corridor modéré · Champs élargis',color:'#185FA5',corr:.42,aber:.40,
+   benef:['Vision haute définition','Champ visuel plus large','Sur-mesure selon la monture','Plus léger et plus fin','Plus esthétique']},
+  {id:'haut',label:'HAUT DE GAMME',sub:'Large corridor · Aberrations minimales',color:'#6B3FA0',corr:.62,aber:.18,
+   benef:['Vision haute définition','Champs visuels encore plus larges','Sur-mesure monture et correction','Adaptation rapide — garantie 3 mois','Convient à tous les presbytes']},
+];
+let _p2Sel='entree',_p2BgImg=null;
 
-function drawProgZones(canvasId, gamme){
+function p2Select(id){_p2Sel=id;_p2RenderPanel();_p2Draw();}
+
+function _p2RenderPanel(){
+  const el=document.getElementById('p2-panel');if(!el)return;
+  const g=_p2Data.find(d=>d.id===_p2Sel);
+  el.innerHTML=_p2Data.map(d=>`<button class="es-p2g ${d.id===_p2Sel?'sel':''}" style="--gc:${d.color}" onclick="p2Select('${d.id}')"><div class="es-p2g-name">${d.label}</div><div class="es-p2g-sub">${d.sub}</div></button>`).join('')
+  +`<div class="es-p2g-benef"><div class="es-p2g-bhdr">Bénéfices</div><div class="es-p2g-bnm" style="color:${g.color}">${g.label}</div><ul>${g.benef.map(b=>`<li>${b}</li>`).join('')}</ul></div>`;
+}
+
+function initProg2(){
+  _p2Sel='entree';_p2RenderPanel();
+  if(_p2BgImg){_p2Draw();return;}
+  const img=new Image();
+  img.onload=()=>{_p2BgImg=img;_p2Draw();};
+  img.src=_svgB64(_p2BgSVG());
+}
+
+function _p2BgSVG(){
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380"><defs>
+<linearGradient id="sk2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6ab2e0"/><stop offset="65%" stop-color="#9ccce8"/><stop offset="100%" stop-color="#b8ddf0"/></linearGradient>
+<linearGradient id="fl2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d0a012"/><stop offset="100%" stop-color="#9c7808"/></linearGradient></defs>
+<rect width="600" height="380" fill="url(#sk2)"/>
+<ellipse cx="120" cy="58" rx="60" ry="20" fill="white" opacity=".85"/>
+<ellipse cx="154" cy="47" rx="44" ry="17" fill="white" opacity=".9"/>
+<ellipse cx="86" cy="62" rx="37" ry="13" fill="white" opacity=".78"/>
+<ellipse cx="408" cy="72" rx="52" ry="18" fill="white" opacity=".7"/>
+<ellipse cx="446" cy="60" rx="36" ry="15" fill="white" opacity=".75"/>
+<polygon points="0,228 63,178 143,203 223,168 303,193 383,156 453,178 533,160 600,173 600,246 0,246" fill="#a4b8c4" opacity=".45"/>
+<polygon points="0,246 83,200 183,226 283,192 378,213 473,192 566,208 600,198 600,263 0,263" fill="#789470" opacity=".52"/>
+<ellipse cx="70" cy="280" rx="146" ry="50" fill="#52901e"/>
+<ellipse cx="230" cy="266" rx="188" ry="56" fill="#488020" opacity=".92"/>
+<rect x="0" y="258" width="338" height="122" fill="url(#fl2)"/>
+<line x1="0" y1="270" x2="330" y2="267" stroke="#786008" stroke-width="1.2" opacity=".5"/>
+<line x1="0" y1="282" x2="330" y2="279" stroke="#786008" stroke-width="1.2" opacity=".5"/>
+<line x1="0" y1="294" x2="330" y2="291" stroke="#786008" stroke-width="1.2" opacity=".5"/>
+<line x1="0" y1="306" x2="330" y2="303" stroke="#786008" stroke-width="1.2" opacity=".5"/>
+<line x1="0" y1="318" x2="330" y2="315" stroke="#786008" stroke-width="1.2" opacity=".5"/>
+<line x1="0" y1="330" x2="330" y2="327" stroke="#786008" stroke-width="1.2" opacity=".5"/>
+<line x1="0" y1="342" x2="330" y2="339" stroke="#786008" stroke-width="1.2" opacity=".5"/>
+<rect x="320" y="258" width="280" height="122" fill="#386818"/>
+<ellipse cx="463" cy="260" rx="170" ry="34" fill="#488424"/>
+<rect x="276" y="220" width="318" height="212" rx="7" fill="#18181e"/>
+<rect x="283" y="227" width="304" height="198" rx="4" fill="#101018"/>
+<rect x="288" y="232" width="294" height="188" rx="3" fill="#56a8e0"/>
+<rect x="288" y="232" width="294" height="86" fill="#56a8e0"/>
+<ellipse cx="323" cy="250" rx="19" ry="8" fill="white" opacity=".85"/>
+<ellipse cx="336" cy="245" rx="14" ry="6" fill="white" opacity=".9"/>
+<ellipse cx="484" cy="258" rx="21" ry="8" fill="white" opacity=".7"/>
+<rect x="288" y="290" width="30" height="130" fill="#b02c18"/>
+<polygon points="288,290 303,279 318,290" fill="#902010"/>
+<rect x="292" y="296" width="6" height="8" fill="#e8d848" opacity=".9"/><rect x="303" y="296" width="6" height="8" fill="#e8d848" opacity=".85"/>
+<rect x="292" y="310" width="6" height="8" fill="#e8d848" opacity=".8"/><rect x="303" y="310" width="6" height="8" fill="#e8d848" opacity=".9"/>
+<rect x="292" y="324" width="6" height="8" fill="#e8d848" opacity=".75"/><rect x="303" y="324" width="6" height="8" fill="#e8d848" opacity=".85"/>
+<rect x="319" y="282" width="31" height="138" fill="#2e3440"/>
+<polygon points="319,282 334.5,271 350,282" fill="#202838"/>
+<rect x="323" y="288" width="7" height="9" fill="#78a8c8" opacity=".9"/><rect x="335" y="288" width="7" height="9" fill="#78a8c8" opacity=".7"/>
+<rect x="323" y="303" width="7" height="9" fill="#78a8c8" opacity=".8"/><rect x="335" y="303" width="7" height="9" fill="#e8d848" opacity=".9"/>
+<rect x="323" y="318" width="7" height="9" fill="#e8d848" opacity=".8"/><rect x="335" y="318" width="7" height="9" fill="#78a8c8" opacity=".65"/>
+<rect x="351" y="276" width="29" height="144" fill="#c06810"/>
+<polygon points="351,276 365.5,265 380,276" fill="#a05408"/>
+<rect x="355" y="282" width="6" height="8" fill="#e8d848" opacity=".9"/><rect x="366" y="282" width="6" height="8" fill="#e8d848" opacity=".8"/>
+<rect x="355" y="296" width="6" height="8" fill="#e8d848" opacity=".75"/><rect x="366" y="296" width="6" height="8" fill="#e8d848" opacity=".9"/>
+<rect x="381" y="282" width="30" height="138" fill="#1a5090"/>
+<polygon points="381,282 396,271 411,282" fill="#14407a"/>
+<rect x="385" y="288" width="7" height="9" fill="#98c8e0" opacity=".9"/><rect x="397" y="288" width="7" height="9" fill="#98c8e0" opacity=".8"/>
+<rect x="385" y="303" width="7" height="9" fill="#e8d848" opacity=".9"/><rect x="397" y="303" width="7" height="9" fill="#98c8e0" opacity=".75"/>
+<rect x="412" y="278" width="27" height="142" fill="#246028"/>
+<polygon points="412,278 425.5,267 439,278" fill="#1a4a20"/>
+<rect x="416" y="284" width="6" height="8" fill="#e8d848" opacity=".9"/><rect x="427" y="284" width="6" height="8" fill="#e8d848" opacity=".75"/>
+<rect x="416" y="298" width="6" height="8" fill="#e8d848" opacity=".85"/><rect x="427" y="298" width="6" height="8" fill="#e8d848" opacity=".9"/>
+<rect x="440" y="285" width="28" height="135" fill="#781808"/>
+<polygon points="440,285 454,274 468,285" fill="#601008"/>
+<rect x="444" y="291" width="6" height="8" fill="#e8d848" opacity=".9"/><rect x="455" y="291" width="6" height="8" fill="#e8d848" opacity=".65"/>
+<rect x="469" y="280" width="36" height="140" fill="#1c2c3c"/>
+<polygon points="469,280 487,269 505,280" fill="#121e2a"/>
+<rect x="474" y="286" width="8" height="10" fill="#70a0c0" opacity=".9"/><rect x="488" y="286" width="8" height="10" fill="#70a0c0" opacity=".75"/>
+<rect x="474" y="302" width="8" height="10" fill="#e8d848" opacity=".8"/><rect x="488" y="302" width="8" height="10" fill="#70a0c0" opacity=".7"/>
+<rect x="506" y="283" width="34" height="137" fill="#b85818"/>
+<polygon points="506,283 523,272 540,283" fill="#a04810"/>
+<rect x="511" y="289" width="7" height="9" fill="#e8d848" opacity=".9"/><rect x="522" y="289" width="7" height="9" fill="#e8d848" opacity=".75"/>
+<rect x="511" y="303" width="7" height="9" fill="#e8d848" opacity=".85"/><rect x="522" y="303" width="7" height="9" fill="#e8d848" opacity=".9"/>
+<rect x="541" y="287" width="41" height="133" fill="#c02c20"/>
+<polygon points="541,287 561.5,276 582,287" fill="#a02018"/>
+<rect x="546" y="293" width="8" height="9" fill="#e8d848" opacity=".9"/><rect x="559" y="293" width="8" height="9" fill="#e8d848" opacity=".7"/>
+<rect x="283" y="227" width="304" height="198" rx="4" fill="none" stroke="#222230" stroke-width="3"/>
+<rect x="147" y="372" width="130" height="13" rx="3" fill="#684018" transform="rotate(-3,207,377)"/>
+<rect x="142" y="384" width="132" height="11" rx="3" fill="#3a4c68" transform="rotate(-1.5,206,389)"/>
+</svg>`;
+}
+
+function _p2Draw(){
+  const cv=document.getElementById('prog2-cv');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  const d=_p2Data.find(x=>x.id===_p2Sel);if(!d)return;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#080808';ctx.fillRect(0,0,W,H);
+  ctx.save();
+  _p2LensPath(ctx,W,H);ctx.clip();
+  if(_p2BgImg) ctx.drawImage(_p2BgImg,0,0,W,H);
+  else{ctx.fillStyle='#2a3a2a';ctx.fillRect(0,0,W,H);}
+  const lg=ctx.createRadialGradient(W*.13,H*.50,8,W*.22,H*.50,W*.30);
+  lg.addColorStop(0,`rgba(210,55,20,${d.aber*.85})`);lg.addColorStop(1,'rgba(210,55,20,0)');
+  ctx.fillStyle=lg;ctx.fillRect(0,0,W,H);
+  const rg=ctx.createRadialGradient(W*.87,H*.50,8,W*.78,H*.50,W*.30);
+  rg.addColorStop(0,`rgba(210,55,20,${d.aber*.85})`);rg.addColorStop(1,'rgba(210,55,20,0)');
+  ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+  ctx.restore();
+  ctx.save();_p2LensPath(ctx,W,H);ctx.strokeStyle='#6a6058';ctx.lineWidth=14;ctx.stroke();ctx.restore();
+  _p2DrawZones(ctx,W,H,d);
+}
+
+function _p2LensPath(ctx,W,H){
+  const m=20;
+  ctx.beginPath();
+  ctx.moveTo(m+W*.13,m);
+  ctx.bezierCurveTo(W*.38,m-7,W*.64,m-5,W-m-W*.08,m+12);
+  ctx.bezierCurveTo(W-m+7,m+20,W-m+10,m+H*.16,W-m+3,m+H*.28);
+  ctx.bezierCurveTo(W-m+5,m+H*.52,W-m,m+H*.73,W-m-W*.06,H-m-12);
+  ctx.bezierCurveTo(W-m-W*.14,H-m+8,W-m-W*.30,H-m+10,W*.50,H-m+3);
+  ctx.bezierCurveTo(W*.33,H-m+8,W*.17,H-m+4,m+W*.07,H-m-H*.10);
+  ctx.bezierCurveTo(m-7,m+H*.66,m-10,m+H*.36,m+2,m+H*.18);
+  ctx.bezierCurveTo(m+2,m+8,m+W*.05,m+1,m+W*.13,m);
+  ctx.closePath();
+}
+
+function _p2DrawZones(ctx,W,H,d){
+  const cx=W/2,lT=20,lB=H-20,lH=lB-lT;
+  const topW=W*d.corr*.92,midW=W*d.corr,botW=W*d.corr*.88;
+  const tY=lT+lH*.06,mY=lT+lH*.52,bY=lT+lH*.91;
+  ctx.save();
+  ctx.strokeStyle='#f0c820';ctx.lineWidth=2;ctx.setLineDash([7,5]);ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(cx-topW/2,tY);ctx.quadraticCurveTo(cx-midW/2-6,mY,cx-botW/2,bY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx+topW/2,tY);ctx.quadraticCurveTo(cx+midW/2+6,mY,cx+botW/2,bY);ctx.stroke();
+  ctx.setLineDash([]);ctx.restore();
+}
+
+function initProgZones(){initProg2();}// compat alias
+
+function _legacyDrawProgZones_UNUSED(canvasId, gamme){
   const canvas = document.getElementById(canvasId);
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -3333,12 +3635,6 @@ function drawProgZones(canvasId, gamme){
       ctx.fillText('RATION', ox, cy + 5);
     });
   }
-}
-
-function initProgZones(){
-  drawProgZones('prog-entree', 'entree');
-  drawProgZones('prog-milieu', 'milieu');
-  drawProgZones('prog-haut',   'haut');
 }
 
 function initDemo(){
