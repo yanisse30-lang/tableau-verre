@@ -424,6 +424,25 @@ select option{background:#fff;color:var(--txt-primary)}
 .btn-save-prix{background:var(--blue-600);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit;display:flex;align-items:center;gap:5px}
 .btn-save-prix:hover{background:var(--blue-800)}
 .saved-badge{font-size:12px;color:#16A34A;margin-top:8px;display:none}
+/* ── PDF SLOTS (conventionnement & catalogue) ───────────────── */
+.pdf-slot-card{background:#fff;border:1.5px solid var(--bdr-light);border-radius:16px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.05)}
+.pdf-slot-header{display:flex;align-items:center;gap:12px;padding:14px 18px;color:#fff}
+.pdf-slot-title{font-size:15px;font-weight:700}
+.pdf-slot-sub{font-size:11px;opacity:0.85;margin-top:1px}
+.pdf-slot-body{padding:14px 18px}
+.pdf-drop-zone{border:2px dashed var(--bdr-medium);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:0.15s;background:var(--surf-secondary)}
+.pdf-drop-zone:hover,.pdf-drop-zone.drag-over{border-color:var(--blue-600);background:#EFF6FF}
+.pdf-file-info{display:flex;align-items:center;justify-content:space-between;background:var(--surf-secondary);border:1.5px solid var(--bdr-light);border-radius:10px;padding:11px 14px;gap:10px}
+.pdf-file-name{font-size:13px;font-weight:600;color:var(--txt-primary);display:flex;align-items:center;gap:7px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pdf-file-actions{display:flex;gap:6px;flex-shrink:0}
+.pdf-btn-view{background:#EFF6FF;border:1px solid #BFDBFE;color:var(--blue-600);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+.pdf-btn-del{background:#FFF1F2;border:1px solid #FECDD3;color:#E11D48;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+/* conv slots grid */
+.conv-slot{background:#fff;border:1.5px solid var(--bdr-light);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.conv-slot-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(135deg,#b45309,#D97706);color:#fff}
+.conv-slot-lbl{font-size:14px;font-weight:700}
+.conv-slot-body{padding:12px 16px}
+
 .pdf-drop{border:2px dashed var(--bdr-medium);border-radius:16px;padding:40px 20px;text-align:center;cursor:pointer;transition:0.15s;margin-bottom:16px}
 .pdf-drop:hover,.pdf-drop.drag{border-color:var(--blue-600);background:#EFF6FF}
 .pdf-drop i{font-size:40px;color:var(--blue-600);display:block;margin-bottom:12px}
@@ -836,9 +855,119 @@ select option{background:#fff;color:var(--txt-primary)}
             <div class="tool-sub">Côte à côte pour que le patient choisisse en connaissance de cause</div>
           </div>
         </div>
+        <div class="tool-card" onclick="openConventionnement()">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#b45309,#D97706)"><i class="ti ti-file-certificate"></i></div>
+          <div>
+            <div class="tool-name">Conventionnement mutuelle</div>
+            <div class="tool-sub">Déposez vos documents de conventionnement par réseau</div>
+          </div>
+        </div>
+        <div class="tool-card" onclick="openCatalogueVerre()">
+          <div class="tool-icon" style="background:linear-gradient(135deg,#0f766e,#0D9488)"><i class="ti ti-book-2"></i></div>
+          <div>
+            <div class="tool-name">Catalogue verre</div>
+            <div class="tool-sub">Catalogue, tarifs et code EDI de votre fournisseur</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- ══════════ MODAL CONVENTIONNEMENT MUTUELLE ══════════ -->
+  <div id="conv-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(240,244,248,0.96);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;z-index:9995;overflow-y:auto;padding:24px">
+    <div style="background:#fff;border:1px solid var(--bdr-light);border-radius:24px;padding:32px;width:100%;max-width:720px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.09)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#b45309,#D97706);display:flex;align-items:center;justify-content:center"><i class="ti ti-file-certificate" style="color:#fff;font-size:20px"></i></div>
+          <div>
+            <div style="font-size:18px;font-weight:800;color:var(--txt-primary)">Conventionnement mutuelle</div>
+            <div style="font-size:12px;color:var(--txt-muted)">Déposez le PDF de conventionnement pour chaque réseau</div>
+          </div>
+        </div>
+        <button onclick="document.getElementById('conv-modal').style.display='none'" style="background:var(--surf-secondary);border:1px solid var(--bdr-light);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--txt-secondary)"><i class="ti ti-x"></i> Fermer</button>
+      </div>
+      <div style="height:1px;background:var(--bdr-light);margin:18px 0"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" id="conv-slots-grid">
+        <!-- généré JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ MODAL CATALOGUE VERRE ══════════ -->
+  <div id="cat-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(240,244,248,0.96);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;z-index:9995;overflow-y:auto;padding:24px">
+    <div style="background:#fff;border:1px solid var(--bdr-light);border-radius:24px;padding:32px;width:100%;max-width:640px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.09)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#0f766e,#0D9488);display:flex;align-items:center;justify-content:center"><i class="ti ti-book-2" style="color:#fff;font-size:20px"></i></div>
+          <div>
+            <div style="font-size:18px;font-weight:800;color:var(--txt-primary)">Catalogue verre</div>
+            <div style="font-size:12px;color:var(--txt-muted)">Documents fournisseur et code EDI</div>
+          </div>
+        </div>
+        <button onclick="document.getElementById('cat-modal').style.display='none'" style="background:var(--surf-secondary);border:1px solid var(--bdr-light);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--txt-secondary)"><i class="ti ti-x"></i> Fermer</button>
+      </div>
+      <div style="height:1px;background:var(--bdr-light);margin:18px 0"></div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <!-- Catalogue verre -->
+        <div class="pdf-slot-card" id="slot-catalogue">
+          <div class="pdf-slot-header" style="background:linear-gradient(135deg,#0f766e,#0D9488)">
+            <i class="ti ti-book-2" style="font-size:22px;color:#fff"></i>
+            <div>
+              <div class="pdf-slot-title">Catalogue verre</div>
+              <div class="pdf-slot-sub">PDF du catalogue complet de votre fournisseur</div>
+            </div>
+          </div>
+          <div class="pdf-slot-body" id="slot-catalogue-body">
+            <div class="pdf-drop-zone" onclick="pdfPickFile('catalogue')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'catalogue')">
+              <i class="ti ti-cloud-upload" style="font-size:32px;color:var(--bdr-medium);display:block;margin-bottom:8px"></i>
+              <div style="font-size:13px;font-weight:600;color:var(--txt-muted)">Cliquez ou glissez un PDF ici</div>
+              <div style="font-size:11px;color:var(--txt-muted);margin-top:4px">Fichier PDF uniquement</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarif verre -->
+        <div class="pdf-slot-card" id="slot-tarif">
+          <div class="pdf-slot-header" style="background:linear-gradient(135deg,#185FA5,#3B82F6)">
+            <i class="ti ti-currency-euro" style="font-size:22px;color:#fff"></i>
+            <div>
+              <div class="pdf-slot-title">Tarif verre</div>
+              <div class="pdf-slot-sub">PDF de la grille tarifaire de votre fournisseur</div>
+            </div>
+          </div>
+          <div class="pdf-slot-body" id="slot-tarif-body">
+            <div class="pdf-drop-zone" onclick="pdfPickFile('tarif')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'tarif')">
+              <i class="ti ti-cloud-upload" style="font-size:32px;color:var(--bdr-medium);display:block;margin-bottom:8px"></i>
+              <div style="font-size:13px;font-weight:600;color:var(--txt-muted)">Cliquez ou glissez un PDF ici</div>
+              <div style="font-size:11px;color:var(--txt-muted);margin-top:4px">Fichier PDF uniquement</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code EDI -->
+        <div class="pdf-slot-card" id="slot-edi">
+          <div class="pdf-slot-header" style="background:linear-gradient(135deg,#5B21B6,#7C3AED)">
+            <i class="ti ti-binary" style="font-size:22px;color:#fff"></i>
+            <div>
+              <div class="pdf-slot-title">Code EDI</div>
+              <div class="pdf-slot-sub">À compléter — sera détaillé ultérieurement</div>
+            </div>
+          </div>
+          <div class="pdf-slot-body">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0">
+              <i class="ti ti-clock" style="color:var(--txt-muted);font-size:18px"></i>
+              <span style="font-size:13px;color:var(--txt-muted);font-style:italic">Fonctionnalité à venir — en cours de configuration</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- input file caché pour PDF -->
+  <input type="file" id="pdf-file-input" accept=".pdf" style="display:none" onchange="pdfFileSelected(this)"/>
 
   <!-- S0-MUT CHOIX MUTUELLE -->
   <div id="s0mut" class="screen">
@@ -4198,6 +4327,154 @@ document.addEventListener('DOMContentLoaded', function(){
   // Grille s1 (vente complète) → même layout
   _renderMutGrid('mut-grid', 'selectMut');
 });
+
+// ══════════════════════════════════════════════════════════
+// CONVENTIONNEMENT MUTUELLE + CATALOGUE VERRE — PDF MANAGER
+// ══════════════════════════════════════════════════════════
+
+const _CONV_RESEAUX = [
+  {id:'kalixia', label:'Kalixia',       color:'#185FA5'},
+  {id:'cb',      label:'Carte Blanche', color:'#0f766e'},
+  {id:'sc',      label:'Santéclair',    color:'#7C3AED'},
+  {id:'itelis',  label:'Itelis',        color:'#D97706'},
+  {id:'seveane', label:'Séveane',       color:'#E11D48'},
+  {id:'optilys', label:'Optilys',       color:'#0D9488'},
+  {id:'actil',   label:'Actil',         color:'#6B7280'},
+];
+
+let _pdfCurrentSlot = null; // slot en cours de sélection
+
+// ── Ouvrir les modales ──────────────────────────────────────
+function openConventionnement(){
+  const grid = document.getElementById('conv-slots-grid');
+  grid.innerHTML = _CONV_RESEAUX.map(r => `
+    <div class="conv-slot">
+      <div class="conv-slot-hdr" style="background:linear-gradient(135deg,${r.color}cc,${r.color})">
+        <i class="ti ti-file-certificate" style="font-size:20px"></i>
+        <span class="conv-slot-lbl">${r.label}</span>
+      </div>
+      <div class="conv-slot-body" id="conv-body-${r.id}">
+        ${_renderConvBody(r.id)}
+      </div>
+    </div>`).join('');
+  document.getElementById('conv-modal').style.display = 'flex';
+}
+
+function openCatalogueVerre(){
+  _refreshCatSlot('catalogue');
+  _refreshCatSlot('tarif');
+  document.getElementById('cat-modal').style.display = 'flex';
+}
+
+// ── Rendu d'un slot conventionnement ───────────────────────
+function _renderConvBody(id){
+  const key = 'pdf_conv_' + id;
+  const stored = localStorage.getItem(key);
+  if(stored){
+    const info = JSON.parse(stored);
+    return `<div class="pdf-file-info">
+      <span class="pdf-file-name"><i class="ti ti-file-type-pdf" style="color:#E11D48;font-size:16px"></i>${info.name}</span>
+      <div class="pdf-file-actions">
+        <button class="pdf-btn-view" onclick="pdfView('${key}')"><i class="ti ti-eye"></i> Voir</button>
+        <button class="pdf-btn-del" onclick="pdfDel('${key}','conv-body-${id}','${id}',true)"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }
+  return `<div class="pdf-drop-zone" onclick="pdfPickFile('conv_${id}')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'conv_${id}')">
+    <i class="ti ti-cloud-upload" style="font-size:28px;color:var(--bdr-medium);display:block;margin-bottom:6px"></i>
+    <div style="font-size:12px;font-weight:600;color:var(--txt-muted)">Cliquez ou glissez un PDF</div>
+  </div>`;
+}
+
+function _refreshCatSlot(type){
+  const key = 'pdf_cat_' + type;
+  const stored = localStorage.getItem(key);
+  const bodyEl = document.getElementById('slot-' + type + '-body');
+  if(!bodyEl) return;
+  if(stored){
+    const info = JSON.parse(stored);
+    bodyEl.innerHTML = `<div class="pdf-file-info">
+      <span class="pdf-file-name"><i class="ti ti-file-type-pdf" style="color:#E11D48;font-size:16px"></i>${info.name}</span>
+      <div class="pdf-file-actions">
+        <button class="pdf-btn-view" onclick="pdfView('${key}')"><i class="ti ti-eye"></i> Voir</button>
+        <button class="pdf-btn-del" onclick="pdfDel('${key}','slot-${type}-body','${type}',false)"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  } else {
+    bodyEl.innerHTML = `<div class="pdf-drop-zone" onclick="pdfPickFile('${type}')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'${type}')">
+      <i class="ti ti-cloud-upload" style="font-size:32px;color:var(--bdr-medium);display:block;margin-bottom:8px"></i>
+      <div style="font-size:13px;font-weight:600;color:var(--txt-muted)">Cliquez ou glissez un PDF ici</div>
+      <div style="font-size:11px;color:var(--txt-muted);margin-top:4px">Fichier PDF uniquement</div>
+    </div>`;
+  }
+}
+
+// ── Sélection de fichier ────────────────────────────────────
+function pdfPickFile(slotId){
+  _pdfCurrentSlot = slotId;
+  document.getElementById('pdf-file-input').value = '';
+  document.getElementById('pdf-file-input').click();
+}
+
+function pdfFileSelected(input){
+  if(!input.files || !input.files[0]) return;
+  _pdfStore(_pdfCurrentSlot, input.files[0]);
+}
+
+function pdfDragOver(e){ e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+
+function pdfDrop(e, slotId){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if(file && file.type === 'application/pdf') _pdfStore(slotId, file);
+  else showToast('Veuillez déposer un fichier PDF.');
+}
+
+function _pdfStore(slotId, file){
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const data = e.target.result;
+    const isConv = slotId.startsWith('conv_');
+    const isCat = slotId === 'catalogue' || slotId === 'tarif';
+    const key = isConv ? 'pdf_conv_' + slotId.replace('conv_','') : 'pdf_cat_' + slotId;
+    try {
+      localStorage.setItem(key, JSON.stringify({name: file.name, data}));
+    } catch(err){
+      showToast('Fichier trop volumineux pour le stockage local.');
+      return;
+    }
+    if(isConv){
+      const rid = slotId.replace('conv_','');
+      const bodyEl = document.getElementById('conv-body-' + rid);
+      if(bodyEl) bodyEl.innerHTML = _renderConvBody(rid);
+    } else if(isCat){
+      _refreshCatSlot(slotId);
+    }
+    showToast('PDF "' + file.name + '" déposé avec succès !');
+  };
+  reader.readAsDataURL(file);
+}
+
+function pdfView(key){
+  const stored = localStorage.getItem(key);
+  if(!stored) return;
+  const info = JSON.parse(stored);
+  const win = window.open();
+  win.document.write('<iframe src="' + info.data + '" style="width:100%;height:100vh;border:none"></iframe>');
+}
+
+function pdfDel(key, bodyId, id, isConv){
+  if(!confirm('Supprimer ce PDF ?')) return;
+  localStorage.removeItem(key);
+  if(isConv){
+    const bodyEl = document.getElementById(bodyId);
+    if(bodyEl) bodyEl.innerHTML = _renderConvBody(id);
+  } else {
+    _refreshCatSlot(id);
+  }
+  showToast('PDF supprimé.');
+}
 </script>
   <div class="logout-bar" id="logout-bar">
     <div class="user-info"><i class="ti ti-user-circle" style="font-size:18px;color:#378ADD"></i> Connecté : <strong id="user-display-name">—</strong> <span id="user-role-badge" style="font-size:11px;padding:2px 8px;border-radius:20px;background:#1e3a5a;color:#60aaee;font-weight:600"></span></div>
