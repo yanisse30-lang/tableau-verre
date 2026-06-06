@@ -25,7 +25,7 @@
 }
 html{zoom:1.25}
 body{font-family:var(--font);background:#111;min-height:100vh;color:#f0f0f0;padding:24px;font-size:17px}
-.app-wrapper{max-width:760px;margin:0 auto;padding-bottom:70px}
+.app-wrapper{max-width:1050px;margin:0 auto;padding-bottom:70px}
 
 /* APP LOGO */
 .app-logo{background:#1e1e1e;border-radius:16px;padding:14px 20px;margin-bottom:28px;display:flex;align-items:center;gap:14px}
@@ -124,8 +124,16 @@ select option{background:#252525;color:#f0f0f0}
 .gamme-header .gamme-desc{font-size:12px;font-weight:400;opacity:0.85;margin-left:auto}
 
 /* ─── VERRE TABLE ─────────────────────────────────────────── */
-.verre-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
-.verre-table thead th{padding:9px 12px;text-align:left;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#666;background:#161616;border-bottom:2px solid #2a2a2a;white-space:nowrap}
+.verre-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;table-layout:fixed}
+.verre-table col.col-info{width:24%}
+.verre-table col.col-indice{width:6%}
+.verre-table col.col-precal{width:8%}
+.verre-table col.col-tarifs{width:8%}
+.verre-table col.col-sv{width:9%}
+.verre-table col.col-sp{width:8%}
+.verre-table col.col-st{width:8%}
+.verre-table col.col-marge{width:29%}
+.verre-table thead th{padding:8px 8px;text-align:left;font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#666;background:#161616;border-bottom:2px solid #2a2a2a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .verre-table thead th.col-tarifs,.verre-table thead th.col-saisie-v,.verre-table thead th.col-saisie-p,.verre-table thead th.col-saisie-t,.verre-table thead th.col-marge{text-align:right}
 .vt-gamme-hdr td{padding:8px 12px;font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;border-bottom:1px solid #222}
 .vt-gamme-hdr.gp td{color:#E57373}
@@ -133,15 +141,15 @@ select option{background:#252525;color:#f0f0f0}
 .vt-gamme-hdr.ge td{color:#81C784}
 .verre-row{border-bottom:1px solid #1e1e1e;cursor:pointer;transition:background 0.1s}
 .verre-row:hover{background:#1a1a1a}
-.verre-row td{padding:10px 12px;vertical-align:middle}
+.verre-row td{padding:9px 8px;vertical-align:middle;overflow:hidden}
 .vr-name{font-size:13px;font-weight:700;color:#e8e8e8;margin-bottom:2px}
 .vr-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .vr-marque{font-size:11px;color:#555}
 .vr-gamme-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 .vr-reseau-badge{font-size:9px;font-weight:800;letter-spacing:0.06em;padding:2px 6px;border-radius:4px;background:#0f2a1a;color:#50d080;border:1px solid #1a4a28}
 .vt-indice{display:inline-block;background:#1a2a3a;color:#60a0e0;font-size:12px;font-weight:800;padding:3px 9px;border-radius:6px}
-.vt-precal-incl{font-size:11px;color:#50c090;background:#0a1e14;border:1px solid #1a4030;padding:3px 8px;border-radius:5px;white-space:nowrap}
-.vt-precal-non{font-size:11px;color:#666;background:#1a1a1a;border:1px solid #2a2a2a;padding:3px 8px;border-radius:5px;white-space:nowrap}
+.vt-precal-incl{font-size:11px;color:#50c090;background:#0a1e14;border:1px solid #1a4030;padding:3px 7px;border-radius:5px;display:inline-block}
+.vt-precal-non{font-size:11px;color:#555;padding:3px 0;display:inline-block}
 .vt-prix{font-size:14px;font-weight:800;color:#f0f0f0;white-space:nowrap}
 .vt-prix.reseau{color:#50e090}
 .vt-saisie{font-size:13px;color:#bbb;text-align:right;white-space:nowrap}
@@ -1905,8 +1913,8 @@ function renderVerreLigne(v){
       </td>
       <td><span class="vt-indice">${v.indiceChoisi}</span></td>
       <td>${v.precalibrage
-        ? `<span class="vt-precal-incl"><i class="ti ti-check" style="font-size:10px;margin-right:3px"></i>Inclus valorisé</span>`
-        : `<span class="vt-precal-non">Non inclus</span>`}</td>
+        ? `<span class="vt-precal-incl"><i class="ti ti-check" style="font-size:10px;margin-right:3px"></i>Inclus</span>`
+        : `<span class="vt-precal-non">—</span>`}</td>
       <td style="text-align:right"><span class="vt-prix ${isReseau?'reseau':''}">${v.vente} €</span></td>
       <td class="vt-saisie">${v.vente} €</td>
       <td class="vt-saisie">${precalSaisie}</td>
@@ -2139,7 +2147,12 @@ function showVerres(){
                 + buildVerreSection(ent,'GAMME ESSENTIELLE','ge');
 
   const tableHTML = compat.length
-    ? `<div style="overflow-x:auto;margin-top:8px"><table class="verre-table">
+    ? `<div style="margin-top:8px"><table class="verre-table">
+        <colgroup>
+          <col class="col-info"><col class="col-indice"><col class="col-precal">
+          <col class="col-tarifs"><col class="col-sv"><col class="col-sp">
+          <col class="col-st"><col class="col-marge">
+        </colgroup>
         <thead><tr>
           <th class="col-info">Informations</th>
           <th>Indice</th>
