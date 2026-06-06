@@ -971,9 +971,11 @@ select option{background:#fff;color:var(--txt-primary)}
       <div id="es-prog" class="es-sub" style="display:none">
         <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
         <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><ellipse cx="20" cy="20" rx="16" ry="12"/><ellipse cx="20" cy="20" rx="10" ry="6" stroke-dasharray="2,2"/></svg><span class="es-sub-ttl">Verres progressifs</span></div>
-        <div class="es-prog2">
-          <div class="es-prog2-panel" id="p2-panel"><!-- généré JS --></div>
-          <div class="es-prog2-view"><canvas id="prog2-cv" width="600" height="380"></canvas></div>
+        <div style="position:relative;border-radius:16px;overflow:hidden;background:#000;line-height:0;box-shadow:0 4px 24px rgba(0,0,0,0.25)">
+          <video id="es-prog-video"
+            src="https://154d6d6c2c7c3b2df2ae6157b4ef3f06.cdn.bubble.io/f1755267451179x655207784074624900/Transitions%20GEN%20S%20Colors%20HD.mp4"
+            muted playsinline
+            style="width:100%;display:block;border-radius:16px"></video>
         </div>
       </div>
 
@@ -3130,7 +3132,7 @@ function esGo(module){
   if(!el)return;
   el.style.display='block';
   window.scrollTo({top:0,behavior:'smooth'});
-  if(module==='prog')  setTimeout(initProg2,80);
+  if(module==='prog')  esProgVideoInit();
   if(module==='mat')   drawMatBars();
   if(module==='ar')    esARScene('nuit',document.querySelector('#es-ar-scenes .es-scene-btn'));
   if(module==='tr')    esTRVideoInit();
@@ -3337,6 +3339,22 @@ function esTRColorV(colorKey, btn){
   vid.style.filter = cfg.filter;
   document.querySelectorAll('#es-tr .es-tr-swatch-v').forEach(s => s.classList.remove('selected'));
   if(btn) btn.classList.add('selected');
+}
+
+// ── Progressifs vidéo ─────────────────────────────────────────────
+function esProgVideoInit(){
+  const vid = document.getElementById('es-prog-video');
+  if(!vid) return;
+  // Nettoyer l'ancien listener si present
+  if(vid._progTU){ vid.removeEventListener('timeupdate', vid._progTU); }
+  function onTU(){
+    if(vid.currentTime < 30) { vid.currentTime = 30; }
+    if(vid.currentTime >= 60){ vid.currentTime = 30; }
+  }
+  vid._progTU = onTU;
+  vid.addEventListener('timeupdate', onTU);
+  vid.currentTime = 30;
+  vid.play().catch(()=>{});
 }
 
 // ── Polarisants ────────────────────────────────────────────────────
