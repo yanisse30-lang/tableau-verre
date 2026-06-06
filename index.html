@@ -629,8 +629,9 @@ select option{background:#252525;color:#f0f0f0}
   .es-slider label{font-size:13px;color:#aaa;min-width:120px}
   .es-slider input{flex:1}
   .es-slider span{font-size:13px;font-weight:700;color:#f0f0f0;min-width:55px;text-align:right}
-  .es-tr-band{height:34px;border-radius:10px;background:linear-gradient(to right,#ddd8c8 0%,#b89060 50%,#60381a 100%);position:relative;margin-bottom:10px;border:1px solid #3a3a3a;overflow:hidden}
-  .es-tr-cursor{position:absolute;top:2px;bottom:2px;width:3px;background:#fff;border-radius:2px;box-shadow:0 0 6px rgba(255,255,255,0.9);transition:left 0.2s}
+  .es-tr-swatch-v{width:66px;height:66px;border-radius:50%;cursor:pointer;border:2.5px solid #3a3a3a;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:5px;transition:border-color 0.15s,transform 0.12s;box-shadow:0 2px 8px rgba(0,0,0,0.5)}
+  .es-tr-swatch-v.selected{border-color:#fff!important;transform:scale(1.12)}
+  .es-tr-swatch-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,0.92);text-shadow:0 1px 3px rgba(0,0,0,0.9);letter-spacing:0.04em;text-align:center}
   .es-def-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
   .es-def-btn{padding:13px 10px;border-radius:12px;border:1.5px solid #2a2a2a;background:#1a1a1a;color:#888;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:0.15s;display:flex;flex-direction:column;align-items:center;gap:6px}
   .es-def-btn.active{border-color:#9060e0;background:#1e0a30;color:#c080f0}
@@ -1074,33 +1075,32 @@ select option{background:#252525;color:#f0f0f0}
       <!-- ── VERRES TRANSITIONS ─────────────────────────────── -->
       <div id="es-tr" class="es-sub" style="display:none">
         <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
-        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><circle cx="20" cy="20" r="7"/><line x1="20" y1="4" x2="20" y2="11"/><line x1="20" y1="29" x2="20" y2="36"/><line x1="4" y1="20" x2="11" y2="20"/><line x1="29" y1="20" x2="36" y2="20"/><line x1="7" y1="7" x2="12" y2="12"/><line x1="28" y1="28" x2="33" y2="33"/><line x1="33" y1="7" x2="28" y2="12"/><line x1="12" y1="28" x2="7" y2="33"/></svg><span class="es-sub-ttl">Verres Transitions</span></div>
+        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34" stroke="#f0f0f0" stroke-width="2.2" fill="none"><circle cx="20" cy="20" r="7"/><line x1="20" y1="4" x2="20" y2="11"/><line x1="20" y1="29" x2="20" y2="36"/><line x1="4" y1="20" x2="11" y2="20"/><line x1="29" y1="20" x2="36" y2="20"/><line x1="7" y1="7" x2="12" y2="12"/><line x1="28" y1="28" x2="33" y2="33"/><line x1="33" y1="7" x2="28" y2="12"/><line x1="12" y1="28" x2="7" y2="33"/></svg><span class="es-sub-ttl">Verres Transitions</span></div>
         <div class="es-info">
           <div class="es-info-title"><i class="ti ti-sun-moon"></i> S'assombrissent automatiquement sous les UV</div>
           <div class="es-info-desc">Transition en 30 secondes. Retour transparent en 3 minutes en intérieur. Protection UV 100%. Disponibles en 8 couleurs.</div>
           <div class="es-avs"><span class="es-av" style="background:#0a2a10;color:#70c8a0">UV 100% bloqués</span><span class="es-av" style="background:#0a2a10;color:#70c8a0">Adaptation auto</span><span class="es-av" style="background:#1a1a30;color:#a0a0f0">8 couleurs</span></div>
         </div>
-        <div class="es-slider">
-          <label><i class="ti ti-sun" style="font-size:13px"></i> Exposition UV</label>
-          <input type="range" min="0" max="100" step="1" value="0" id="es-tr-uv" oninput="esTRUpdate(+this.value)"/>
-          <span id="es-tr-uv-out">0%</span>
+
+        <!-- Vidéo Transitions GEN S Colors -->
+        <div style="position:relative;border-radius:16px;overflow:hidden;margin-bottom:20px;background:#000;line-height:0;box-shadow:0 4px 24px rgba(0,0,0,0.6)">
+          <video id="es-tr-video"
+            src="https://154d6d6c2c7c3b2df2ae6157b4ef3f06.cdn.bubble.io/f1755267451179x655207784074624900/Transitions%20GEN%20S%20Colors%20HD.mp4"
+            autoplay loop muted playsinline
+            style="width:100%;display:block;border-radius:16px;transition:filter 0.5s ease"></video>
         </div>
-        <div class="es-tr-band"><div class="es-tr-cursor" id="es-tr-cursor" style="left:2px"></div></div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:14px"><span>Intérieur (clair)</span><span>Extérieur (teinté)</span></div>
-        <div class="es-ba">
-          <div class="es-ba-col"><img id="es-tr-before" src="" class="es-ba-img" alt=""/><div class="es-ba-lbl" style="background:rgba(20,80,160,0.85)">Intérieur — Clair</div></div>
-          <div class="es-ba-col"><img id="es-tr-after" src="" class="es-ba-img" alt=""/><div class="es-ba-lbl" style="background:rgba(80,50,10,0.85)">Extérieur — Teinté</div></div>
-        </div>
-        <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Teintes disponibles</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <div style="width:36px;height:36px;border-radius:50%;background:#404040;border:2px solid #666;cursor:pointer;title='Gris'" onclick="esTRColor('#404040',this)"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#7a4010;border:2px solid #666;cursor:pointer" onclick="esTRColor('#7a4010',this)"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#184060;border:2px solid #666;cursor:pointer" onclick="esTRColor('#184060',this)"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#601828;border:2px solid #666;cursor:pointer" onclick="esTRColor('#601828',this)"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#30508a;border:2px solid #666;cursor:pointer" onclick="esTRColor('#30508a',this)"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#205040;border:2px solid #666;cursor:pointer" onclick="esTRColor('#205040',this)"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#704820;border:2px solid #666;cursor:pointer" onclick="esTRColor('#704820',this)"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:#2a2a3a;border:2px solid #666;cursor:pointer" onclick="esTRColor('#2a2a3a',this)"></div>
+
+        <!-- Teintes disponibles -->
+        <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px">Teintes disponibles — Transitions GEN S</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;padding:0 4px">
+          <div class="es-tr-swatch-v selected" onclick="esTRColorV('gris',this)" style="background:radial-gradient(circle at 35% 35%,#909090,#3a3a3a)"><span class="es-tr-swatch-lbl">Gris</span></div>
+          <div class="es-tr-swatch-v" onclick="esTRColorV('brun',this)" style="background:radial-gradient(circle at 35% 35%,#c07040,#5a2808)"><span class="es-tr-swatch-lbl">Brun</span></div>
+          <div class="es-tr-swatch-v" onclick="esTRColorV('saphir',this)" style="background:radial-gradient(circle at 35% 35%,#5090e0,#0a2870)"><span class="es-tr-swatch-lbl">Saphir</span></div>
+          <div class="es-tr-swatch-v" onclick="esTRColorV('amethyste',this)" style="background:radial-gradient(circle at 35% 35%,#a060d0,#4a1080)"><span class="es-tr-swatch-lbl">Améthyste</span></div>
+          <div class="es-tr-swatch-v" onclick="esTRColorV('emeraude',this)" style="background:radial-gradient(circle at 35% 35%,#38b878,#0a4828)"><span class="es-tr-swatch-lbl">Émeraude</span></div>
+          <div class="es-tr-swatch-v" onclick="esTRColorV('or',this)" style="background:radial-gradient(circle at 35% 35%,#e0b030,#805800)"><span class="es-tr-swatch-lbl">Or</span></div>
+          <div class="es-tr-swatch-v" onclick="esTRColorV('rouge',this)" style="background:radial-gradient(circle at 35% 35%,#d04060,#600018)"><span class="es-tr-swatch-lbl">Rouge</span></div>
+          <div class="es-tr-swatch-v" onclick="esTRColorV('sepia',this)" style="background:radial-gradient(circle at 35% 35%,#a07848,#4a2c10)"><span class="es-tr-swatch-lbl">Sépia</span></div>
         </div>
       </div>
 
@@ -3134,7 +3134,7 @@ function esGo(module){
   if(module==='prog')  setTimeout(initProg2,80);
   if(module==='mat')   drawMatBars();
   if(module==='ar')    esARScene('nuit',document.querySelector('#es-ar-scenes .es-scene-btn'));
-  if(module==='tr')    {esTRInitImages();esTRUpdate(0);}
+  if(module==='tr')    esTRVideoInit();
   if(module==='pol')   esSolInit();
   if(module==='uni')   esUniInit();
   if(module==='ecran') setTimeout(drawEcranZones,80);
@@ -3316,28 +3316,28 @@ function esARScene(scene,btn){
   after.style.filter='contrast(1.1) brightness(1.04)';
 }
 
-// ── Transitions ────────────────────────────────────────────────────
-let _esTRColor='#404040';
-function esTRInitImages(){
-  const sc1=demoScenes['ecran'],sc2=demoScenes['soleil'];
-  if(!sc1||!sc2)return;
-  document.getElementById('es-tr-before').src=sc1.url;
-  document.getElementById('es-tr-before').style.filter='none';
-  document.getElementById('es-tr-after').src=sc2.url;
+// ── Transitions GEN S ─────────────────────────────────────────────
+const _trColCfg = {
+  gris:      {filter:'grayscale(0.15) brightness(0.92)'},
+  brun:      {filter:'sepia(0.75) saturate(1.6) brightness(0.82)'},
+  saphir:    {filter:'sepia(0.5) hue-rotate(186deg) saturate(3) brightness(0.82)'},
+  amethyste: {filter:'sepia(0.5) hue-rotate(264deg) saturate(2.8) brightness(0.82)'},
+  emeraude:  {filter:'sepia(0.5) hue-rotate(102deg) saturate(3) brightness(0.82)'},
+  or:        {filter:'sepia(0.9) saturate(2.8) hue-rotate(8deg) brightness(0.85)'},
+  rouge:     {filter:'sepia(0.5) hue-rotate(314deg) saturate(3) brightness(0.82)'},
+  sepia:     {filter:'sepia(1) saturate(0.55) brightness(0.78)'},
+};
+function esTRVideoInit(){
+  const sel = document.querySelector('#es-tr .es-tr-swatch-v.selected');
+  esTRColorV('gris', sel || document.querySelector('#es-tr .es-tr-swatch-v'));
 }
-function esTRUpdate(val){
-  document.getElementById('es-tr-uv-out').textContent=val+'%';
-  const cursor=document.getElementById('es-tr-cursor');
-  if(cursor)cursor.style.left=(val*0.96+2)+'%';
-  const after=document.getElementById('es-tr-after');if(!after)return;
-  const sun=val/100;
-  after.style.filter=`sepia(${(sun*0.6).toFixed(2)}) saturate(${(1-sun*0.38).toFixed(2)}) brightness(${(1-sun*0.36).toFixed(2)})`;
-}
-function esTRColor(hex,el){
-  _esTRColor=hex;
-  document.querySelectorAll('#es-tr .es-tile-icon ~ div > div, #es-tr div[onclick]').forEach(d=>d.style.border='2px solid #666');
-  if(el)el.style.border='2px solid #fff';
-  esTRUpdate(parseInt(document.getElementById('es-tr-uv')?.value||0));
+function esTRColorV(colorKey, btn){
+  const vid = document.getElementById('es-tr-video');
+  if(!vid) return;
+  const cfg = _trColCfg[colorKey] || _trColCfg.gris;
+  vid.style.filter = cfg.filter;
+  document.querySelectorAll('#es-tr .es-tr-swatch-v').forEach(s => s.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
 }
 
 // ── Polarisants ────────────────────────────────────────────────────
