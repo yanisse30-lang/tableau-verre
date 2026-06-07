@@ -268,19 +268,35 @@ select option{background:#fff;color:var(--txt-primary)}
 /* FOOTER */
 .footer-note{text-align:center;font-size:12px;color:var(--txt-muted);margin-top:24px;padding-top:16px;border-top:1px solid var(--bdr-light)}
 
-/* LOGIN */
-#login-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(240,244,248,0.96);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:9999}
-.login-box{background:#fff;border:1px solid var(--bdr-light);border-radius:24px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.10)}
-.login-title{text-align:center;font-size:22px;font-weight:800;color:var(--txt-primary);margin-bottom:4px}
-.login-sub{text-align:center;font-size:14px;color:var(--txt-muted);margin-bottom:28px}
+/* LOGIN REDESIGN */
+#login-screen{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:row;z-index:9999;overflow:hidden}
+.login-panel-left{flex:0 0 480px;min-width:320px;background:#fff;display:flex;align-items:center;justify-content:center;padding:48px 44px;position:relative;z-index:2}
+.login-panel-right{flex:1;background:linear-gradient(145deg,#0D2247 0%,#185FA5 100%);display:flex;align-items:center;justify-content:center;padding:48px;position:relative;overflow:visible}
+@media(max-width:700px){.login-panel-right{display:none}.login-panel-left{flex:1;min-width:0;padding:32px 24px}}
+.login-box{width:100%;max-width:380px}
+.login-brand{display:flex;align-items:center;gap:10px;margin-bottom:34px}
+.login-brand-icon{width:34px;height:34px;background:#111;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.login-brand-name{font-size:17px;font-weight:800;color:#111;letter-spacing:-0.02em}
+.login-title{font-size:26px;font-weight:800;color:#111;margin-bottom:6px;text-align:left}
+.login-sub{font-size:13px;color:#999;margin-bottom:26px;text-align:left;line-height:1.55}
 .login-field{margin-bottom:16px}
-.login-field label{display:block;font-size:13px;font-weight:600;color:var(--txt-secondary);margin-bottom:6px;letter-spacing:0.04em;text-transform:uppercase}
-.login-field input{width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid var(--bdr-medium);background:#fff;color:var(--txt-primary);font-size:15px;font-family:inherit;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
-.login-field input:focus{border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(24,95,165,0.12)}
-.btn-login{width:100%;padding:14px;background:var(--blue-600);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-login:hover{background:var(--blue-800)}
-.login-error{background:#FFF1F2;border:1px solid #FECDD3;color:#E11D48;border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:14px;display:none;text-align:center}
-.login-footer{text-align:center;font-size:12px;color:var(--txt-muted);margin-top:20px}
+.login-field label{display:block;font-size:13px;font-weight:500;color:#555;margin-bottom:7px}
+.login-field input{width:100%;padding:12px 15px;border-radius:10px;border:1.5px solid #E5E7EB;background:#fff;color:#111;font-size:14px;font-family:inherit;outline:none;transition:border-color 0.2s,box-shadow 0.2s;box-sizing:border-box}
+.login-field input:focus{border-color:#185FA5;box-shadow:0 0 0 3px rgba(24,95,165,0.13)}
+.btn-login{width:100%;padding:13px;background:#111;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;transition:background 0.15s,transform 0.1s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-login:hover{background:#333}
+.btn-login:active{transform:scale(0.98)}
+.login-error{background:#FFF1F2;border:1px solid #FECDD3;color:#E11D48;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;text-align:center}
+.login-footer{text-align:center;font-size:11px;color:#ccc;margin-top:22px}
+/* RIGHT PANEL CONTENT */
+.login-right-content{position:relative;z-index:2;max-width:340px}
+.login-sparkle-wrap{margin-bottom:28px}
+.login-right-title{font-size:28px;font-weight:800;color:#fff;line-height:1.28;margin-bottom:18px;letter-spacing:-0.025em}
+.login-right-title em{color:#93C5FD;font-style:normal}
+.login-right-desc{font-size:14px;color:rgba(255,255,255,0.68);line-height:1.75}
+/* STARS SCINTILLANTES */
+@keyframes star-twinkle{0%,100%{opacity:0.05;transform:scale(0.3) rotate(0deg)}45%{opacity:1;transform:scale(1.2) rotate(20deg)}70%{opacity:0.6;transform:scale(0.85) rotate(-8deg)}}
+#login-stars-strip{position:absolute;top:0;left:-28px;width:56px;height:100%;pointer-events:none;z-index:3;overflow:visible}
 
 @media(max-width:540px){body{padding:14px}.eye-grid{grid-template-columns:1fr}.grid-4{grid-template-columns:1fr}.home-grid{grid-template-columns:1fr}.tool-grid{grid-template-columns:1fr}.card{padding:18px}.traitements-grid{grid-template-columns:1fr}}
 
@@ -803,21 +819,65 @@ select option{background:#fff;color:var(--txt-primary)}
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-box">
-    <div class="login-title">Verre Beta Test</div>
-    <div class="login-sub">Confidentiel — Accès réservé au personnel</div>
-    <div class="login-error" id="login-error"><i class="ti ti-alert-circle"></i> Identifiant ou mot de passe incorrect</div>
-    <div class="login-field">
-      <label><i class="ti ti-user" style="font-size:12px"></i> Identifiant</label>
-      <input type="text" id="login-user" placeholder="Votre identifiant" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"/>
+
+  <!-- PANNEAU GAUCHE -->
+  <div class="login-panel-left">
+    <div class="login-box">
+      <!-- Logo -->
+      <div class="login-brand">
+        <div class="login-brand-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+            <path d="M12 2L14.2 9.8L22 12L14.2 14.2L12 22L9.8 14.2L2 12L9.8 9.8Z" fill="white"/>
+            <path d="M20 4L21 7L24 8L21 9L20 12L19 9L16 8L19 7Z" fill="white" opacity="0.7"/>
+          </svg>
+        </div>
+        <span class="login-brand-name">beta test</span>
+      </div>
+
+      <div class="login-title">Se connecter</div>
+      <div class="login-sub">Content de te revoir !<br>Entre tes identifiants pour continuer.</div>
+
+      <div class="login-error" id="login-error"><i class="ti ti-alert-circle"></i> Identifiant ou mot de passe incorrect</div>
+
+      <div class="login-field">
+        <label>Identifiant</label>
+        <input type="text" id="login-user" placeholder="Votre identifiant" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <div class="login-field">
+        <label>Mot de passe</label>
+        <input type="password" id="login-pass" placeholder="Votre mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+
+      <button class="btn-login" onclick="doLogin()">Se connecter</button>
+      <div class="login-footer">Confidentiel · Accès réservé au personnel</div>
     </div>
-    <div class="login-field">
-      <label><i class="ti ti-lock" style="font-size:12px"></i> Mot de passe</label>
-      <input type="password" id="login-pass" placeholder="Votre mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
-    </div>
-    <button class="btn-login" onclick="doLogin()"><i class="ti ti-login"></i> Se connecter</button>
-    <div class="login-footer">Confidentiel · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#555;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
   </div>
+
+  <!-- PANNEAU DROIT -->
+  <div class="login-panel-right">
+    <!-- Étoiles scintillantes sur la bordure -->
+    <div id="login-stars-strip"></div>
+
+    <div class="login-right-content">
+      <!-- Icône sparkle -->
+      <div class="login-sparkle-wrap">
+        <svg viewBox="0 0 64 64" width="56" height="56" fill="none">
+          <path d="M26 6L29.5 23L46 26L29.5 29.5L26 46L22.5 29.5L6 26L22.5 23Z" fill="#93C5FD"/>
+          <path d="M48 10L50 18L58 20L50 22L48 30L46 22L38 20L46 18Z" fill="#93C5FD" opacity="0.65"/>
+          <path d="M54 38L55.5 43L61 44.5L55.5 46L54 51.5L52.5 46L47 44.5L52.5 43Z" fill="#93C5FD" opacity="0.4"/>
+        </svg>
+      </div>
+
+      <div class="login-right-title">
+        Optimise tes choix de<br>verres selon chaque <em>correction</em>
+      </div>
+
+      <div class="login-right-desc">
+        Le compagnon digital des opticiens pour optimiser la marge, pour les <strong style="color:rgba(255,255,255,0.9)">débutants</strong> et <strong style="color:rgba(255,255,255,0.9)">opticiens confirmés</strong>. Simple, rapide, efficace.
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div class="app-wrapper">
@@ -3158,6 +3218,25 @@ async function openConnexionPanel(){
 function closeConnexionPanel(){
   document.getElementById('conn-panel')?.classList.remove('open');
 }
+
+// ── Étoiles scintillantes login ────────────────────────────────────
+function _initLoginStars(){
+  const strip = document.getElementById('login-stars-strip');
+  if(!strip) return;
+  strip.innerHTML = '';
+  for(let i = 0; i < 22; i++){
+    const top    = (i / 21 * 94 + 3).toFixed(1);
+    const offset = ((Math.random() - 0.5) * 44).toFixed(1);
+    const size   = (Math.random() * 11 + 7).toFixed(1);
+    const dur    = (Math.random() * 2.2 + 1.4).toFixed(2);
+    const del    = (Math.random() * 3.5).toFixed(2);
+    const s = document.createElement('div');
+    s.style.cssText = `position:absolute;top:${top}%;left:${offset}px;transform:translateX(-50%);animation:star-twinkle ${dur}s ease-in-out infinite ${del}s;`;
+    s.innerHTML = `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none"><path d="M12 1.5L13.9 9.1L21.5 11L13.9 12.9L12 20.5L10.1 12.9L2.5 11L10.1 9.1Z" fill="#93C5FD"/></svg>`;
+    strip.appendChild(s);
+  }
+}
+document.addEventListener('DOMContentLoaded', _initLoginStars);
 
 async function doLogin(){
   const u = document.getElementById('login-user').value.trim();
