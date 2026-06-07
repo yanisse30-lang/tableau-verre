@@ -1444,9 +1444,9 @@ select option{background:#fff;color:var(--txt-primary)}
         </div>
 
         <!-- Zone image -->
-        <div id="pol-img-wrap" style="display:none;margin:0 auto;max-width:240px">
+        <div id="pol-img-wrap" style="display:none;margin:0 auto;max-width:300px">
           <div style="overflow:hidden;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.22);line-height:0">
-            <img id="pol-img" src="pol-comparison.jpg" alt="Verre" style="width:200%;display:block;margin-left:0%;transition:margin-left 0.35s ease;filter:url(#pol-sharpen);image-rendering:-webkit-optimize-contrast;image-rendering:smooth"/>
+            <img id="pol-img" src="" alt="Verre" style="width:100%;display:block;border-radius:14px;transition:opacity 0.25s"/>
           </div>
         </div>
 
@@ -4183,8 +4183,13 @@ function polSelectType(type){
   const img  = document.getElementById('pol-img');
   if(img && wrap){
     wrap.style.display = 'block';
-    // Slide CSS : classique = moitié gauche, polarisant = moitié droite
-    img.style.marginLeft = (type === 'polarisant') ? '-100%' : '0%';
+    img.style.opacity = '0';
+    setTimeout(()=>{
+      img.src = data.img;
+      img.alt = data.titre;
+      img.onload = ()=>{ img.style.opacity='1'; };
+      if(img.complete) img.style.opacity='1';
+    }, 150);
   }
   const desc = document.getElementById('pol-desc');
   if(desc){
