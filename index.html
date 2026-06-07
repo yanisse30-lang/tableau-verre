@@ -1268,34 +1268,31 @@ select option{background:#fff;color:var(--txt-primary)}
         </div>
 
         <!-- Sélecteur de gamme -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
           <button class="prog-gamme-btn" id="pgb-essentiel" onclick="progSelectGamme('essentiel')">
-            <div class="pgb-icon" style="background:linear-gradient(135deg,#16A34A,#22C55E)"><i class="ti ti-circle-1" style="font-size:18px;color:#fff"></i></div>
+            <div class="pgb-icon" style="background:linear-gradient(135deg,#16A34A,#22C55E)"><span style="font-size:18px;font-weight:900;color:#fff">1</span></div>
             <div class="pgb-label">Gamme</div>
             <div class="pgb-name">Essentiel</div>
           </button>
           <button class="prog-gamme-btn" id="pgb-smart" onclick="progSelectGamme('smart')">
-            <div class="pgb-icon" style="background:linear-gradient(135deg,#185FA5,#378ADD)"><i class="ti ti-circle-2" style="font-size:18px;color:#fff"></i></div>
+            <div class="pgb-icon" style="background:linear-gradient(135deg,#185FA5,#378ADD)"><span style="font-size:18px;font-weight:900;color:#fff">2</span></div>
             <div class="pgb-label">Gamme</div>
             <div class="pgb-name">Smart</div>
           </button>
           <button class="prog-gamme-btn" id="pgb-premium" onclick="progSelectGamme('premium')">
-            <div class="pgb-icon" style="background:linear-gradient(135deg,#7C3AED,#A855F7)"><i class="ti ti-circle-3" style="font-size:18px;color:#fff"></i></div>
+            <div class="pgb-icon" style="background:linear-gradient(135deg,#7C3AED,#A855F7)"><span style="font-size:18px;font-weight:900;color:#fff">3</span></div>
             <div class="pgb-label">Gamme</div>
             <div class="pgb-name">Premium</div>
           </button>
         </div>
 
         <!-- Zone image -->
-        <div id="prog-img-wrap" style="border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.18);background:#111;min-height:200px;display:flex;align-items:center;justify-content:center;transition:0.3s">
-          <div style="color:#555;font-size:13px;text-align:center;padding:40px">
-            <i class="ti ti-hand-click" style="font-size:32px;display:block;margin-bottom:10px;color:#444"></i>
-            Sélectionnez une gamme
-          </div>
+        <div id="prog-img-wrap" style="border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.18);background:#000;line-height:0">
+          <img id="prog-img" src="prog-essentiel.png" alt="Gamme Essentiel" style="width:100%;display:block;border-radius:16px"/>
         </div>
 
         <!-- Description gamme -->
-        <div id="prog-desc" style="margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--surf-secondary);border:1px solid var(--bdr-light);font-size:12px;color:var(--txt-secondary);display:none;line-height:1.6"></div>
+        <div id="prog-desc" style="margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);font-size:12px;color:#ccc;line-height:1.6"></div>
       </div>
 
       <!-- ── VERRES UNIFOCAUX ────────────────────────────────── -->
@@ -4075,7 +4072,7 @@ function esGo(module){
   if(!el)return;
   el.style.display='block';
   window.scrollTo({top:0,behavior:'smooth'});
-  if(module==='prog')  esProgVideoInit();
+  if(module==='prog')  { progSelectGamme('essentiel'); }
   if(module==='mat')   drawMatBars();
   if(module==='ar')    esARScene('nuit',document.querySelector('#es-ar-scenes .es-scene-btn'));
   if(module==='tr')    esTRVideoInit();
@@ -4098,19 +4095,19 @@ const _progGammes = {
     img: 'prog-essentiel.png',
     couleur: '#16A34A',
     titre: 'Gamme Essentiel',
-    desc: `<strong style="color:#16A34A">Gamme Essentiel</strong> — Corridor de progression standard. Zones de vision fonctionnelles, idéales pour un premier équipement progressif ou un budget maîtrisé. Adaptation rapide pour les presbyties débutantes.`
+    descCourt: 'Corridor standard. Zones fonctionnelles pour un premier équipement progressif ou budget maîtrisé.'
   },
   smart: {
     img: 'prog-smart.png',
     couleur: '#185FA5',
     titre: 'Gamme Smart',
-    desc: `<strong style="color:#185FA5">Gamme Smart</strong> — Corridor élargi, zones de vision loin et près plus étendues. Meilleur confort en vision intermédiaire, idéal pour les porteurs actifs et les presbyties confirmées. Adaptation aisée.`
+    descCourt: 'Corridor élargi. Zones loin/près plus étendues, meilleur confort intermédiaire pour porteurs actifs.'
   },
   premium: {
     img: 'prog-premium.jpg',
     couleur: '#7C3AED',
     titre: 'Gamme Premium',
-    desc: `<strong style="color:#7C3AED">Gamme Premium</strong> — Corridor large Freeform personnalisé. Zones de vision maximales sur toute la surface du verre. Confort optimal, vision nette dans toutes les directions. Idéal pour les exigences visuelles élevées.`
+    descCourt: 'Corridor large Freeform. Vision nette dans toutes les directions — confort optimal toutes distances.'
   }
 };
 
@@ -4120,7 +4117,6 @@ function progSelectGamme(gamme){
     const btn = document.getElementById('pgb-'+g);
     if(btn) btn.className = 'prog-gamme-btn';
   });
-
   // Activer le bouton sélectionné
   const btn = document.getElementById('pgb-'+gamme);
   if(btn) btn.className = 'prog-gamme-btn active-'+gamme;
@@ -4128,23 +4124,25 @@ function progSelectGamme(gamme){
   const data = _progGammes[gamme];
   if(!data) return;
 
-  // Afficher l'image avec fondu
-  const wrap = document.getElementById('prog-img-wrap');
-  if(wrap){
-    wrap.style.opacity = '0';
+  // Changer l'image avec fondu
+  const img = document.getElementById('prog-img');
+  if(img){
+    img.style.opacity = '0';
+    img.style.transition = 'opacity 0.25s';
     setTimeout(()=>{
-      wrap.innerHTML = `<img src="${data.img}" alt="${data.titre}" style="width:100%;display:block;border-radius:14px"/>`;
-      wrap.style.opacity = '1';
-      wrap.style.transition = 'opacity 0.35s';
+      img.src = data.img;
+      img.alt = data.titre;
+      img.onload = ()=>{ img.style.opacity='1'; };
+      // fallback si déjà en cache
+      if(img.complete) img.style.opacity='1';
     }, 150);
   }
 
-  // Afficher la description
+  // Description
   const desc = document.getElementById('prog-desc');
   if(desc){
-    desc.innerHTML = `<i class="ti ti-info-circle" style="color:${data.couleur};margin-right:6px"></i>${data.desc}`;
+    desc.innerHTML = `<strong style="color:${data.couleur}">${data.titre}</strong> — ${data.descCourt}`;
     desc.style.display = 'block';
-    desc.style.borderColor = data.couleur + '44';
   }
 }
 
