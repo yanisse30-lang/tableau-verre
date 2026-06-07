@@ -1411,31 +1411,6 @@ select option{background:#fff;color:var(--txt-primary)}
       <!-- ── VERRES POLARISANTS ──────────────────────────────── -->
       <div id="es-pol" class="es-sub" style="display:none">
         <button class="es-back" onclick="esBack()"><i class="ti ti-arrow-left"></i> Menu</button>
-        <div class="es-sub-hdr"><svg viewBox="0 0 40 40" width="34" height="34"><circle cx="20" cy="20" r="7"/><line x1="20" y1="4" x2="20" y2="11"/><line x1="20" y1="29" x2="20" y2="36"/><line x1="4" y1="20" x2="11" y2="20"/><line x1="29" y1="20" x2="36" y2="20"/><line x1="8" y1="14" x2="32" y2="14"/><line x1="6" y1="20" x2="34" y2="20"/><line x1="8" y1="26" x2="32" y2="26"/></svg><span class="es-sub-ttl">Verres solaires &amp; polarisants</span></div>
-        <div class="es-sol">
-          <div class="es-sol-panel">
-            <div class="es-sol-ttl">Teinte</div>
-            <div class="es-sol-swatches" id="sol-swatches"><!-- JS --></div>
-            <div class="es-sol-ttl">Filtre polarisant</div>
-            <div class="es-sol-row">
-              <button class="es-sol-obtn" data-v="sans" onclick="esSolPol(false)">Sans<br>Polarisant</button>
-              <button class="es-sol-obtn sel" data-v="avec" onclick="esSolPol(true)">Avec<br>Polarisant</button>
-            </div>
-            <div class="es-sol-ttl">Saison</div>
-            <div class="es-sol-row">
-              <button class="es-sol-obtn sel" data-s="ete" onclick="esSolSaison('ete')">ÉTÉ</button>
-              <button class="es-sol-obtn" data-s="hiver" onclick="esSolSaison('hiver')">HIVER</button>
-            </div>
-          </div>
-          <div class="es-sol-view">
-            <div class="es-sol-slider" id="sol-slider">
-              <canvas id="sol-cv" width="600" height="380"></canvas>
-              <div class="es-sol-sline" id="sol-sline" style="left:50%"></div>
-              <div class="es-sol-shandle" id="sol-shandle" style="left:50%">⟺</div>
-            </div>
-            <div class="es-sol-labels"><span>Protégé</span><span>Verre de base</span></div>
-          </div>
-        </div>
       </div>
 
       <!-- ── DÉFAUTS VISUELS ─────────────────────────────────── -->
