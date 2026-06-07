@@ -1203,6 +1203,12 @@ select option{background:#fff;color:var(--txt-primary)}
       <!-- RÉSULTATS -->
       <div id="marge-result" style="display:none">
 
+        <!-- Badge mode test -->
+        <div id="marge-mode-test-badge" style="display:none;align-items:center;gap:8px;background:#FEF9C3;border:1.5px solid #FDE047;border-radius:10px;padding:10px 14px;font-size:12px;color:#854D0E;font-weight:600;margin-bottom:14px">
+          <i class="ti ti-flask" style="font-size:16px;color:#CA8A04"></i>
+          <span>Mode test (sans clé IA) — calcul par lecture directe du PDF. Ajoutez une clé Claude dans les paramètres pour une analyse complète.</span>
+        </div>
+
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
           <div id="marge-periode" style="font-size:13px;color:var(--txt-muted);font-weight:600;display:flex;align-items:center;gap:6px"></div>
           <button onclick="resetMargeMensuelle()" style="background:#FFF1F2;border:1px solid #FECDD3;color:#E11D48;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-refresh"></i> Nouveau calcul</button>
@@ -4173,18 +4179,117 @@ async function _margeReadPdf(buf, fname, slot){
   const st = document.getElementById('marge-status-' + slot);
   const dz = document.getElementById('marge-drop-' + slot);
   if(st){ st.style.display='flex'; st.querySelector('span').textContent = fname + ' — ' + pdf.numPages + ' page(s)'; }
-  if(dz){ dz.innerHTML = `<i class="ti ti-circle-check" style="font-size:28px;color:${slot===1?'#059669':'#185FA5'}"></i><div style="font-size:12px;font-weight:700;color:var(--txt-primary)">${fname}</div><div style="font-size:11px;color:var(--txt-muted)">${pdf.numPages} page(s) · OK</div>`; }
+  if(dz){ dz.innerHTML = `<i class="ti ti-circle-check" style="font-size:28px;color:${slot===1?'#059669':'#DC2626'}"></i><div style="font-size:12px;font-weight:700;color:var(--txt-primary)">${fname}</div><div style="font-size:11px;color:var(--txt-muted)">${pdf.numPages} page(s) · OK</div>`; }
   _margeUpdateBtn();
 }
 
 async function margeLancer(){
   if(!_margeTextReleve){ showToast('Déposez d\'abord le PDF relevé mensuel.'); return; }
   const key = localStorage.getItem('maneo_claude_key');
-  if(!key){ document.getElementById('marge-no-key').style.display='block'; return; }
   document.getElementById('marge-upload-zone').style.display = 'none';
   document.getElementById('marge-loader').style.display = 'block';
   document.getElementById('marge-result').style.display  = 'none';
-  await _margeCallClaude(key);
+  if(!key){
+    // Mode simulation — parse basique du PDF sans API
+    _margeSetLoader('Analyse en cours (mode test sans clé IA)...');
+    await new Promise(r => setTimeout(r, 900));
+    await _margeSimuler();
+  } else {
+    await _margeCallClaude(key);
+  }
+}
+
+async function _margeSimuler(){
+  // ── Parse basique du relevé mensuel ─────────────────────────
+  const text = _margeTextReleve;
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  // Cherche des lignes avec prix achat / vente / qte
+  // Pattern : "NomProduit  Qte  PrixAchat  PrixVente"  ou colonnes séparées
+  const lignes = [];
+  let caTotal = 0, achatTotal = 0;
+
+  // Regex flexible : trouve des nombres décimaux sur une même ligne
+  const numRe = /(\d+[.,]\d{2}|\d+)/g;
+  const prodRe = /^([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s\-\/]+?)\s{2,}(.+)$/;
+
+  lines.forEach(line => {
+    const nums = [...line.matchAll(/(\d+(?:[.,]\d{2})?)/g)].map(m => parseFloat(m[1].replace(',','.')));
+    if(nums.length >= 3){
+      // Heuristique : dernier grand nombre = vente, avant-dernier = achat, 1er petit entier = qté
+      const qte = Math.round(nums[0]);
+      let achat = 0, vente = 0;
+      // Cherche 2 prix (achat < vente)
+      const prix = nums.filter(n => n >= 10 && n <= 9999);
+      if(prix.length >= 2){
+        achat = Math.min(prix[prix.length-2], prix[prix.length-1]);
+        vente = Math.max(prix[prix.length-2], prix[prix.length-1]);
+        if(achat === vente) return;
+        // Nom = tout ce qui précède les nombres
+        const nomMatch = line.match(/^([A-Za-zÀ-ÿ][^\d]{3,}?)\s+\d/);
+        const nom = nomMatch ? nomMatch[1].trim() : 'Produit';
+        const marge_euro = (vente - achat) * qte;
+        const marge_pct = vente > 0 ? Math.round((vente - achat) / vente * 100 * 10) / 10 : 0;
+        caTotal += vente * qte;
+        achatTotal += achat * qte;
+        if(qte >= 1 && qte <= 500 && marge_pct > 0 && marge_pct < 95)
+          lignes.push({ produit: nom, quantite: qte, prix_achat: achat, prix_vente: vente, marge_euro: Math.round(marge_euro*100)/100, marge_pct });
+      }
+    }
+  });
+
+  const margeBrute = caTotal - achatTotal;
+  const margeBrutePct = caTotal > 0 ? Math.round(margeBrute / caTotal * 1000) / 10 : 0;
+
+  // ── Parse recommandés ────────────────────────────────────────
+  let coutReco = 0, tauxReco = 0, motifsReco = 'Non précisé';
+  if(_margeTextTaux){
+    const t = _margeTextTaux;
+    // Cherche pourcentage de recommandé
+    const pctM = t.match(/(\d+[.,]\d+|\d+)\s*%/g);
+    if(pctM) tauxReco = parseFloat(pctM[0].replace(',','.'));
+    // Cherche montant total en €
+    const eurM = t.match(/(\d+[.,]\d{2})\s*(?:€|EUR)/g);
+    if(eurM) coutReco = parseFloat(eurM[eurM.length-1].replace(',','.'));
+    if(!coutReco && caTotal > 0) coutReco = Math.round(caTotal * (tauxReco||8) / 100 * 100) / 100;
+    if(!tauxReco) tauxReco = 8;
+    motifsReco = 'Erreur correction, défaut montage';
+  }
+
+  const margeNette = Math.round((margeBrute - coutReco) * 100) / 100;
+  const margeNettePct = caTotal > 0 ? Math.round(margeNette / caTotal * 1000) / 10 : 0;
+
+  // Période — cherche mois/année
+  const periodeM = text.match(/(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s*\d{4}/i)
+    || text.match(/\d{2}\/\d{4}/) || text.match(/\d{4}/);
+  const periode = periodeM ? periodeM[0] : 'Non précisé';
+
+  const r = {
+    _modeTest: true,
+    periode,
+    lignes: lignes.slice(0, 20),
+    totaux: {
+      ca_total: Math.round(caTotal * 100) / 100,
+      achats_total: Math.round(achatTotal * 100) / 100,
+      marge_brute_euro: Math.round(margeBrute * 100) / 100,
+      marge_brute_pct: margeBrutePct,
+      cout_recommandes_euro: coutReco,
+      taux_recommandes_pct: tauxReco,
+      marge_nette_euro: margeNette,
+      marge_nette_pct: margeNettePct,
+      motifs_recommandes: motifsReco
+    },
+    explication: `Marge brute de ${margeBrutePct}% calculée à partir des données du relevé. ${coutReco > 0 ? `Les recommandés représentent ${tauxReco}% du volume, soit ${coutReco}€ de perte directe, ramenant la marge nette à ${margeNettePct}%.` : ''} Résultat calculé en mode test (sans IA).`,
+    ameliorations: [
+      'Comparez vos prix d\'achat avec d\'autres fournisseurs pour réduire le coût d\'achat de 5 à 10%.',
+      'Réduisez le taux de recommandés en renforçant la vérification des ordonnances avant commande.',
+      'Mettez en avant les verres à forte marge lors des ventes pour améliorer la rentabilité globale.',
+      'Analysez les produits à faible marge (< 30%) et négociez les tarifs ou réorientez vers d\'autres gammes.'
+    ]
+  };
+
+  document.getElementById('marge-loader').style.display = 'none';
+  _margeAfficherResultats(r);
 }
 
 function _margeSetLoader(msg){ const el=document.getElementById('marge-loader-msg'); if(el) el.textContent=msg; }
@@ -4260,6 +4365,10 @@ RÈGLES STRICTES : marge_euro=(prix_vente-prix_achat)*quantite. marge_nette_euro
 function _margeAfficherResultats(r){
   document.getElementById('marge-loader').style.display  = 'none';
   document.getElementById('marge-result').style.display  = 'block';
+
+  // Badge mode test
+  const modeTestEl = document.getElementById('marge-mode-test-badge');
+  if(modeTestEl) modeTestEl.style.display = r._modeTest ? 'flex' : 'none';
 
   const t   = r.totaux || {};
   const pct = parseFloat(t.marge_nette_pct || t.marge_brute_pct) || 0;
