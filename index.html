@@ -28,8 +28,8 @@
   --txt-primary:#1A202C;--txt-secondary:#4A5568;--txt-muted:#94A3B8;
 }
 html{zoom:1}
-body{font-family:var(--font);background:var(--surf-page);min-height:100vh;color:var(--txt-primary);padding:20px 36px;font-size:14px}
-.app-wrapper{max-width:1440px;margin:0 auto;padding-bottom:50px}
+body{font-family:var(--font);background:var(--surf-page);min-height:100vh;color:var(--txt-primary);padding:16px 24px;font-size:14px}
+.app-wrapper{max-width:1440px;margin:0 auto;padding-bottom:60px}
 
 /* APP LOGO */
 .app-logo{background:#fff!important;border:1px solid var(--bdr-light)!important;border-radius:14px;padding:14px 22px;margin-bottom:24px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
@@ -1064,8 +1064,9 @@ select option{background:#fff;color:var(--txt-primary)}
             <div class="home-card-sub">Montrez au patient la différence visuelle entre les traitements</div>
           </div>
         </div>
+        <!-- Outils patient -->
         <div style="margin-top:16px">
-          <div class="section-label" style="margin-top:0;margin-bottom:10px"><i class="ti ti-tool"></i> Outils patient</div>
+          <div class="section-label" style="margin-top:0;margin-bottom:10px"><i class="ti ti-users"></i> Outils patient</div>
           <div class="tool-grid">
             <div class="tool-card" onclick="openThick()">
               <div class="tool-icon" style="background:linear-gradient(135deg,#0e3a6a,#185FA5)"><i class="ti ti-ruler-measure"></i></div>
@@ -1081,18 +1082,18 @@ select option{background:#fff;color:var(--txt-primary)}
                 <div class="tool-sub">Côte à côte pour que le patient choisisse en connaissance de cause</div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Outils gestion -->
+        <div style="margin-top:14px">
+          <div class="section-label" style="margin-top:0;margin-bottom:10px"><i class="ti ti-settings-2"></i> Gestion magasin</div>
+          <div class="tool-grid">
             <div class="tool-card" onclick="openConventionnement()">
               <div class="tool-icon" style="background:linear-gradient(135deg,#b45309,#D97706)"><i class="ti ti-file-certificate"></i></div>
               <div>
                 <div class="tool-name">Conventionnement mutuelle</div>
                 <div class="tool-sub">Déposez vos documents de conventionnement par réseau</div>
-              </div>
-            </div>
-            <div class="tool-card" onclick="openMargeMensuelle()">
-              <div class="tool-icon" style="background:linear-gradient(135deg,#065F46,#059669)"><i class="ti ti-trending-up"></i></div>
-              <div>
-                <div class="tool-name">Résultat marge mensuelle</div>
-                <div class="tool-sub">Analysez vos marges en déposant votre relevé mensuel PDF</div>
               </div>
             </div>
             <div class="tool-card" onclick="openCatalogueVerre()">
@@ -1101,6 +1102,15 @@ select option{background:#fff;color:var(--txt-primary)}
                 <div class="tool-name">Catalogue verre</div>
                 <div class="tool-sub">Catalogue, tarifs et code EDI de votre fournisseur</div>
               </div>
+            </div>
+            <!-- Marge mensuelle : pleine largeur -->
+            <div class="tool-card" onclick="openMargeMensuelle()" style="grid-column:1/-1;border-color:#059669;background:linear-gradient(135deg,#F0FDF4,#DCFCE7)">
+              <div class="tool-icon" style="background:linear-gradient(135deg,#065F46,#059669)"><i class="ti ti-trending-up"></i></div>
+              <div style="flex:1">
+                <div class="tool-name" style="color:#065F46">Résultat marge mensuelle</div>
+                <div class="tool-sub">Déposez votre relevé mensuel PDF — l'IA calcule vos marges en € et en %</div>
+              </div>
+              <div style="font-size:11px;font-weight:700;color:#059669;background:#fff;border:1.5px solid #BBF7D0;border-radius:8px;padding:4px 10px;white-space:nowrap;flex-shrink:0">IA <i class="ti ti-cpu" style="font-size:10px"></i></div>
             </div>
           </div>
         </div>
