@@ -4153,26 +4153,42 @@ function openMargeMensuelle(){
 }
 
 function _margeModeDemo(){
-  // Données fictives réalistes pour tester sans PDF
+  // ── 300 paires/mois = 600 lenticules ────────────────────────────
+  // Unifocaux 270 unités (45%) · Progressifs 330 unités (55%)
+  // Prix achat/vente représentatifs d'un opticien indépendant français
+  // ─────────────────────────────────────────────────────────────────
+  // CA total ~94 876 € · Achats ~41 592 € · Marge brute ~56,2%
+  // Recommandés 9% → coût ~8 540 € · Marge nette ~47,2%
+  // ─────────────────────────────────────────────────────────────────
   _margeTextReleve = [
-    'Relevé mensuel mai 2025',
-    'Verre unifocal blanc         12  45.20  98.50',
-    'Verre progressif Varilux      8  89.00  245.00',
-    'Verre antireflet UV400       15  32.00  75.00',
-    'Verre haute correction        4  62.00  155.00',
-    'Verre solaire photochromique  6  58.00  138.00',
-    'Verre enfant polycarbonate   11  25.00  58.00',
-    'Verre bifocal adulte          5  38.00  92.00',
-    'Verre mince indice 1.67       7  72.00  175.00',
-    'Verre sport incassable        3  48.00  115.00',
-    'Total mai 2025'
+    'RELEVE MENSUEL MAI 2025',
+    'Periode mai 2025',
+    'Designation                       Qte   P.Achat   P.Vente',
+    '-----------------------------------------------------------',
+    'Unifocal blanc standard            60    12.00     38.00',
+    'Unifocal antireflet UV             80    22.00     62.00',
+    'Unifocal photochromique            40    54.00    132.00',
+    'Unifocal haute index AR            36    45.00    108.00',
+    'Unifocal enfant polycarbonate      54    18.00     52.00',
+    'Progressif entree de gamme         80    65.00    152.00',
+    'Progressif milieu de gamme        100   102.00    228.00',
+    'Progressif premium                 80   136.00    292.00',
+    'Progressif photochromique          40   118.00    255.00',
+    'Progressif ultra-mince             30   112.00    238.00',
+    '-----------------------------------------------------------',
+    'Total verres vendus 600 unites'
   ].join('\n');
-  _margeTextTaux = 'Taux recommandés mai 2025\nTaux : 7.5%\nCoût total recommandés : 1240.00€';
-  // Afficher en mode démo dans les dropzones
+  _margeTextTaux = [
+    'Rapport taux de recommandes mai 2025',
+    'Taux mensuel : 9%',
+    'Cout total recommandes : 8540.00 EUR',
+    'Nombre de verres refaits : 54',
+    'Motifs : erreur correction, defaut centrage, monture inadaptee'
+  ].join('\n');
   const dz1 = document.getElementById('marge-drop-1');
   const dz2 = document.getElementById('marge-drop-2');
-  if(dz1) dz1.innerHTML = '<i class="ti ti-circle-check" style="font-size:28px;color:#059669"></i><div style="font-size:12px;font-weight:700;color:var(--txt-primary)">données-demo.pdf</div><div style="font-size:11px;color:#059669">Mode démo — données fictives</div>';
-  if(dz2) dz2.innerHTML = '<i class="ti ti-circle-check" style="font-size:28px;color:#DC2626"></i><div style="font-size:12px;font-weight:700;color:var(--txt-primary)">taux-demo.pdf</div><div style="font-size:11px;color:#DC2626">Mode démo — 7,5%</div>';
+  if(dz1) dz1.innerHTML = '<i class="ti ti-circle-check" style="font-size:28px;color:#059669"></i><div style="font-size:12px;font-weight:700;color:var(--txt-primary)">releve-mai-2025-demo.pdf</div><div style="font-size:11px;color:#059669">300 paires · 10 références · mode démo</div>';
+  if(dz2) dz2.innerHTML = '<i class="ti ti-circle-check" style="font-size:28px;color:#DC2626"></i><div style="font-size:12px;font-weight:700;color:var(--txt-primary)">taux-recommandes-demo.pdf</div><div style="font-size:11px;color:#DC2626">Taux recommandés : 9% · mode démo</div>';
   _margeUpdateBtn();
   margeLancer();
 }
