@@ -2320,7 +2320,7 @@ function getIndiceLabel(i){
   return {'1.50':'1.50 — Standard','1.59':'1.59 — Polycarbonate','1.60':'1.60 — Aminci','1.67':'1.67 — Très aminci','1.74':'1.74 — Ultra-mince'}[i]||i;
 }
 
-function getConseils(eqMax,cylMax,vision){
+function getConseils(eqMax,cylMax,vision,sphMax){
   const eq=eqMax;
   const c=[];
   if(eq>7) c.push({icon:'ti-stack-2',t:`Correction très forte (éq. > 7 D) : verre ultra-mince 1.74 indispensable. Réduction d'épaisseur de bord de 40 % vs 1.60.`});
@@ -2330,7 +2330,7 @@ function getConseils(eqMax,cylMax,vision){
   if(cylMax>=1.25) c.push({icon:'ti-refresh',t:`Astigmatisme ≥ 1.25 D : verre torique obligatoire. Précalibrage recommandé pour un centrage optimal et éviter les aberrations résiduelles.`});
   if(cylMax>=2.0) c.push({icon:'ti-alert-triangle',t:`Fort astigmatisme (cyl ≥ 2 D) : surfaçage numérique Freeform conseillé pour corriger les aberrations de l'astigmatisme élevé.`});
   if(vision==='progressif' && eq>5) c.push({icon:'ti-adjustments',t:`Progressif forte correction : verre avec précalibrage monture recommandé pour maximiser les zones utiles de vision.`});
-  if(sphMax>=5 && !cylMax) c.push({icon:'ti-maximize',t:`Verre asphérique conseillé : réduit les déformations périphériques typiques des fortes sphères et améliore le champ visuel net.`});
+  if((sphMax||0)>=5 && !cylMax) c.push({icon:'ti-maximize',t:`Verre asphérique conseillé : réduit les déformations périphériques typiques des fortes sphères et améliore le champ visuel net.`});
   if(selectedMonture === 'nylor' || selectedMonture === 'percee'){
     c.push({icon:'ti-alert-triangle',t:'Monture '+(selectedMonture==='nylor'?'Nylor':'Percée')+' : indice minimum 1.60 appliqué. Précalibrage obligatoire pour garantir la solidité du verre dans la monture.'});
   }
@@ -2914,7 +2914,7 @@ function showVerres(){
       : `<div class="summary-row"><span class="key"><i class="ti ti-tool" style="font-size:14px"></i> Précalibrage (si applicable)</span><span class="val" style="color:#c8c8c8">+${state.mutuelle.prixPrecalibrage ?? 15} € / verre</span></div>`}`;
 
   // Conseils
-  const conseils=getConseils(eqMax,cylMax,state.vision.id);
+  const conseils=getConseils(eqMax,cylMax,state.vision.id,sphMax);
   let conseilHTML='';
   if(conseils.length){
     conseilHTML=`<div class="conseil-box">
