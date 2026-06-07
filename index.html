@@ -1164,7 +1164,7 @@ select option{background:#fff;color:var(--txt-primary)}
               <div style="font-size:11px;color:var(--txt-muted)">Relevé avec quantités vendues</div>
             </div>
             <input type="file" id="marge-file-1" accept=".pdf" style="display:none" onchange="margeLoadPdf(this.files[0],1)"/>
-            <div id="marge-status-1" style="display:none;margin-top:8px;padding:8px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;font-size:12px;color:#059669;font-weight:600;display:flex;align-items:center;gap:6px"><i class="ti ti-check"></i> <span></span></div>
+            <div id="marge-status-1" style="display:none;margin-top:8px;padding:8px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;font-size:12px;color:#059669;font-weight:600;align-items:center;gap:6px"><i class="ti ti-check"></i> <span></span></div>
           </div>
 
           <!-- PDF 2 : Taux de remboursement -->
@@ -1183,7 +1183,7 @@ select option{background:#fff;color:var(--txt-primary)}
               <div style="font-size:11px;color:var(--txt-muted)">Verres refaits à vos frais suite à erreur · moy. secteur 8%</div>
             </div>
             <input type="file" id="marge-file-2" accept=".pdf" style="display:none" onchange="margeLoadPdf(this.files[0],2)"/>
-            <div id="marge-status-2" style="display:none;margin-top:8px;padding:8px 12px;background:#FFF1F2;border:1px solid #FECDD3;border-radius:8px;font-size:12px;color:#DC2626;font-weight:600;display:flex;align-items:center;gap:6px"><i class="ti ti-check"></i> <span></span></div>
+            <div id="marge-status-2" style="display:none;margin-top:8px;padding:8px 12px;background:#FFF1F2;border:1px solid #FECDD3;border-radius:8px;font-size:12px;color:#DC2626;font-weight:600;align-items:center;gap:6px"><i class="ti ti-check"></i> <span></span></div>
           </div>
         </div>
 
@@ -1192,7 +1192,10 @@ select option{background:#fff;color:var(--txt-primary)}
           style="width:100%;padding:14px;background:#E5E7EB;color:#9CA3AF;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:not-allowed;font-family:inherit;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:8px">
           <i class="ti ti-cpu"></i> Analyser avec l'IA
         </button>
-        <div style="text-align:center;font-size:11px;color:var(--txt-muted);margin-top:8px">Le PDF n°1 est obligatoire pour lancer l'analyse</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+          <div style="font-size:11px;color:var(--txt-muted)">Le PDF n°1 est obligatoire pour lancer l'analyse</div>
+          <button onclick="_margeModeDemo()" style="background:none;border:none;font-size:11px;color:#059669;font-weight:700;cursor:pointer;font-family:inherit;padding:0;text-decoration:underline;text-underline-offset:2px"><i class="ti ti-flask" style="font-size:11px"></i> Tester en mode démo</button>
+        </div>
       </div>
 
       <!-- Loader -->
@@ -4144,8 +4147,34 @@ let _margeTextReleve = '';   // texte PDF 1 (relevé)
 let _margeTextTaux   = '';   // texte PDF 2 (recommandés)
 
 function openMargeMensuelle(){
+  resetMargeMensuelle();
   document.getElementById('marge-modal').style.display = 'flex';
   document.getElementById('marge-no-key').style.display = localStorage.getItem('maneo_claude_key') ? 'none' : 'block';
+}
+
+function _margeModeDemo(){
+  // Données fictives réalistes pour tester sans PDF
+  _margeTextReleve = [
+    'Relevé mensuel mai 2025',
+    'Verre unifocal blanc         12  45.20  98.50',
+    'Verre progressif Varilux      8  89.00  245.00',
+    'Verre antireflet UV400       15  32.00  75.00',
+    'Verre haute correction        4  62.00  155.00',
+    'Verre solaire photochromique  6  58.00  138.00',
+    'Verre enfant polycarbonate   11  25.00  58.00',
+    'Verre bifocal adulte          5  38.00  92.00',
+    'Verre mince indice 1.67       7  72.00  175.00',
+    'Verre sport incassable        3  48.00  115.00',
+    'Total mai 2025'
+  ].join('\n');
+  _margeTextTaux = 'Taux recommandés mai 2025\nTaux : 7.5%\nCoût total recommandés : 1240.00€';
+  // Afficher en mode démo dans les dropzones
+  const dz1 = document.getElementById('marge-drop-1');
+  const dz2 = document.getElementById('marge-drop-2');
+  if(dz1) dz1.innerHTML = '<i class="ti ti-circle-check" style="font-size:28px;color:#059669"></i><div style="font-size:12px;font-weight:700;color:var(--txt-primary)">données-demo.pdf</div><div style="font-size:11px;color:#059669">Mode démo — données fictives</div>';
+  if(dz2) dz2.innerHTML = '<i class="ti ti-circle-check" style="font-size:28px;color:#DC2626"></i><div style="font-size:12px;font-weight:700;color:var(--txt-primary)">taux-demo.pdf</div><div style="font-size:11px;color:#DC2626">Mode démo — 7,5%</div>';
+  _margeUpdateBtn();
+  margeLancer();
 }
 function closeMargeMensuelle(){
   document.getElementById('marge-modal').style.display = 'none';
