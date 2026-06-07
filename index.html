@@ -1916,8 +1916,15 @@ const catalogue2e = [
 function getSphMax(od,og){return Math.max(Math.abs(parseFloat(od)||0),Math.abs(parseFloat(og)||0))}
 function getCylMax(od,og){return Math.max(Math.abs(parseFloat(od)||0),Math.abs(parseFloat(og)||0))}
 
-function getIndiceRec(sphMax,cylMax){
-  const eq=sphMax+cylMax/2;
+// Calcule l'équivalent sphérique max sur les deux yeux (valeurs absolues, œil par œil)
+function computeEqMax(odSph, ogSph, odCyl, ogCyl){
+  const eqOD = Math.abs(parseFloat(odSph)||0) + Math.abs(parseFloat(odCyl)||0)/2;
+  const eqOG = Math.abs(parseFloat(ogSph)||0) + Math.abs(parseFloat(ogCyl)||0)/2;
+  return Math.max(eqOD, eqOG);
+}
+
+// Recommande l'indice à partir de l'équivalent sphérique max (en valeur absolue)
+function getIndiceRec(eq){
   if(eq<=2.5) return '1.50';
   if(eq<=4.5) return '1.60';
   if(eq<=7.0) return '1.67';
@@ -1928,8 +1935,8 @@ function getIndiceLabel(i){
   return {'1.50':'1.50 — Standard','1.59':'1.59 — Polycarbonate','1.60':'1.60 — Aminci','1.67':'1.67 — Très aminci','1.74':'1.74 — Ultra-mince'}[i]||i;
 }
 
-function getConseils(sphMax,cylMax,vision){
-  const eq=sphMax+cylMax/2;
+function getConseils(eqMax,cylMax,vision){
+  const eq=eqMax;
   const c=[];
   if(eq>7) c.push({icon:'ti-stack-2',t:`Correction très forte (éq. > 7 D) : verre ultra-mince 1.74 indispensable. Réduction d'épaisseur de bord de 40 % vs 1.60.`});
   else if(eq>4.5) c.push({icon:'ti-stack-2',t:`Correction forte (éq. > 4.5 D) : indice 1.67 recommandé. Verre plus fin, plus léger, meilleure esthétique de face.`});
@@ -2142,8 +2149,8 @@ function renderVerreCard(v,i,showTop,paire2=false){
   const marge=v.vente-v.achat;
   const taux=Math.round(marge/v.vente*100);
   const mutId=state.mutuelle?.id;
-  const isReseau=(mutId==='cb'||mutId==='actil')&&v.tarifsReseau&&(mutId==='cb'?v.tarifsReseau.cb?.[v.indiceChoisi]:v.tarifsReseau.actil?.[v.indiceChoisi]);
-  const reseauLabel=mutId==='cb'?'Tarif Carte Blanche':mutId==='actil'?'Tarif Actil':null;
+  const isReseau = mutId && v.tarifsReseau && v.tarifsReseau[mutId]?.[v.indiceChoisi] != null;
+  const reseauLabel = isReseau ? `Tarif ${state.mutuelle?.label || mutId.toUpperCase()}` : null;
   const gc=v.gamme==='haut'?'haut-gamme':v.gamme==='milieu'?'milieu-gamme':'entree-gamme';
   const traitKw = getTraitKeywords ? getTraitKeywords() : new Set();
   const trHTML=v.traitements.map(t=>{
@@ -2190,25 +2197,45 @@ function renderVerreCard(v,i,showTop,paire2=false){
           </div>
           ${currentUser && currentUser.admin ? '' : `<div style="font-size:12px;color:#aaa;margin-top:6px;display:flex;align-items:center;gap:5px"><i class="ti ti-info-circle" style="color:#378ADD"></i> Verre recommandé — marge optimisée pour le magasin</div>`}
           ${(()=>{
+            // Tarifs réseau conventionné — affiche le tarif du réseau actif
             if(!v.tarifsReseau || !v.indiceChoisi) return '';
             const ind = v.indiceChoisi;
-            const cbP = v.tarifsReseau.cb && v.tarifsReseau.cb[ind] != null ? v.tarifsReseau.cb[ind] : null;
-            const acP = v.tarifsReseau.actil && v.tarifsReseau.actil[ind] != null ? v.tarifsReseau.actil[ind] : null;
-            if(!cbP && !acP) return '';
+            const plafond = state.mutuelle?.plafond_verre ?? null;
+            const isUnderContract = state.mutuelle?.section === 'sous';
+            // Réseau actif (mutuelle courante)
+            const activeNetP = mutId && v.tarifsReseau[mutId]?.[ind] != null ? v.tarifsReseau[mutId][ind] : null;
+            // Tous les autres tarifs réseau disponibles pour ce verre
+            const allReseaux = Object.entries(v.tarifsReseau).map(([rid, prices])=>{
+              const p = prices[ind];
+              if(p == null) return null;
+              const m = mutuelles.find(x=>x.id===rid);
+              return {rid, label: m?.label || rid.toUpperCase(), p};
+            }).filter(Boolean);
+            if(!allReseaux.length) return '';
+            const resteC = (plafond!=null && isUnderContract && activeNetP!=null) ? Math.max(0, activeNetP - plafond) : null;
+            const priseC = (plafond!=null && isUnderContract && activeNetP!=null) ? Math.min(activeNetP, plafond) : null;
             return `<div style="margin-top:12px;background:#1a1a2a;border:1px solid #2a2a4a;border-radius:10px;padding:12px 14px">
               <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#7090d0;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-building-store" style="font-size:13px"></i> Tarifs réseau — indice ${ind}</div>
-              <div style="display:flex;gap:10px">
-                ${cbP!=null?`<div style="flex:1;background:#111830;border:1px solid #1e3060;border-radius:8px;padding:10px;text-align:center">
-                  <div style="font-size:10px;color:#7090d0;font-weight:700;letter-spacing:0.06em;margin-bottom:4px">CRYSTAL B</div>
-                  <div style="font-size:18px;font-weight:800;color:#80b0f0">${cbP} €</div>
-                  <div style="font-size:10px;color:#556;margin-top:2px">le verre</div>
-                </div>`:''}
-                ${acP!=null?`<div style="flex:1;background:#111820;border:1px solid #1e402a;border-radius:8px;padding:10px;text-align:center">
-                  <div style="font-size:10px;color:#60b080;font-weight:700;letter-spacing:0.06em;margin-bottom:4px">ACTIL</div>
-                  <div style="font-size:18px;font-weight:800;color:#70d090">${acP} €</div>
-                  <div style="font-size:10px;color:#556;margin-top:2px">le verre</div>
-                </div>`:''}
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                ${allReseaux.map(r=>`<div style="flex:1;min-width:100px;background:${r.rid===mutId?'#111830':'#141414'};border:1.5px solid ${r.rid===mutId?'#3060c0':'#2a2a2a'};border-radius:8px;padding:8px 10px;text-align:center">
+                  <div style="font-size:9px;color:${r.rid===mutId?'#80b0ff':'#667'};font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px">${r.label}${r.rid===mutId?' ✓':''}</div>
+                  <div style="font-size:16px;font-weight:800;color:${r.rid===mutId?'#80c0ff':'#aaa'}">${r.p} €</div>
+                  <div style="font-size:9px;color:#556;margin-top:1px">le verre</div>
+                </div>`).join('')}
               </div>
+              ${(plafond!=null && isUnderContract && activeNetP!=null) ? `
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <div style="flex:1;background:#0a2040;border:1px solid #1e4080;border-radius:8px;padding:8px;text-align:center">
+                  <div style="font-size:9px;color:#7090d0;font-weight:700;text-transform:uppercase;margin-bottom:3px">Plafond remboursé</div>
+                  <div style="font-size:15px;font-weight:800;color:#60b0ff">${priseC} €</div>
+                  <div style="font-size:9px;color:#556">par verre</div>
+                </div>
+                <div style="flex:1;background:${resteC===0?'#0a2e1a':'#2a1010'};border:1px solid ${resteC===0?'#1a6040':'#6a2020'};border-radius:8px;padding:8px;text-align:center">
+                  <div style="font-size:9px;color:${resteC===0?'#60d090':'#e08080'};font-weight:700;text-transform:uppercase;margin-bottom:3px">Reste à charge</div>
+                  <div style="font-size:15px;font-weight:800;color:${resteC===0?'#50e0a0':'#ff8080'}">${resteC===0?'0 €':resteC+' €'}</div>
+                  <div style="font-size:9px;color:#556">par verre</div>
+                </div>
+              </div>` : ''}
             </div>`;
           })()}
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
@@ -2227,8 +2254,9 @@ function renderVerreLigne(v){
   const marge = v.vente - v.achat;
   const taux  = Math.round(marge / v.vente * 100);
   const mutId = state.mutuelle?.id;
-  const isReseau = (mutId==='cb'||mutId==='actil') && v.tarifsReseau
-    && (mutId==='cb' ? v.tarifsReseau.cb?.[v.indiceChoisi] : v.tarifsReseau.actil?.[v.indiceChoisi]);
+  // isReseau : vrai pour TOUS les réseaux ayant un tarif conventionné pour ce verre
+  const isReseau = mutId && v.tarifsReseau && v.tarifsReseau[mutId]?.[v.indiceChoisi] != null;
+  const reseauLabel = isReseau ? (state.mutuelle?.label || mutId.toUpperCase()) : null;
   const gcColor = v.gamme==='haut'?'#9060e0':v.gamme==='milieu'?'#378ADD':'#3B6D11';
   const _precalPrix    = state.mutuelle?.prixPrecalibrage ?? 15;
   const _precalInclus  = state.mutuelle?.optislimInclus  ?? false;
@@ -2241,6 +2269,23 @@ function renderVerreLigne(v){
   const trHTML = v.traitements.slice(0,3).map(t =>
     `<div class="vt-trait"><strong><i class="ti ${t.icon}" style="margin-right:4px;color:#378ADD"></i>${t.nom}</strong>${t.desc.substring(0,90)}…</div>`
   ).join('');
+  // Plafond / reste à charge patient
+  const plafond = state.mutuelle?.plafond_verre ?? null;
+  const resteC  = v.resteCharge  ?? (plafond != null ? Math.max(0, v.vente - plafond) : null);
+  const priseC  = v.priseEnCharge ?? (plafond != null ? Math.min(v.vente, plafond)    : null);
+  const plafondHTML = (plafond != null && state.mutuelle?.section === 'sous') ? `
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+      <div style="flex:1;min-width:110px;background:#0a2040;border:1px solid #1e4080;border-radius:8px;padding:8px 10px;text-align:center">
+        <div style="font-size:9px;color:#7090d0;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px">Prise en charge mutuelle</div>
+        <div style="font-size:15px;font-weight:800;color:#60b0ff">${priseC} €</div>
+        <div style="font-size:9px;color:#556;margin-top:2px">par verre</div>
+      </div>
+      <div style="flex:1;min-width:110px;background:${resteC===0?'#0a2e1a':'#2a1010'};border:1px solid ${resteC===0?'#1a6040':'#6a2020'};border-radius:8px;padding:8px 10px;text-align:center">
+        <div style="font-size:9px;color:${resteC===0?'#60d090':'#e08080'};font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px">Reste à charge patient</div>
+        <div style="font-size:15px;font-weight:800;color:${resteC===0?'#50e0a0':'#ff8080'}">${resteC===0?'Intégral':'+'+ resteC +' €'}</div>
+        <div style="font-size:9px;color:#556;margin-top:2px">par verre</div>
+      </div>
+    </div>` : '';
 
   return `
     <tr class="verre-row" onclick="toggleVT('vt-${v.id}')">
@@ -2249,14 +2294,17 @@ function renderVerreLigne(v){
         <div class="vr-meta">
           <span class="vr-gamme-dot" style="background:${gcColor}"></span>
           <span class="vr-marque">${v.marque}</span>
-          ${isReseau ? `<span class="vr-reseau-badge">${mutId==='cb'?'CB':'ACTIL'}</span>` : ''}
+          ${isReseau ? `<span class="vr-reseau-badge">${reseauLabel}</span>` : ''}
         </div>
       </td>
       <td><span class="vt-indice">${v.indiceChoisi}</span></td>
       <td>${v.precalibrage
         ? `<span class="vt-precal-incl"><i class="ti ti-check" style="font-size:10px;margin-right:3px"></i>Inclus</span>`
         : `<span class="vt-precal-non">—</span>`}</td>
-      <td style="text-align:right"><span class="vt-prix ${isReseau?'reseau':''}">${v.vente} €</span></td>
+      <td style="text-align:right">
+        <span class="vt-prix ${isReseau?'reseau':''}">${v.vente} €</span>
+        ${plafond!=null&&state.mutuelle?.section==='sous'?`<br><span style="font-size:10px;color:${resteC===0?'#50d090':'#ff8080'}">RAC: ${resteC===0?'0 €':resteC+' €'}</span>`:''}
+      </td>
       <td class="vt-saisie">${v.vente} €</td>
       <td class="vt-saisie">${precalSaisie}</td>
       <td class="vt-saisie">—</td>
@@ -2266,7 +2314,8 @@ function renderVerreLigne(v){
       <td colspan="8">
         <div class="vt-detail-inner">
           ${trHTML}
-          <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
+          ${plafondHTML}
+          <div style="display:flex;gap:8px;align-items:center;margin-left:auto;margin-top:8px">
             <button class="btn-comparer" id="cmp-${v.id}" onclick="event.stopPropagation();toggleCompareBtn(this,'${v.id}')"><i class="ti ti-layout-columns"></i> Comparer</button>
             <button class="btn-choisir" style="width:auto;margin-top:0;padding:10px 16px" onclick="event.stopPropagation();choisirPaire2('${v.id}')"><i class="ti ti-copy"></i> 2ème paire</button>
           </div>
@@ -2412,9 +2461,11 @@ function showVerres(){
   const odAdd=document.getElementById('od-add').value;
   const ogAdd=document.getElementById('og-add').value;
 
+  // Calcul équivalent sphérique par œil (valeurs absolues) — on prend le pire des deux yeux
+  const eqMax = computeEqMax(odSph, ogSph, odCyl, ogCyl);
   const sphMax=getSphMax(odSph,ogSph);
   const cylMax=getCylMax(odCyl,ogCyl);
-  let indiceRec=getIndiceRec(sphMax,cylMax);
+  let indiceRec=getIndiceRec(eqMax);
   let forcePrecalibrage = false;
 
   // Monture rules
@@ -2424,23 +2475,30 @@ function showVerres(){
     forcePrecalibrage = true;
   }
 
+  // Plafond mutuelle verre
+  const plafondVerre = state.mutuelle?.plafond_verre ?? null;
+  const hasConventionnement = state.mutuelle?.section === 'sous';
+
   // Recap
   const montureLabel = selectedMonture==='cercle'?'Cerclée':selectedMonture==='nylor'?'Nylor (semi-percée)':selectedMonture==='percee'?'Percée':'-';
+  // Équivalent sphérique OD/OG pour affichage
+  const eqOD = (Math.abs(parseFloat(odSph)||0) + Math.abs(parseFloat(odCyl)||0)/2).toFixed(2);
+  const eqOG = (Math.abs(parseFloat(ogSph)||0) + Math.abs(parseFloat(ogCyl)||0)/2).toFixed(2);
   document.getElementById('recap').innerHTML=`
     <div class="summary-row"><span class="key"><i class="ti ti-shield" style="font-size:14px"></i> Mutuelle</span><span class="val">${state.mutuelle.label}</span></div>
     <div class="summary-row"><span class="key"><i class="ti ti-eye" style="font-size:14px"></i> Vision</span><span class="val">${state.vision.label}</span></div>
     <div class="summary-row"><span class="key"><i class="ti ti-eyeglass" style="font-size:14px"></i> Monture</span><span class="val">${montureLabel}${forcePrecalibrage?" · <span style='color:#c080f0'>Précalibrage ✓</span>":""}</span></div>
-    <div class="summary-row"><span class="key">OD</span><span class="val">${odSph||'—'} / ${odCyl||'0'} / ${odAxe||'—'}°${odAdd?' add +'+odAdd:''}</span></div>
-    <div class="summary-row"><span class="key">OG</span><span class="val">${ogSph||'—'} / ${ogCyl||'0'} / ${ogAxe||'—'}°${ogAdd?' add +'+ogAdd:''}</span></div>
+    <div class="summary-row"><span class="key">OD</span><span class="val">${odSph||'—'} / ${odCyl||'0'} / ${odAxe||'—'}°${odAdd?' add +'+odAdd:''}  <span style="font-size:10px;color:#888">éq. ${eqOD} D</span></span></div>
+    <div class="summary-row"><span class="key">OG</span><span class="val">${ogSph||'—'} / ${ogCyl||'0'} / ${ogAxe||'—'}°${ogAdd?' add +'+ogAdd:''}  <span style="font-size:10px;color:#888">éq. ${eqOG} D</span></span></div>
     <div class="summary-row"><span class="key"><i class="ti ti-stack-2" style="font-size:14px"></i> Indice recommandé</span><span class="val" style="color:#f0c040" id="indice-recap-val">${getIndiceLabel(indiceRec)}</span></div>
-    ${(state.mutuelle.id==='cb'||state.mutuelle.id==='actil')?`<div class="summary-row"><span class="key"><i class="ti ti-building-store" style="font-size:14px"></i> Mode tarif</span><span class="val" style="color:#70d090">${state.mutuelle.id==='cb'?'Tarif réseau Carte Blanche':'Tarif réseau Actil'}</span></div>`:''}
+    ${hasConventionnement && plafondVerre ? `<div class="summary-row" style="background:#0a1e30;border-left:3px solid #185FA5;padding-left:10px;border-radius:4px"><span class="key"><i class="ti ti-building-store" style="font-size:14px;color:#60a0e0"></i>&nbsp;<strong style="color:#80c0ff">Plafond mutuelle</strong></span><span class="val" style="color:#80c0ff;font-weight:800">${plafondVerre} € / verre</span></div>` : ''}
     ${state.mutuelle.remiseMonture > 0 ? `<div class="summary-row" style="background:#FFF7ED;border-left:3px solid #ea580c;padding-left:10px;border-radius:4px"><span class="key"><i class="ti ti-tag" style="font-size:14px;color:#e65c00"></i>&nbsp;<strong style="color:#e65c00">Remise monture obligatoire</strong></span><span class="val" style="color:#ea580c;font-weight:800">${state.mutuelle.remiseMonture}% sur le prix public</span></div>` : ''}
     ${state.mutuelle.optislimInclus
       ? `<div class="summary-row" style="background:#F0FDF4;border-left:3px solid #16A34A;padding-left:10px;border-radius:4px"><span class="key"><i class="ti ti-tool" style="font-size:14px;color:#50d080"></i>&nbsp;<strong style="color:#50d080">Précalibrage Optislim</strong></span><span class="val" style="color:#16A34A;font-weight:700">Inclus dans le tarif verre</span></div>`
       : `<div class="summary-row"><span class="key"><i class="ti ti-tool" style="font-size:14px"></i> Précalibrage (si applicable)</span><span class="val" style="color:#c8c8c8">+${state.mutuelle.prixPrecalibrage ?? 15} € / verre</span></div>`}`;
 
   // Conseils
-  const conseils=getConseils(sphMax,cylMax,state.vision.id);
+  const conseils=getConseils(eqMax,cylMax,state.vision.id);
   let conseilHTML='';
   if(conseils.length){
     conseilHTML=`<div class="conseil-box">
@@ -2474,11 +2532,15 @@ function showVerres(){
     const achat=v.achats[ind];
     if(!vente||!achat) return null;
     const mutId=state.mutuelle?.id;
-    if(mutId && v.tarifsReseau){
-      const netP=mutId==='cb'?v.tarifsReseau.cb?.[ind]:mutId==='actil'?v.tarifsReseau.actil?.[ind]:null;
-      if(netP) vente=netP;
+    // Tarif réseau : s'applique à TOUS les réseaux ayant un tarifsReseau pour cette mutuelle
+    if(mutId && v.tarifsReseau && v.tarifsReseau[mutId]?.[ind] != null){
+      vente = v.tarifsReseau[mutId][ind];
     }
-    return{...v,indiceChoisi:ind,vente,achat,marge:vente-achat,taux:Math.round((vente-achat)/vente*100)};
+    // Plafond mutuelle : calcul reste à charge patient
+    const plafond = state.mutuelle?.plafond_verre ?? null;
+    const resteCharge = plafond != null ? Math.max(0, Math.round((vente - plafond)*100)/100) : null;
+    const priseEnCharge = plafond != null ? Math.min(vente, plafond) : null;
+    return{...v,indiceChoisi:ind,vente,achat,marge:vente-achat,taux:Math.round((vente-achat)/vente*100),resteCharge,priseEnCharge};
   }).filter(Boolean).sort((a,b)=>b.marge-a.marge);
 
   const haut=compat.filter(v=>v.gamme==='haut');
@@ -2536,9 +2598,12 @@ function choisirPaire2(vid){
     <i class="ti ti-check-circle"></i>
     <div><div class="pr-label">1ère paire choisie</div><div class="pr-name">${state.verre1.nom} — ${state.verre1.marque}</div></div>`;
 
-  const sphMax=getSphMax(document.getElementById('od-sph').value,document.getElementById('og-sph').value);
-  const cylMax=getCylMax(document.getElementById('od-cyl').value,document.getElementById('og-cyl').value);
-  let indiceRec=getIndiceRec(sphMax,cylMax);
+  const _odSph2 = document.getElementById('od-sph').value;
+  const _ogSph2 = document.getElementById('og-sph').value;
+  const _odCyl2 = document.getElementById('od-cyl').value;
+  const _ogCyl2 = document.getElementById('og-cyl').value;
+  const eqMax2  = computeEqMax(_odSph2, _ogSph2, _odCyl2, _ogCyl2);
+  let indiceRec=getIndiceRec(eqMax2);
   let forcePrecalibrage = false;
 
   // Monture rules
@@ -2551,8 +2616,13 @@ function choisirPaire2(vid){
   const sorted=(window._priseType==='sante'?[]:catalogue2e).map(v=>{
     const ind=getBestIndice(v,indiceRec);
     if(!ind) return null;
-    const vente=v.indices[ind],achat=v.achats[ind];
+    let vente=v.indices[ind];
+    const achat=v.achats[ind];
     if(!vente||!achat) return null;
+    // Tarif réseau pour tous les réseaux
+    if(state.mutuelle?.id && v.tarifsReseau && v.tarifsReseau[state.mutuelle.id]?.[ind] != null){
+      vente = v.tarifsReseau[state.mutuelle.id][ind];
+    }
     return{...v,indiceChoisi:ind,vente,achat,marge:vente-achat,taux:Math.round((vente-achat)/vente*100)};
   }).filter(Boolean).sort((a,b)=>b.marge-a.marge);
 
