@@ -3707,8 +3707,8 @@ async function renderAdminListe(){
           <div class="admin-compte-info"><i class="ti ti-user" style="font-size:13px;margin-right:4px"></i>${c.nom} <span style="color:#aaa;font-weight:400">(${c.username})</span></div>
           <div class="admin-compte-role">${c.admin?'<span style="color:#7C3AED;font-weight:700">👑 Administrateur</span>':'<span style="color:#185FA5;font-weight:600">👤 Collaborateur</span>'}</div>
         </div>
-        <button class="btn-del" onclick="delCompte('${c.id}','${c.username}')" ${c.admin?'disabled':''} title="${c.admin?'Compte admin non supprimable':'Supprimer'}">
-          <i class="ti ti-trash"></i> ${c.admin?'Admin':'Supprimer'}
+        <button class="btn-del" onclick="delCompte('${c.id}','${c.username}')" ${c.admin&&!isSuperhote()?'disabled':''} title="${c.admin&&!isSuperhote()?'Compte admin non supprimable':'Supprimer'}">
+          <i class="ti ti-trash"></i> Supprimer
         </button>
       </div>`).join('');
   } catch(e) {
@@ -3780,11 +3780,16 @@ async function addCompte(){
 async function delCompte(id, username){
   if(!confirm('Supprimer le compte "'+username+'" ?')) return;
   try{
-    await sbFetch('/rest/v1/comptes?id=eq.'+id, {method:'DELETE'});
+    const deleted = await sbFetch('/rest/v1/comptes?id=eq.'+id, {method:'DELETE'});
+    if(!deleted || (Array.isArray(deleted) && deleted.length===0)){
+      showAdminMsg('Compte introuvable ou déjà supprimé.','err');
+      await renderAdminListe();
+      return;
+    }
     await renderAdminListe();
-    showAdminMsg('Compte supprimé.','ok');
+    showAdminMsg('Compte "'+username+'" supprimé.','ok');
   } catch(e){
-    showAdminMsg('Erreur lors de la suppression.','err');
+    showAdminMsg('Erreur suppression : '+e.message,'err');
   }
 }
 
