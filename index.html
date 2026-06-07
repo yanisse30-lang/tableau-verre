@@ -297,6 +297,12 @@ select option{background:#fff;color:var(--txt-primary)}
 /* STARS SCINTILLANTES */
 @keyframes star-twinkle{0%,100%{opacity:0.05;transform:scale(0.3) rotate(0deg)}45%{opacity:1;transform:scale(1.2) rotate(20deg)}70%{opacity:0.6;transform:scale(0.85) rotate(-8deg)}}
 #login-stars-strip{position:absolute;top:0;left:-28px;width:56px;height:100%;pointer-events:none;z-index:3;overflow:visible}
+/* LOGIN WOW TRANSITION */
+@keyframes panel-exit-left{0%{transform:translateX(0);opacity:1}100%{transform:translateX(-110%);opacity:0}}
+@keyframes panel-exit-right{0%{transform:translateX(0);opacity:1}100%{transform:translateX(110%);opacity:0}}
+@keyframes burst-expand{0%{transform:translate(-50%,-50%) scale(0);opacity:1}100%{transform:translate(-50%,-50%) scale(60);opacity:0}}
+@keyframes star-launch{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{opacity:0}}
+@keyframes app-entry{0%{opacity:0;transform:scale(0.96) translateY(14px)}100%{opacity:1;transform:scale(1) translateY(0)}}
 
 @media(max-width:540px){body{padding:14px}.eye-grid{grid-template-columns:1fr}.grid-4{grid-template-columns:1fr}.home-grid{grid-template-columns:1fr}.tool-grid{grid-template-columns:1fr}.card{padding:18px}.traitements-grid{grid-template-columns:1fr}}
 
@@ -3219,6 +3225,59 @@ function closeConnexionPanel(){
   document.getElementById('conn-panel')?.classList.remove('open');
 }
 
+// ── Animation WOW login → app ──────────────────────────────────────
+function _loginWowAnimation(callback){
+  const screen = document.getElementById('login-screen');
+  const left   = screen.querySelector('.login-panel-left');
+  const right  = screen.querySelector('.login-panel-right');
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+
+  // 1. Burst circulaire depuis la séparation
+  const burst = document.createElement('div');
+  burst.style.cssText = `position:fixed;top:${cy}px;left:${cx}px;width:80px;height:80px;
+    border-radius:50%;background:radial-gradient(circle,#fff 0%,#185FA5 45%,#0D2247 100%);
+    pointer-events:none;z-index:99999;`;
+  document.body.appendChild(burst);
+  requestAnimationFrame(()=>{
+    burst.style.animation = 'burst-expand 0.75s cubic-bezier(0.2,0,0.5,1) forwards';
+  });
+
+  // 2. Étoiles qui explosent dans toutes les directions
+  for(let i = 0; i < 16; i++){
+    const angle = (i / 16) * Math.PI * 2;
+    const dist  = 140 + Math.random() * 180;
+    const size  = 8 + Math.random() * 10;
+    const p = document.createElement('div');
+    p.style.cssText = `position:fixed;top:${cy}px;left:${cx}px;width:${size}px;height:${size}px;
+      pointer-events:none;z-index:99998;animation:star-launch 0.55s ease-out ${i*0.02}s forwards;`;
+    p.innerHTML = `<svg viewBox="0 0 24 24" width="${size}" height="${size}"><path d="M12 1.5L13.9 9.1L21.5 11L13.9 12.9L12 20.5L10.1 12.9L2.5 11L10.1 9.1Z" fill="#93C5FD"/></svg>`;
+    document.body.appendChild(p);
+    // Propulse l'étoile
+    requestAnimationFrame(()=>{
+      p.style.transition = `transform 0.55s cubic-bezier(0.2,0,0,1) ${i*0.02}s, opacity 0.3s ease ${0.25+i*0.02}s`;
+      p.style.transform  = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
+      p.style.opacity    = '0';
+    });
+    setTimeout(()=> p.remove(), 700);
+  }
+
+  // 3. Panneaux qui s'écartent
+  setTimeout(()=>{
+    left.style.animation  = 'panel-exit-left  0.55s cubic-bezier(0.4,0,1,1) forwards';
+    right.style.animation = 'panel-exit-right 0.55s cubic-bezier(0.4,0,1,1) forwards';
+  }, 120);
+
+  // 4. Masquer le login et révéler l'app
+  setTimeout(()=>{
+    screen.style.display = 'none';
+    burst.remove();
+    // Animation d'entrée de l'app
+    const app = document.querySelector('.app-wrapper');
+    if(app){ app.style.animation = 'app-entry 0.5s cubic-bezier(0.2,0,0,1) forwards'; }
+    callback();
+  }, 660);
+}
+
 // ── Étoiles scintillantes login ────────────────────────────────────
 function _initLoginStars(){
   const strip = document.getElementById('login-stars-strip');
@@ -3253,33 +3312,36 @@ async function doLogin(){
     const data = await sbFetch(`/rest/v1/comptes?username=eq.${encodeURIComponent(u)}&password=eq.${encodeURIComponent(p)}&select=*`);
     if(data && data.length > 0){
       currentUser = data[0];
-      document.getElementById('login-screen').style.display='none';
-      err.style.display='none';
-      document.getElementById('logout-bar').style.display='flex';
-      document.getElementById('user-display-name').textContent=currentUser.nom;
-      // Badge rôle : Superhôte > Admin > Collaborateur
-      const roleBadge = document.getElementById('user-role-badge');
-      if(isSuperhote()){
-        roleBadge.className = 'badge-superhote';
-        roleBadge.innerHTML = '<i class="ti ti-star-filled" style="font-size:10px"></i> Superhôte';
-      } else if(currentUser.admin){
-        roleBadge.className = '';
-        roleBadge.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:20px;background:#F5F3FF;color:#7C3AED;font-weight:700;border:1px solid #DDD6FE';
-        roleBadge.textContent = '👑 Admin';
-      } else {
-        roleBadge.className = '';
-        roleBadge.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:20px;background:#EFF6FF;color:#185FA5;font-weight:600';
-        roleBadge.textContent = 'Collaborateur';
-      }
-      if(currentUser.admin){ document.getElementById('admin-btn').style.display='flex'; document.getElementById('verres-admin-btn').style.display='flex'; }
-      showToast('Bienvenue, ' + currentUser.nom + ' !');
-      // Log connexion + notification superhote
-      _getPublicIP().then(ip => {
-        _logConnexion(currentUser, ip);
+      btn.innerHTML = '<i class="ti ti-check"></i> Connecté !';
+      // Lance l'animation WOW puis setup l'app
+      _loginWowAnimation(()=>{
+        err.style.display='none';
+        document.getElementById('logout-bar').style.display='flex';
+        document.getElementById('user-display-name').textContent=currentUser.nom;
+        // Badge rôle : Superhôte > Admin > Collaborateur
+        const roleBadge = document.getElementById('user-role-badge');
         if(isSuperhote()){
-          setTimeout(_refreshConnexionBell, 800);
-          setTimeout(_initSuperhoteHome, 1000);
+          roleBadge.className = 'badge-superhote';
+          roleBadge.innerHTML = '<i class="ti ti-star-filled" style="font-size:10px"></i> Superhôte';
+        } else if(currentUser.admin){
+          roleBadge.className = '';
+          roleBadge.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:20px;background:#F5F3FF;color:#7C3AED;font-weight:700;border:1px solid #DDD6FE';
+          roleBadge.textContent = '👑 Admin';
+        } else {
+          roleBadge.className = '';
+          roleBadge.style.cssText = 'font-size:11px;padding:2px 8px;border-radius:20px;background:#EFF6FF;color:#185FA5;font-weight:600';
+          roleBadge.textContent = 'Collaborateur';
         }
+        if(currentUser.admin){ document.getElementById('admin-btn').style.display='flex'; document.getElementById('verres-admin-btn').style.display='flex'; }
+        setTimeout(()=> showToast('Bienvenue, ' + currentUser.nom + ' !'), 200);
+        // Log connexion + notification superhote
+        _getPublicIP().then(ip => {
+          _logConnexion(currentUser, ip);
+          if(isSuperhote()){
+            setTimeout(_refreshConnexionBell, 800);
+            setTimeout(_initSuperhoteHome, 1000);
+          }
+        });
       });
     } else {
       err.style.display='block';
