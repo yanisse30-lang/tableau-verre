@@ -940,7 +940,7 @@ select option{background:#fff;color:var(--txt-primary)}
             <div class="sh-conn-hdr-title">
               <span class="sh-live-dot"></span> Connexions récentes
             </div>
-            <button class="sh-refresh-btn" onclick="refreshHomeConnexions()" title="Actualiser">
+            <button class="sh-refresh-btn" onclick="refreshHomeConnexions(true)" title="Actualiser">
               <i class="ti ti-refresh"></i> Actualiser
             </button>
           </div>
@@ -2756,7 +2756,7 @@ function go(n){
   if(n==='0demo') setTimeout(()=>initDemo(),50);
   if(n==='oc')    setTimeout(()=>ocReset(),50);
   // Rafraîchir le panneau connexions en revenant à l'accueil
-  if((n==='0'||n===0) && isSuperhote()) setTimeout(refreshHomeConnexions, 200);
+  if((n==='0'||n===0) && isSuperhote()) setTimeout(()=>refreshHomeConnexions(false), 200);
 }
 
 // ─── LOGIN ───────────────────────────────────────────────────
@@ -2835,18 +2835,65 @@ async function _refreshConnexionBell(){
 // ─── HOME CONNEXIONS (panneau gauche) ─────────────────────────
 let _shConnData = [];
 let _shRefreshTimer = null;
+let _shSeenIds = new Set();    // IDs déjà vus — pour détecter les nouvelles connexions
+let _shFirstLoad = true;       // premier chargement = pas de notification
 
-async function refreshHomeConnexions(){
-  const listEl = document.getElementById('sh-conn-list');
-  if(listEl) listEl.innerHTML = '<div class="sh-conn-empty"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite;font-size:16px"></i></div>';
+// Bip sonore discret pour nouvelle connexion
+function _shPlayBip(){
   try {
-    // Connexions des dernières 24h
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.35);
+  } catch(e){}
+}
+
+// Clignotement de la cloche
+function _shFlashBell(){
+  const bell = document.getElementById('superhote-bell');
+  if(!bell) return;
+  let count = 0;
+  const iv = setInterval(()=>{
+    bell.style.transform = count%2===0 ? 'scale(1.25)' : 'scale(1)';
+    bell.style.boxShadow = count%2===0 ? '0 0 12px rgba(124,58,237,0.7)' : '';
+    count++;
+    if(count >= 6){ clearInterval(iv); bell.style.transform=''; bell.style.boxShadow=''; }
+  }, 120);
+}
+
+async function refreshHomeConnexions(showLoader){
+  const listEl = document.getElementById('sh-conn-list');
+  if(showLoader && listEl) listEl.innerHTML = '<div class="sh-conn-empty"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite;font-size:16px"></i></div>';
+  try {
     const since = new Date(Date.now() - 24*60*60*1000).toISOString();
     const data = await sbFetch(`/rest/v1/connexions?select=*&order=created_at.desc&limit=100&created_at=gte.${since}`);
-    _shConnData = data || [];
+    const fresh = data || [];
+
+    // Détection des nouvelles connexions (pas les miennes)
+    if(!_shFirstLoad){
+      const nouvelles = fresh.filter(c => !_shSeenIds.has(c.id) && c.username !== _SUPERHOTE_USER);
+      nouvelles.forEach(c => {
+        // Toast alerte (fond violet, cloche, 6 secondes)
+        showToast(`${c.nom||c.username} vient de se connecter — IP : ${c.ip||'?'}`, 6000, true);
+        // Bip + clignotement cloche
+        _shPlayBip();
+        _shFlashBell();
+        // Mettre à jour badge cloche
+        _refreshConnexionBell();
+      });
+    }
+    _shFirstLoad = false;
+
+    // Mémoriser tous les IDs vus
+    fresh.forEach(c => _shSeenIds.add(c.id));
+    _shConnData = fresh;
     _renderHomeConnexions(_shConnData);
   } catch(e){
-    if(listEl) listEl.innerHTML = '<div class="sh-conn-empty" style="color:#E11D48"><i class="ti ti-alert-circle"></i> Erreur de chargement</div>';
+    if(showLoader && listEl) listEl.innerHTML = '<div class="sh-conn-empty" style="color:#E11D48"><i class="ti ti-alert-circle"></i> Erreur de chargement</div>';
   }
 }
 
@@ -2860,17 +2907,18 @@ function _renderHomeConnexions(data){
   listEl.innerHTML = data.map(c => {
     const d = new Date(c.created_at);
     const isMe = c.username === _SUPERHOTE_USER;
+    const isNew = _shSeenIds.has(c.id) && (Date.now() - d.getTime()) < 90000 && !isMe;
     const diffMs = Date.now() - d.getTime();
     const diffMin = Math.floor(diffMs/60000);
     let timeStr;
-    if(diffMin < 1) timeStr = 'à l\'instant';
+    if(diffMin < 1) timeStr = '<span style="color:#16A34A;font-weight:700">à l\'instant</span>';
     else if(diffMin < 60) timeStr = `il y a ${diffMin} min`;
     else if(diffMin < 1440) timeStr = `il y a ${Math.floor(diffMin/60)}h`;
     else timeStr = d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) + ' ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    return `<div class="sh-conn-row" style="${isMe?'opacity:0.45':''}">
+    return `<div class="sh-conn-row" style="${isMe?'opacity:0.4':isNew?'border-color:#7C3AED;background:#F5F3FF;':''}">
       <div class="sh-conn-row-name">
-        <i class="ti ti-user-circle" style="color:#7C3AED;font-size:14px"></i>
-        ${c.nom||c.username}${isMe?' <span style="font-size:9px;color:#aaa">(moi)</span>':''}
+        <i class="ti ti-user-circle" style="color:${isNew?'#7C3AED':'#185FA5'};font-size:14px"></i>
+        ${c.nom||c.username}${isMe?' <span style="font-size:9px;color:#aaa">(moi)</span>':isNew?'<span style="font-size:9px;background:#7C3AED;color:#fff;padding:1px 5px;border-radius:4px;margin-left:4px">Nouveau</span>':''}
         <span style="font-size:10px;color:#aaa;font-weight:400;margin-left:auto">@${c.username}</span>
       </div>
       <div class="sh-conn-row-ip"><i class="ti ti-world" style="font-size:9px"></i> ${c.ip||'IP inconnue'}</div>
@@ -2885,10 +2933,12 @@ function _initSuperhoteHome(){
   const side  = document.getElementById('sh-conn-side');
   if(outer) outer.classList.add('sh-active');
   if(side)  side.classList.add('visible');
-  refreshHomeConnexions();
-  // Auto-refresh toutes les 60 secondes
+  _shFirstLoad = true;
+  _shSeenIds.clear();
+  refreshHomeConnexions(true);
+  // Auto-refresh toutes les 15 secondes
   clearInterval(_shRefreshTimer);
-  _shRefreshTimer = setInterval(()=>{ if(isSuperhote()) refreshHomeConnexions(); }, 60000);
+  _shRefreshTimer = setInterval(()=>{ if(isSuperhote()) refreshHomeConnexions(false); }, 15000);
 }
 
 // ─── ADMIN LOGS ───────────────────────────────────────────────
@@ -4581,12 +4631,13 @@ function initDemo(){
 
 
 
-function showToast(msg){
+function showToast(msg, duration, isAlert){
   const t=document.createElement('div');
-  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#185FA5;color:#fff;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:700;z-index:9998;box-shadow:0 4px 20px rgba(0,0,0,0.5);display:flex;align-items:center;gap:8px;';
-  t.innerHTML='<i class="ti ti-check"></i>'+msg;
+  const bg = isAlert ? 'linear-gradient(135deg,#5B21B6,#7C3AED)' : '#185FA5';
+  t.style.cssText=`position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:${bg};color:#fff;padding:12px 24px;border-radius:30px;font-size:14px;font-weight:700;z-index:99999;box-shadow:0 4px 24px rgba(0,0,0,0.45);display:flex;align-items:center;gap:8px;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;`;
+  t.innerHTML=(isAlert?'<i class="ti ti-bell-ringing" style="font-size:18px"></i>':'<i class="ti ti-check"></i>')+msg;
   document.body.appendChild(t);
-  setTimeout(()=>t.remove(),3000);
+  setTimeout(()=>t.remove(), duration||3000);
 }
 
 // ─── CALCULATEUR ÉPAISSEUR ───────────────────────────────────
