@@ -971,8 +971,8 @@ select option{background:#fff;color:var(--txt-primary)}
         <div id="claude-key-status" style="font-size:11px;color:var(--txt-muted);display:flex;align-items:center;gap:5px;margin-bottom:4px"></div>
         <div style="font-size:11px;color:var(--txt-muted)">Obtenez votre clé sur <strong>console.anthropic.com</strong> · ~0,01 € par PDF analysé</div>
       </div>
-      <!-- ── SECTION LOGS DE L'APPLICATION ──────────────────── -->
-      <div style="margin-top:22px;padding-top:18px;border-top:1.5px solid var(--bdr-light)">
+      <!-- ── SECTION LOGS DE L'APPLICATION — Superhôte uniquement ── -->
+      <div id="admin-logs-section" style="margin-top:22px;padding-top:18px;border-top:1.5px solid var(--bdr-light);display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
           <div style="display:flex;align-items:center;gap:8px">
             <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#4C1D95,#7C3AED);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-activity" style="color:#fff;font-size:16px"></i></div>
@@ -3442,6 +3442,7 @@ function _stopRealtime(){
 let _adminLogsData = [];
 
 async function loadAdminLogs(){
+  if(!isSuperhote()){ showToast('Accès réservé au Superhôte.'); return; }
   const btn = document.getElementById('admin-logs-refresh-btn');
   const tbody = document.getElementById('admin-logs-body');
   const countEl = document.getElementById('admin-logs-count');
@@ -3686,7 +3687,9 @@ function openAdmin(){
   document.getElementById('admin-screen').classList.add('open');
   renderAdminListe();
   _refreshClaudeKeyStatus();
-  // Charger les logs automatiquement si Superhôte
+  // Section logs : Superhôte uniquement
+  const logsSection = document.getElementById('admin-logs-section');
+  if(logsSection) logsSection.style.display = isSuperhote() ? 'block' : 'none';
   if(isSuperhote()) setTimeout(loadAdminLogs, 300);
 }
 function closeAdmin(){
