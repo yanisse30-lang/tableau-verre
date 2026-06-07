@@ -3782,14 +3782,18 @@ async function delCompte(id, username){
   try{
     const deleted = await sbFetch('/rest/v1/comptes?id=eq.'+id, {method:'DELETE'});
     if(!deleted || (Array.isArray(deleted) && deleted.length===0)){
-      showAdminMsg('Compte introuvable ou déjà supprimé.','err');
+      showAdminMsg('❌ Suppression échouée — compte introuvable.','err');
+      showToast('❌ Suppression échouée pour "'+username+'" — le compte n\'existe pas ou est déjà supprimé.', 5000);
       await renderAdminListe();
       return;
     }
     await renderAdminListe();
-    showAdminMsg('Compte "'+username+'" supprimé.','ok');
+    showAdminMsg('✅ Compte "'+username+'" supprimé.','ok');
+    showToast('✅ Compte "'+username+'" supprimé avec succès !', 3000, true);
   } catch(e){
-    showAdminMsg('Erreur suppression : '+e.message,'err');
+    showAdminMsg('❌ Erreur : '+e.message,'err');
+    showToast('❌ Erreur suppression "'+username+'" : '+e.message, 6000);
+    console.error('[delCompte] Erreur DELETE:', e);
   }
 }
 
