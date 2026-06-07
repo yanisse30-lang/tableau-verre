@@ -3810,6 +3810,11 @@ function doLogout(){
   _shSeenIds.clear();
   document.getElementById('login-user').value='';
   document.getElementById('login-pass').value='';
+  // Reset panels avant de réafficher (animations panel-exit laissent les panneaux hors écran)
+  const _lLeft  = document.querySelector('.login-panel-left');
+  const _lRight = document.querySelector('.login-panel-right');
+  if(_lLeft)  { _lLeft.style.animation='';  _lLeft.style.transform='';  _lLeft.style.opacity='1'; }
+  if(_lRight) { _lRight.style.animation=''; _lRight.style.transform=''; _lRight.style.opacity='1'; }
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('admin-btn').style.display='none';
   document.getElementById('verres-admin-btn').style.display='none';
