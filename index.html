@@ -775,6 +775,25 @@ select option{background:#fff;color:var(--txt-primary)}
         <div class="admin-list-title">Comptes existants</div>
         <div id="admin-liste"></div>
       </div>
+      <!-- ── SECTION CLÉ API IA ──────────────────────────────── -->
+      <div style="margin-top:22px;padding-top:18px;border-top:1.5px solid var(--bdr-light)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#5B21B6,#7C3AED);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-cpu" style="color:#fff;font-size:16px"></i></div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--txt-primary)">Analyse IA automatique</div>
+            <div style="font-size:11px;color:var(--txt-muted)">Clé API Claude (Anthropic) — lecture intelligente des PDF</div>
+          </div>
+        </div>
+        <div class="admin-field" style="margin-bottom:8px">
+          <label><i class="ti ti-key" style="font-size:11px"></i> Clé API Anthropic</label>
+          <div style="display:flex;gap:8px">
+            <input type="password" id="claude-key-input" placeholder="sk-ant-api03-..." autocomplete="off" style="flex:1"/>
+            <button onclick="saveClaudeKey()" style="background:var(--blue-600);color:#fff;border:none;border-radius:10px;padding:0 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap"><i class="ti ti-check"></i> Sauver</button>
+          </div>
+        </div>
+        <div id="claude-key-status" style="font-size:11px;color:var(--txt-muted);display:flex;align-items:center;gap:5px;margin-bottom:4px"></div>
+        <div style="font-size:11px;color:var(--txt-muted)">Obtenez votre clé sur <strong>console.anthropic.com</strong> · ~0,01 € par PDF analysé</div>
+      </div>
       <button class="btn-admin-close" onclick="closeAdmin()"><i class="ti ti-x"></i> Fermer</button>
     </div>
   </div>
@@ -2625,6 +2644,7 @@ function openAdmin(){
   if(!currentUser || !currentUser.admin){ showToast('Accès réservé aux administrateurs.'); return; }
   document.getElementById('admin-screen').classList.add('open');
   renderAdminListe();
+  _refreshClaudeKeyStatus();
 }
 function closeAdmin(){
   document.getElementById('admin-screen').classList.remove('open');
@@ -2876,7 +2896,7 @@ async function extractPdfText(arrayBuffer){
       fullText += content.items.map(s => s.str).join(' ') + '\n';
       drop.innerHTML = `<i class="ti ti-loader-2" style="font-size:36px;color:#378ADD;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#aaa">Analyse — page ${i}/${pdf.numPages}...</p>`;
     }
-    analyzePdfText(fullText);
+    analyzeWithClaudeAI(fullText);
   }catch(err){
     resetPdfDrop();
     showToast(`Erreur lecture PDF : ${err.message}`);
@@ -3008,6 +3028,188 @@ function analyzePdfText(text){
       <div class="pdf-verre-new"><i class="ti ti-check" style="font-size:11px"></i> Remplacera les prix actuels</div>
     </div>`).join('');
   applyBtn.style.display = 'flex';
+  result.style.display = 'block';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ANALYSE IA — CLAUDE API
+// ══════════════════════════════════════════════════════════════════
+
+function saveClaudeKey(){
+  const val = document.getElementById('claude-key-input').value.trim();
+  if(val){ localStorage.setItem('maneo_claude_key', val); showToast('Clé API sauvegardée !'); }
+  else { localStorage.removeItem('maneo_claude_key'); showToast('Clé API supprimée.'); }
+  _refreshClaudeKeyStatus();
+}
+
+function _refreshClaudeKeyStatus(){
+  const el = document.getElementById('claude-key-status');
+  const inp = document.getElementById('claude-key-input');
+  if(!el) return;
+  const key = localStorage.getItem('maneo_claude_key');
+  if(key){
+    el.innerHTML = '<i class="ti ti-circle-check" style="color:#16A34A"></i> <span style="color:#16A34A;font-weight:600">Clé configurée — analyse IA activée</span>';
+    if(inp) inp.placeholder = '••••••••••••••••••••••••••';
+  } else {
+    el.innerHTML = '<i class="ti ti-alert-circle" style="color:#D97706"></i> <span style="color:#D97706">Aucune clé — mode regex (moins précis)</span>';
+  }
+}
+
+async function analyzeWithClaudeAI(pdfText){
+  const key = localStorage.getItem('maneo_claude_key');
+  if(!key){ analyzePdfText(pdfText); return; }
+
+  // Afficher le loader
+  const drop = document.getElementById('pdf-drop');
+  if(drop) drop.innerHTML = `<i class="ti ti-cpu" style="font-size:36px;color:#7C3AED;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#7C3AED;font-weight:600">Claude IA analyse le PDF...</p><p style="font-size:12px;color:#aaa;margin-top:6px">Identification des verres et des prix en cours</p>`;
+
+  // Construire le contexte du catalogue existant
+  const all = [...catalogue, ...catalogue2e];
+  const catCtx = all.map(v => `${v.id}|${v.nom}|${v.marque}|[${Object.keys(v.indices||{}).join(',')}]`).join('\n');
+
+  const prompt = `Tu es un expert en optique ophtalmique. Analyse ce texte extrait d'un PDF de tarif/catalogue verre.
+
+CATALOGUE EXISTANT (id|nom|marque|indices disponibles):
+${catCtx}
+
+TEXTE DU PDF (${pdfText.length} caractères):
+${pdfText.substring(0, 18000)}
+
+MISSION: Extrais TOUS les verres avec leurs prix depuis le PDF.
+Pour chaque verre trouvé, cherche la correspondance dans le catalogue existant (par nom ou marque).
+
+Réponds UNIQUEMENT avec ce JSON valide, rien d'autre:
+{
+  "verres": [
+    {
+      "id": "id_catalogue_si_correspondance_sinon_null",
+      "nom": "nom exact du verre tel qu'il apparaît dans le PDF",
+      "marque": "fabricant/marque",
+      "indices": {
+        "1.50": 145.00,
+        "1.60": 165.00,
+        "1.67": 195.00,
+        "1.74": 240.00
+      }
+    }
+  ]
+}
+
+RÈGLES STRICTES:
+- Inclure UNIQUEMENT les verres dont tu trouves des prix concrets dans le PDF
+- Les prix sont des prix d'achat en euros (HT ou TTC selon le PDF)
+- N'invente aucun prix — si tu n'es pas sûr, ne l'inclus pas
+- Inclure seulement les indices pour lesquels un prix est clairement indiqué
+- Si aucun verre ni prix trouvé: {"verres":[]}`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 4096,
+        messages:[{role:'user', content: prompt}]
+      })
+    });
+
+    if(!resp.ok){
+      const errData = await resp.json().catch(()=>({}));
+      throw new Error(errData.error?.message || `HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    let rawJson = data.content[0].text.trim();
+    // Nettoyer le JSON si Claude ajoute du texte autour
+    const jsonMatch = rawJson.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('Réponse IA invalide');
+    const parsed = JSON.parse(jsonMatch[0]);
+    _applyClaudeResults(parsed, pdfText.length);
+
+  } catch(e){
+    console.error('Claude API error:', e);
+    resetPdfDrop();
+    if(e.message.includes('401') || e.message.includes('authentication')){
+      showToast('Clé API invalide — vérifiez dans les paramètres admin.');
+    } else if(e.message.includes('insufficient')){
+      showToast('Crédit API insuffisant — rechargez votre compte Anthropic.');
+    } else {
+      showToast('Erreur IA : ' + e.message + ' — tentative avec l\'analyse classique.');
+      analyzePdfText(pdfText);
+    }
+  }
+}
+
+function _applyClaudeResults(parsed, textLen){
+  resetPdfDrop();
+  pdfPrixDetectes = [];
+
+  if(!parsed.verres || !parsed.verres.length){
+    const result = document.getElementById('pdf-result');
+    document.getElementById('pdf-verres-found').innerHTML = `
+      <div style="text-align:center;padding:20px;color:var(--txt-muted)">
+        <i class="ti ti-robot" style="font-size:28px;display:block;margin-bottom:10px;color:#DDD6FE"></i>
+        <strong style="color:var(--txt-primary)">Aucun verre détecté par l'IA</strong><br>
+        <span style="font-size:12px">Le PDF ne contient pas de tarif verre lisible, ou il est scanné (image).</span>
+      </div>`;
+    document.querySelector('.btn-apply-pdf').style.display = 'none';
+    result.style.display = 'block';
+    return;
+  }
+
+  const all = [...catalogue, ...catalogue2e];
+
+  parsed.verres.forEach(item => {
+    if(!item.indices || !Object.keys(item.indices).length) return;
+    // Trouver correspondance dans le catalogue
+    let target = item.id ? all.find(v => v.id === item.id) : null;
+    if(!target) target = all.find(v => v.nom.toLowerCase() === (item.nom||'').toLowerCase());
+    if(!target){
+      const nomLower = (item.nom||'').toLowerCase();
+      target = all.find(v => nomLower.includes(v.nom.toLowerCase().split(' ')[0].toLowerCase()) && v.nom.split(' ')[0].length >= 4);
+    }
+    if(!target) return; // verre inconnu du catalogue, on skip
+
+    const detected = {id: target.id, nom: target.nom, marque: target.marque, prix: {}};
+    Object.entries(item.indices).forEach(([ind, prix]) => {
+      const p = parseFloat(prix);
+      if(target.indices[ind] != null && !isNaN(p) && p > 5 && p < 2000){
+        detected.prix[ind] = Math.round(p * 100) / 100;
+      }
+    });
+    if(Object.keys(detected.prix).length) pdfPrixDetectes.push(detected);
+  });
+
+  const result = document.getElementById('pdf-result');
+  const foundEl = document.getElementById('pdf-verres-found');
+  const applyBtn = document.querySelector('.btn-apply-pdf');
+
+  if(!pdfPrixDetectes.length){
+    foundEl.innerHTML = `<div style="text-align:center;padding:16px;color:var(--txt-muted)">
+      <i class="ti ti-search-off" style="font-size:22px;display:block;margin-bottom:8px"></i>
+      <strong>L'IA a analysé le PDF mais aucun verre ne correspond au catalogue.</strong><br>
+      <span style="font-size:12px">L'IA a trouvé ${parsed.verres.length} verre(s) dans le PDF mais sans correspondance dans votre catalogue.</span>
+    </div>`;
+    applyBtn.style.display = 'none';
+  } else {
+    foundEl.innerHTML = `
+      <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#7C3AED;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-cpu"></i> <strong>Analyse IA terminée</strong> — ${pdfPrixDetectes.length} verre(s) identifié(s) avec prix
+      </div>
+      ${pdfPrixDetectes.map(v => `
+      <div class="pdf-verre-found">
+        <div class="pdf-verre-nom">${v.nom} <span style="color:#aaa;font-weight:400">${v.marque}</span></div>
+        <div class="pdf-verre-prix">${Object.entries(v.prix).map(([ind,p]) => `Ind. ${ind} : <strong>${p} €</strong>`).join(' · ')}</div>
+        <div class="pdf-verre-new"><i class="ti ti-check" style="font-size:11px"></i> Prix mis à jour automatiquement</div>
+      </div>`).join('')}`;
+    applyBtn.style.display = 'flex';
+    applyBtn.innerHTML = '<i class="ti ti-check"></i> Appliquer ces prix au catalogue';
+  }
   result.style.display = 'block';
 }
 
