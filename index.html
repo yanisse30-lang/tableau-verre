@@ -792,6 +792,15 @@ select option{background:#fff;color:var(--txt-primary)}
 </head>
 <body>
 
+<!-- SVG FILTERS (hidden) -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="pol-sharpen" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feConvolutionMatrix order="3" kernelMatrix="0 -0.6 0 -0.6 3.4 -0.6 0 -0.6 0" preserveAlpha="true"/>
+    </filter>
+  </defs>
+</svg>
+
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
@@ -1435,9 +1444,9 @@ select option{background:#fff;color:var(--txt-primary)}
         </div>
 
         <!-- Zone image -->
-        <div id="pol-img-wrap" style="display:none;margin:0 auto;max-width:310px">
+        <div id="pol-img-wrap" style="display:none;margin:0 auto;max-width:240px">
           <div style="overflow:hidden;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.22);line-height:0">
-            <img id="pol-img" src="pol-comparison.jpg" alt="Verre" style="width:200%;display:block;margin-left:0%;transition:margin-left 0.35s ease"/>
+            <img id="pol-img" src="pol-comparison.jpg" alt="Verre" style="width:200%;display:block;margin-left:0%;transition:margin-left 0.35s ease;filter:url(#pol-sharpen);image-rendering:-webkit-optimize-contrast;image-rendering:smooth"/>
           </div>
         </div>
 
