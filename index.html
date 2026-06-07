@@ -1168,20 +1168,20 @@ select option{background:#fff;color:var(--txt-primary)}
           <!-- PDF 2 : Taux de remboursement -->
           <div>
             <div style="font-size:12px;font-weight:700;color:var(--txt-secondary);margin-bottom:8px;display:flex;align-items:center;gap:6px">
-              <span style="width:20px;height:20px;border-radius:50%;background:#185FA5;color:#fff;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">2</span>
-              Taux de remboursement verre <span style="font-size:10px;color:var(--txt-muted)">(optionnel)</span>
+              <span style="width:20px;height:20px;border-radius:50%;background:#DC2626;color:#fff;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">2</span>
+              Taux de recommandé verre <span style="font-size:10px;color:var(--txt-muted)">(optionnel)</span>
             </div>
             <div id="marge-drop-2" onclick="document.getElementById('marge-file-2').click()"
-                 ondragover="event.preventDefault();this.style.borderColor='#185FA5';this.style.background='#EFF6FF'"
+                 ondragover="event.preventDefault();this.style.borderColor='#DC2626';this.style.background='#FFF1F2'"
                  ondragleave="this.style.borderColor='';this.style.background=''"
                  ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';margeLoadPdf(event.dataTransfer.files[0],2)"
                  style="border:2px dashed var(--bdr-medium);border-radius:14px;padding:24px 16px;text-align:center;cursor:pointer;transition:0.15s;background:var(--surf-secondary);min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
-              <i class="ti ti-receipt-refund" style="font-size:32px;color:#185FA5"></i>
-              <div style="font-size:13px;font-weight:700;color:var(--txt-primary)">Remboursements mutuelles</div>
-              <div style="font-size:11px;color:var(--txt-muted)">Taux de prise en charge par réseau</div>
+              <i class="ti ti-refresh-alert" style="font-size:32px;color:#DC2626"></i>
+              <div style="font-size:13px;font-weight:700;color:var(--txt-primary)">Verres recommandés</div>
+              <div style="font-size:11px;color:var(--txt-muted)">Verres refaits à vos frais suite à erreur · moy. secteur 8%</div>
             </div>
             <input type="file" id="marge-file-2" accept=".pdf" style="display:none" onchange="margeLoadPdf(this.files[0],2)"/>
-            <div id="marge-status-2" style="display:none;margin-top:8px;padding:8px 12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;font-size:12px;color:#185FA5;font-weight:600;display:flex;align-items:center;gap:6px"><i class="ti ti-check"></i> <span></span></div>
+            <div id="marge-status-2" style="display:none;margin-top:8px;padding:8px 12px;background:#FFF1F2;border:1px solid #FECDD3;border-radius:8px;font-size:12px;color:#DC2626;font-weight:600;display:flex;align-items:center;gap:6px"><i class="ti ti-check"></i> <span></span></div>
           </div>
         </div>
 
@@ -4099,7 +4099,7 @@ function resetPdfDrop(){
 // MARGE MENSUELLE
 // ══════════════════════════════════════════════════════════════════
 let _margeTextReleve = '';   // texte PDF 1 (relevé)
-let _margeTextTaux   = '';   // texte PDF 2 (remboursements)
+let _margeTextTaux   = '';   // texte PDF 2 (recommandés)
 
 function openMargeMensuelle(){
   document.getElementById('marge-modal').style.display = 'flex';
@@ -4123,7 +4123,7 @@ function _margeResetDrop(n){
   if(n===1){
     dz.innerHTML = `<i class="ti ti-file-analytics" style="font-size:32px;color:#059669"></i><div style="font-size:13px;font-weight:700;color:var(--txt-primary)">Prix achat / Prix vente</div><div style="font-size:11px;color:var(--txt-muted)">Relevé avec quantités vendues</div>`;
   } else {
-    dz.innerHTML = `<i class="ti ti-receipt-refund" style="font-size:32px;color:#185FA5"></i><div style="font-size:13px;font-weight:700;color:var(--txt-primary)">Remboursements mutuelles</div><div style="font-size:11px;color:var(--txt-muted)">Taux de prise en charge par réseau</div>`;
+    dz.innerHTML = `<i class="ti ti-refresh-alert" style="font-size:32px;color:#DC2626"></i><div style="font-size:13px;font-weight:700;color:var(--txt-primary)">Taux de recommandé verre</div><div style="font-size:11px;color:var(--txt-muted)">Verres refaits à vos frais suite à erreur · moy. secteur 8%</div>`;
   }
 }
 function _margeUpdateBtn(){
@@ -4139,7 +4139,7 @@ function _margeUpdateBtn(){
 function margeLoadPdf(file, slot){
   if(!file || file.type !== 'application/pdf'){ showToast('Veuillez sélectionner un fichier PDF.'); return; }
   const dz = document.getElementById('marge-drop-' + slot);
-  dz.innerHTML = `<i class="ti ti-loader-2" style="font-size:28px;color:${slot===1?'#059669':'#185FA5'};animation:spin 1s linear infinite"></i><div style="font-size:12px;color:var(--txt-muted);margin-top:4px">Lecture...</div>`;
+  dz.innerHTML = `<i class="ti ti-loader-2" style="font-size:28px;color:${slot===1?'#059669':'#DC2626'};animation:spin 1s linear infinite"></i><div style="font-size:12px;color:var(--txt-muted);margin-top:4px">Lecture...</div>`;
   const reader = new FileReader();
   reader.onload = async (evt) => {
     try {
@@ -4191,45 +4191,53 @@ function _margeSetLoader(msg){ const el=document.getElementById('marge-loader-ms
 
 async function _margeCallClaude(key){
   _margeSetLoader('Claude IA analyse vos données...');
-  const hasTaux = !!_margeTextTaux;
+  const hasReco = !!_margeTextTaux;
   const prompt = `Tu es un expert-comptable spécialisé en optique opticien. Analyse les documents suivants.
 
 ═══ DOCUMENT 1 — RELEVÉ MENSUEL (${_margeTextReleve.length} car.) ═══
 ${_margeTextReleve.substring(0, 14000)}
 
-${hasTaux ? `═══ DOCUMENT 2 — TAUX DE REMBOURSEMENT (${_margeTextTaux.length} car.) ═══\n${_margeTextTaux.substring(0, 6000)}` : '(Pas de document de remboursement fourni)'}
+${hasReco ? `═══ DOCUMENT 2 — TAUX DE RECOMMANDÉS (${_margeTextTaux.length} car.) ═══
+CONTEXTE : Un "recommandé" = verre refait une 2ème fois à cause d'une erreur (mauvaise correction, défaut fabrication, etc.).
+Le 1er verre était payé par le client. Le recommandé est PAYÉ PAR L'OPTICIEN = perte sèche sur la marge.
+La moyenne du secteur optique est de 8% de taux de recommandé.
+${_margeTextTaux.substring(0, 6000)}` : '(Pas de données recommandés fournies — utiliser un taux moyen estimé de 8% pour information)'}
 
 ═══ MISSION ═══
-1. Identifie tous les produits/verres avec prix d'achat, prix de vente et quantités.
-2. Calcule la marge brute par ligne et le total.
-3. ${hasTaux ? 'Intègre les taux de remboursement mutuelle pour calculer la marge nette réelle.' : 'Pas de données de remboursement : calcule uniquement la marge brute.'}
-4. Explique en détail POURQUOI ce niveau de marge (quels produits tirent vers le haut ou le bas, structure des coûts, etc.)
-5. Donne des conseils concrets et actionnables pour améliorer la marge.
+1. Identifie tous les produits/verres avec prix d'achat, prix de vente et quantités depuis le document 1.
+2. Calcule la marge brute : (prix_vente - prix_achat) × quantité.
+3. ${hasReco ? `Depuis le document 2, extrais : coût total des recommandés en euros, taux de recommandé en %, motifs principaux.
+   Calcule la MARGE NETTE RÉELLE = marge brute − coût total recommandés.
+   Compare le taux observé à la moyenne secteur de 8%.` : `Estime l'impact théorique des recommandés à 8% (moyenne secteur) sur la marge brute.`}
+4. Explique clairement POURQUOI ce résultat : quels produits pèsent le plus, impact des recommandés, points forts et faibles.
+5. Donne 4 conseils concrets pour améliorer la marge ET réduire les recommandés.
 
 Réponds UNIQUEMENT avec ce JSON valide :
 {
   "periode": "mois/année détecté ou 'Non précisé'",
   "lignes": [
-    { "produit": "nom", "quantite": 1, "prix_achat": 0.00, "prix_vente": 0.00, "marge_euro": 0.00, "marge_pct": 0.0, "remboursement": 0.00 }
+    { "produit": "nom", "quantite": 1, "prix_achat": 0.00, "prix_vente": 0.00, "marge_euro": 0.00, "marge_pct": 0.0 }
   ],
   "totaux": {
     "ca_total": 0.00,
     "achats_total": 0.00,
-    "remboursements_total": 0.00,
     "marge_brute_euro": 0.00,
     "marge_brute_pct": 0.0,
+    "cout_recommandes_euro": 0.00,
+    "taux_recommandes_pct": 0.0,
     "marge_nette_euro": 0.00,
-    "marge_nette_pct": 0.0
+    "marge_nette_pct": 0.0,
+    "motifs_recommandes": "résumé des motifs d'erreurs principaux"
   },
-  "explication": "Explication claire en 4-5 phrases : pourquoi ce taux de marge, quels produits influencent le plus, facteurs positifs et négatifs.",
+  "explication": "4-5 phrases claires : niveau de marge, impact des recommandés en euros et %, comparaison avec le secteur (8%), quels produits influencent le plus.",
   "ameliorations": [
-    "Conseil 1 concret et chiffré si possible",
-    "Conseil 2",
+    "Conseil 1 pour améliorer la marge (chiffré si possible)",
+    "Conseil 2 pour réduire les recommandés avec actions concrètes",
     "Conseil 3",
     "Conseil 4"
   ]
 }
-RÈGLES : marge_euro=(prix_vente-prix_achat)*quantite, marge_pct=marge_euro/ca_ligne*100. Si prix manquant pour une ligne, ne pas l'inclure. Si rien trouvé : lignes vides, explication explicative.`;
+RÈGLES STRICTES : marge_euro=(prix_vente-prix_achat)*quantite. marge_nette_euro=marge_brute_euro-cout_recommandes_euro. Si prix manquant pour une ligne, ne pas l'inclure.`;
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
