@@ -491,9 +491,11 @@ select option{background:#fff;color:var(--txt-primary)}
 .bell-btn{position:relative;background:linear-gradient(135deg,#5B21B6,#7C3AED);border:none;border-radius:10px;padding:6px 12px;cursor:pointer;font-family:inherit;display:none;align-items:center;gap:5px;color:#fff;font-size:12px;font-weight:600;transition:0.15s}
 .bell-btn:hover{background:linear-gradient(135deg,#4C1D95,#6D28D9);transform:translateY(-1px)}
 .bell-badge{position:absolute;top:-5px;right:-5px;background:#E11D48;color:#fff;font-size:10px;font-weight:800;border-radius:99px;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff}
-/* PANNEAU CONNEXIONS */
-#conn-panel{position:fixed;top:0;right:-420px;width:400px;max-width:95vw;height:100%;background:#fff;border-left:1px solid var(--bdr-light);z-index:10001;box-shadow:-4px 0 30px rgba(0,0,0,0.12);transition:right 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column}
-#conn-panel.open{right:0}
+/* PANNEAU CONNEXIONS — modal centré */
+#conn-panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-60%);width:420px;max-width:94vw;max-height:85vh;background:#fff;border-radius:20px;z-index:10001;box-shadow:0 20px 60px rgba(0,0,0,0.18);display:none;flex-direction:column;opacity:0;transition:opacity 0.25s,transform 0.25s}
+#conn-panel.open{display:flex;opacity:1;transform:translate(-50%,-50%)}
+#conn-panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:10000;display:none;backdrop-filter:blur(2px)}
+#conn-panel-overlay.open{display:block}
 .conn-panel-hdr{padding:18px 20px;border-bottom:1px solid var(--bdr-light);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#5B21B6,#7C3AED)}
 .conn-panel-title{font-size:16px;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px}
 .conn-close-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit}
@@ -3370,6 +3372,8 @@ async function openConnexionPanel(){
   const panel = document.getElementById('conn-panel');
   if(!panel) return;
   panel.classList.add('open');
+  const overlay = document.getElementById('conn-panel-overlay');
+  if(overlay) overlay.classList.add('open');
   localStorage.setItem('maneo_conn_seen', new Date().toISOString());
   const badge = document.getElementById('bell-badge');
   if(badge) badge.style.display = 'none';
@@ -3402,6 +3406,7 @@ async function openConnexionPanel(){
 
 function closeConnexionPanel(){
   document.getElementById('conn-panel')?.classList.remove('open');
+  document.getElementById('conn-panel-overlay')?.classList.remove('open');
 }
 
 // ── Animation WOW login → app ──────────────────────────────────────
@@ -6050,6 +6055,9 @@ function pdfDel(key, bodyId, id, isConv){
       <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Déconnexion</button>
     </div>
   </div>
+
+  <!-- OVERLAY CONNEXIONS -->
+  <div id="conn-panel-overlay" onclick="closeConnexionPanel()"></div>
 
   <!-- PANNEAU CONNEXIONS SUPERHOTE -->
   <div id="conn-panel">
