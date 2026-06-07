@@ -11,6 +11,7 @@
 <meta property="og:url" content="https://yanisse30-lang.github.io/tableau-verre/"/>
 <meta property="og:type" content="website"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -2927,18 +2928,83 @@ function _renderHomeConnexions(data){
   }).join('');
 }
 
+// ─── REALTIME SUPABASE ────────────────────────────────────────
+let _rtClient   = null;
+let _rtChannel  = null;
+
 function _initSuperhoteHome(){
   if(!isSuperhote()) return;
+
+  // Afficher le panneau gauche
   const outer = document.getElementById('sh-home-outer');
   const side  = document.getElementById('sh-conn-side');
   if(outer) outer.classList.add('sh-active');
   if(side)  side.classList.add('visible');
+
+  // Chargement initial (historique 24h)
   _shFirstLoad = true;
   _shSeenIds.clear();
   refreshHomeConnexions(true);
-  // Auto-refresh toutes les 15 secondes
+
+  // ── WebSocket Realtime ──────────────────────────────────────
+  _startRealtime();
+
+  // Fallback polling 30s (au cas où le WS coupe)
   clearInterval(_shRefreshTimer);
-  _shRefreshTimer = setInterval(()=>{ if(isSuperhote()) refreshHomeConnexions(false); }, 15000);
+  _shRefreshTimer = setInterval(()=>{ if(isSuperhote()) refreshHomeConnexions(false); }, 30000);
+}
+
+function _startRealtime(){
+  // Fermer l'ancien canal si existant
+  if(_rtChannel){ try { _rtClient?.removeChannel(_rtChannel); } catch(e){} }
+
+  if(typeof window.supabase === 'undefined'){
+    console.warn('Supabase JS non chargé — mode polling uniquement');
+    return;
+  }
+
+  _rtClient  = window.supabase.createClient(SB_URL, SB_KEY);
+  _rtChannel = _rtClient
+    .channel('connexions-live')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'connexions' },
+      payload => {
+        const c = payload.new;
+        if(!c) return;
+
+        // Ignorer mes propres connexions
+        if(c.username === _SUPERHOTE_USER) return;
+
+        // Ajouter au début de la liste locale
+        _shSeenIds.add(c.id);
+        _shConnData.unshift(c);
+        _renderHomeConnexions(_shConnData);
+
+        // Notification immédiate
+        showToast(`${c.nom||c.username} vient de se connecter — IP : ${c.ip||'?'}`, 7000, true);
+        _shPlayBip();
+        _shFlashBell();
+        _refreshConnexionBell();
+      }
+    )
+    .subscribe(status => {
+      const dot = document.querySelector('.sh-live-dot');
+      if(status === 'SUBSCRIBED'){
+        // Vert = connecté temps réel
+        if(dot){ dot.style.background='#4ade80'; dot.title='Temps réel actif'; }
+      } else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT'){
+        // Orange = problème WS, polling en fallback
+        if(dot){ dot.style.background='#f59e0b'; dot.title='Mode fallback (polling)'; }
+      }
+    });
+}
+
+function _stopRealtime(){
+  clearInterval(_shRefreshTimer);
+  if(_rtChannel){ try { _rtClient?.removeChannel(_rtChannel); } catch(e){} }
+  _rtChannel = null;
+  _rtClient  = null;
 }
 
 // ─── ADMIN LOGS ───────────────────────────────────────────────
@@ -3202,7 +3268,16 @@ function showAdminMsg(txt,type){
 
 function doLogout(){
   if(!confirm('Se déconnecter ?')) return;
+  _stopRealtime();
+  // Cacher le panneau superhote
+  const outer = document.getElementById('sh-home-outer');
+  const side  = document.getElementById('sh-conn-side');
+  if(outer) outer.classList.remove('sh-active');
+  if(side)  side.classList.remove('visible');
+  document.getElementById('superhote-bell').style.display='none';
   currentUser = null;
+  _shFirstLoad = true;
+  _shSeenIds.clear();
   document.getElementById('login-user').value='';
   document.getElementById('login-pass').value='';
   document.getElementById('login-screen').style.display='flex';
