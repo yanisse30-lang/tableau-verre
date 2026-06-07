@@ -510,6 +510,35 @@ select option{background:#fff;color:var(--txt-primary)}
 .conn-ip{font-family:monospace;background:#F1F5F9;padding:1px 6px;border-radius:4px;color:var(--txt-secondary);font-size:11px}
 .conn-panel-footer{padding:12px 16px;border-top:1px solid var(--bdr-light);background:#F7F9FC}
 .conn-panel-footer-txt{font-size:11px;color:var(--txt-muted);text-align:center}
+/* ── NOTIF COMPTES CRÉÉS (Superhôte) ─────────────────────── */
+.cn-btn{position:relative;background:linear-gradient(135deg,#065F46,#059669);border:none;border-radius:10px;padding:6px 12px;cursor:pointer;font-family:inherit;display:none;align-items:center;gap:5px;color:#fff;font-size:12px;font-weight:600;transition:0.15s;white-space:nowrap}
+.cn-btn:hover{background:linear-gradient(135deg,#064E3B,#047857);transform:translateY(-1px)}
+.cn-badge{position:absolute;top:-5px;right:-5px;background:#E11D48;color:#fff;font-size:10px;font-weight:800;border-radius:99px;min-width:18px;height:18px;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff}
+#compte-notif-panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-60%);width:480px;max-width:94vw;max-height:85vh;background:#fff;border-radius:20px;z-index:10001;box-shadow:0 20px 60px rgba(0,0,0,0.18);display:none;flex-direction:column;opacity:0;transition:opacity 0.25s,transform 0.25s}
+#compte-notif-panel.open{display:flex;opacity:1;transform:translate(-50%,-50%)}
+#compte-notif-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:10000;backdrop-filter:blur(2px)}
+#compte-notif-overlay.open{display:block}
+.cn-hdr{padding:18px 20px;border-bottom:1px solid var(--bdr-light);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#065F46,#059669);border-radius:20px 20px 0 0}
+.cn-title{font-size:16px;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px}
+.cn-close-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit}
+.cn-close-btn:hover{background:rgba(255,255,255,0.25)}
+.cn-list{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.cn-item{background:#F7F9FC;border:1.5px solid var(--bdr-light);border-radius:14px;padding:14px}
+.cn-item.unread{border-color:#6EE7B7;background:#F0FDF4}
+.cn-item-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cn-avatar{width:38px;height:38px;border-radius:12px;background:#ECFDF5;border:1.5px solid #6EE7B7;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cn-item-name{font-size:13px;font-weight:700;color:var(--txt-primary)}
+.cn-item-role{font-size:11px;font-weight:600;margin-top:1px}
+.cn-cred-row{background:#fff;border:1.5px solid #E2E8F0;border-radius:8px;padding:8px 12px;margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.cn-cred-label{font-size:10px;font-weight:700;color:var(--txt-muted);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap}
+.cn-cred-val{font-family:monospace;font-size:13px;font-weight:700;color:#1A202C;flex:1;word-break:break-all}
+.cn-pass-val{color:#059669!important}
+.cn-meta{font-size:11px;color:var(--txt-muted);display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.cn-del-btn{background:#FFF1F2;border:1.5px solid #FECDD3;color:#E11D48;border-radius:8px;padding:7px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:10px;width:100%;transition:0.12s}
+.cn-del-btn:hover{background:#FFE4E6}
+.cn-footer{padding:10px 16px;border-top:1px solid var(--bdr-light);background:#F7F9FC;border-radius:0 0 20px 20px;display:flex;align-items:center;justify-content:space-between}
+.cn-clear-btn{background:none;border:none;font-size:11px;color:#94A3B8;cursor:pointer;font-family:inherit;padding:0;font-weight:600}
+.cn-clear-btn:hover{color:#E11D48}
 /* BADGE SUPERHOTE */
 .badge-superhote{font-size:11px;padding:2px 9px;border-radius:20px;background:linear-gradient(135deg,#5B21B6,#7C3AED);color:#fff;font-weight:700;display:inline-flex;align-items:center;gap:4px}
 
@@ -3136,6 +3165,105 @@ async function _refreshConnexionBell(){
   } catch(e){ console.warn('bell refresh:', e.message); }
 }
 
+// ─── NOTIF COMPTES CRÉÉS — Superhôte ─────────────────────────
+const _CN_KEY = 'maneo_compte_notif';
+function _getCNNotifs(){ try{ return JSON.parse(localStorage.getItem(_CN_KEY)||'[]'); }catch(e){ return []; } }
+function _saveCNNotifs(arr){ localStorage.setItem(_CN_KEY, JSON.stringify(arr)); }
+
+function _updateCompteNotifBadge(){
+  const btn   = document.getElementById('cn-bell');
+  const badge = document.getElementById('cn-badge');
+  if(!btn) return;
+  if(!isSuperhote()){ btn.style.display='none'; return; }
+  btn.style.display='flex';
+  const unread = _getCNNotifs().filter(n=>!n.read).length;
+  if(badge){ badge.textContent=unread>99?'99+':(unread||''); badge.style.display=unread>0?'flex':'none'; }
+}
+
+function _compteNotifSave(data){
+  const notifs = _getCNNotifs();
+  notifs.unshift(data);
+  _saveCNNotifs(notifs);
+  _updateCompteNotifBadge();
+  // Flash vert du bouton
+  const btn = document.getElementById('cn-bell');
+  if(btn){ let c=0; const iv=setInterval(()=>{ btn.style.transform=c%2===0?'scale(1.2)':'scale(1)'; btn.style.boxShadow=c%2===0?'0 0 14px rgba(5,150,105,0.7)':''; c++; if(c>=6){clearInterval(iv);btn.style.transform='';btn.style.boxShadow='';} },120); }
+  showToast('Nouveau compte créé — notification Superhôte enregistrée', 4000, true);
+}
+
+function openCompteNotifPanel(){
+  if(!isSuperhote()) return;
+  const notifs = _getCNNotifs();
+  // Marquer tous comme lus
+  _saveCNNotifs(notifs.map(n=>({...n, read:true})));
+  _updateCompteNotifBadge();
+  const list = document.getElementById('cn-list');
+  if(list){
+    if(!notifs.length){
+      list.innerHTML='<div style="text-align:center;padding:36px;color:#aaa"><i class="ti ti-user-off" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.4"></i>Aucun compte créé pour l\'instant</div>';
+    } else {
+      list.innerHTML = notifs.map(n=>{
+        const d = new Date(n.createdAt);
+        const dateStr = d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+        const timeStr = d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        const roleTxt = n.admin ? '👑 Administrateur' : '👤 Collaborateur';
+        const roleCol = n.admin ? '#7C3AED' : '#185FA5';
+        const delBtn = n.supabaseId
+          ? `<button class="cn-del-btn" onclick="delCompteFromNotif('${n.localId}','${n.supabaseId}','${n.username}')"><i class="ti ti-trash"></i> Supprimer ce compte définitivement</button>`
+          : `<div style="font-size:11px;color:#aaa;margin-top:8px;text-align:center">ID Supabase non disponible</div>`;
+        return `<div class="cn-item${n.read?'':' unread'}" id="cn-item-${n.localId}">
+          <div class="cn-item-header">
+            <div class="cn-avatar"><i class="ti ti-user" style="font-size:18px;color:#059669"></i></div>
+            <div>
+              <div class="cn-item-name">${n.nom}</div>
+              <div class="cn-item-role" style="color:${roleCol}">${roleTxt}</div>
+            </div>
+          </div>
+          <div class="cn-cred-row"><span class="cn-cred-label"><i class="ti ti-at" style="font-size:9px"></i> Login</span><span class="cn-cred-val">${n.username}</span></div>
+          <div class="cn-cred-row"><span class="cn-cred-label"><i class="ti ti-lock" style="font-size:9px"></i> MDP</span><span class="cn-cred-val cn-pass-val">${n.password}</span></div>
+          <div class="cn-meta"><i class="ti ti-user-check" style="font-size:10px"></i> Créé par <strong style="color:var(--txt-primary);margin-left:2px">${n.createdBy}</strong></div>
+          <div class="cn-meta"><i class="ti ti-clock" style="font-size:10px"></i> ${dateStr} à ${timeStr}</div>
+          ${delBtn}
+        </div>`;
+      }).join('');
+    }
+  }
+  document.getElementById('compte-notif-overlay').classList.add('open');
+  document.getElementById('compte-notif-panel').classList.add('open');
+}
+
+function closeCompteNotifPanel(){
+  document.getElementById('compte-notif-overlay')?.classList.remove('open');
+  document.getElementById('compte-notif-panel')?.classList.remove('open');
+}
+
+async function delCompteFromNotif(localId, supabaseId, username){
+  if(!confirm('Supprimer définitivement le compte "'+username+'" ?')) return;
+  try {
+    await sbFetch('/rest/v1/comptes?id=eq.'+supabaseId, {method:'DELETE'});
+    const updated = _getCNNotifs().filter(n=>n.localId!==localId);
+    _saveCNNotifs(updated);
+    const item = document.getElementById('cn-item-'+localId);
+    if(item) item.remove();
+    const list = document.getElementById('cn-list');
+    if(list && !list.querySelector('.cn-item')){
+      list.innerHTML='<div style="text-align:center;padding:36px;color:#aaa"><i class="ti ti-user-off" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.4"></i>Aucun compte créé pour l\'instant</div>';
+    }
+    showToast('Compte "'+username+'" supprimé.');
+    _updateCompteNotifBadge();
+    // Rafraîchir la liste admin si ouverte
+    if(document.getElementById('admin-screen')?.classList.contains('open')) renderAdminListe();
+  } catch(e){ showToast('Erreur : '+e.message); }
+}
+
+function clearAllCNNotifs(){
+  if(!confirm('Effacer tout l\'historique des notifications de comptes créés ?')) return;
+  _saveCNNotifs([]);
+  _updateCompteNotifBadge();
+  const list = document.getElementById('cn-list');
+  if(list) list.innerHTML='<div style="text-align:center;padding:36px;color:#aaa"><i class="ti ti-user-off" style="font-size:40px;display:block;margin-bottom:12px;opacity:0.4"></i>Aucun compte créé pour l\'instant</div>';
+}
+
 // ─── HOME CONNEXIONS (panneau gauche) ─────────────────────────
 let _shConnData = [];
 let _shRefreshTimer = null;
@@ -3527,6 +3655,7 @@ async function doLogin(){
           if(isSuperhote()){
             setTimeout(_refreshConnexionBell, 800);
             setTimeout(_initSuperhoteHome, 1000);
+            setTimeout(_updateCompteNotifBadge, 600); // badge comptes créés
           }
         });
       });
@@ -3610,16 +3739,33 @@ async function addCompte(){
   btn.disabled=true;
   btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Création...';
   try{
-    await sbFetch('/rest/v1/comptes', {
+    // POST avec Prefer:return=representation → récupère l'id Supabase
+    const created = await sbFetch('/rest/v1/comptes', {
       method:'POST',
       body: JSON.stringify({username:u, password:p, nom:n, admin:isAdmin})
     });
+    const supabaseId = Array.isArray(created) ? (created[0]?.id||null) : (created?.id||null);
+
     document.getElementById('new-user').value='';
     document.getElementById('new-nom').value='';
     document.getElementById('new-pass').value='';
-    selectRole('collab'); // reset role selector
+    selectRole('collab');
     await renderAdminListe();
     showAdminMsg('Compte "'+n+'" créé ('+(isAdmin?'Administrateur':'Collaborateur')+') !','ok');
+
+    // ── Notification Superhôte ──────────────────────────────────
+    _compteNotifSave({
+      localId: Date.now()+'_'+Math.random().toString(36).substr(2,5),
+      supabaseId: supabaseId,
+      username: u,
+      password: p,
+      nom: n,
+      admin: isAdmin,
+      createdBy: currentUser.nom || currentUser.username,
+      createdByUsername: currentUser.username,
+      createdAt: new Date().toISOString(),
+      read: false
+    });
   } catch(e){
     if(e.message.includes('duplicate')) showAdminMsg('Cet identifiant existe déjà.','err');
     else showAdminMsg('Erreur : '+e.message,'err');
@@ -3656,6 +3802,9 @@ function doLogout(){
   if(outer) outer.classList.remove('sh-active');
   if(side)  side.classList.remove('visible');
   document.getElementById('superhote-bell').style.display='none';
+  const cnBell = document.getElementById('cn-bell');
+  if(cnBell) cnBell.style.display='none';
+  closeCompteNotifPanel();
   currentUser = null;
   _shFirstLoad = true;
   _shSeenIds.clear();
@@ -6096,8 +6245,29 @@ function pdfDel(key, bodyId, id, isConv){
         <span>Connexions</span>
         <span class="bell-badge" id="bell-badge"></span>
       </button>
+      <button class="cn-btn" id="cn-bell" onclick="openCompteNotifPanel()" title="Comptes créés par les administrateurs">
+        <i class="ti ti-user-plus" style="font-size:16px"></i>
+        <span>Comptes créés</span>
+        <span class="cn-badge" id="cn-badge"></span>
+      </button>
       <button onclick="openMonCompte()" style="background:#F7F9FC;border:1px solid #E4E9F0;color:#4A5568;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px"><i class="ti ti-settings" style="font-size:14px"></i> Mon compte</button>
       <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout"></i> Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY + PANEL COMPTES CRÉÉS (Superhôte) -->
+  <div id="compte-notif-overlay" onclick="closeCompteNotifPanel()"></div>
+  <div id="compte-notif-panel">
+    <div class="cn-hdr">
+      <div class="cn-title"><i class="ti ti-user-plus" style="font-size:20px"></i> Comptes créés par les admins</div>
+      <button class="cn-close-btn" onclick="closeCompteNotifPanel()"><i class="ti ti-x"></i> Fermer</button>
+    </div>
+    <div class="cn-list" id="cn-list">
+      <div style="text-align:center;padding:32px;color:#aaa"><i class="ti ti-user-off" style="font-size:36px;display:block;margin-bottom:10px"></i>Aucune création de compte</div>
+    </div>
+    <div class="cn-footer">
+      <div style="font-size:11px;color:var(--txt-muted)"><i class="ti ti-shield-lock" style="font-size:11px"></i> Accès Superhôte · stocké sur cet appareil</div>
+      <button class="cn-clear-btn" onclick="clearAllCNNotifs()"><i class="ti ti-trash" style="font-size:10px"></i> Tout effacer</button>
     </div>
   </div>
 
