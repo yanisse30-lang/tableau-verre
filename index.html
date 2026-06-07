@@ -1121,66 +1121,126 @@ select option{background:#fff;color:var(--txt-primary)}
 
   <!-- ══════════ MODAL MARGE MENSUELLE ══════════ -->
   <div id="marge-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(240,244,248,0.96);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;z-index:9995;overflow-y:auto;padding:24px">
-    <div style="background:#fff;border:1px solid var(--bdr-light);border-radius:24px;padding:32px;width:100%;max-width:740px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.09)">
+    <div style="background:#fff;border:1px solid var(--bdr-light);border-radius:24px;padding:32px;width:100%;max-width:800px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.09)">
 
       <!-- Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
         <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#065F46,#059669);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#065F46,#059669);display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <i class="ti ti-trending-up" style="color:#fff;font-size:22px"></i>
           </div>
           <div>
             <div style="font-size:18px;font-weight:800;color:var(--txt-primary)">Résultat marge mensuelle</div>
-            <div style="font-size:12px;color:var(--txt-muted)">Importez votre relevé mensuel — l'IA calcule vos marges automatiquement</div>
+            <div style="font-size:12px;color:var(--txt-muted)">Analyse IA · résultat en € et % · explication + conseils</div>
           </div>
         </div>
         <button onclick="closeMargeMensuelle()" style="background:var(--surf-secondary);border:1px solid var(--bdr-light);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--txt-secondary)"><i class="ti ti-x"></i> Fermer</button>
       </div>
 
-      <!-- Drop zone PDF -->
-      <div id="marge-drop-zone" onclick="document.getElementById('marge-file-input').click()"
-           ondragover="event.preventDefault();this.classList.add('drag-over')"
-           ondragleave="this.classList.remove('drag-over')"
-           ondrop="event.preventDefault();this.classList.remove('drag-over');margePdfLoaded(event.dataTransfer.files[0])"
-           style="border:2px dashed var(--bdr-medium);border-radius:16px;padding:36px 20px;text-align:center;cursor:pointer;transition:0.15s;background:var(--surf-secondary);margin-bottom:16px">
-        <i class="ti ti-file-analytics" style="font-size:44px;color:#059669;display:block;margin-bottom:12px"></i>
-        <p style="font-size:15px;font-weight:700;color:var(--txt-primary);margin:0 0 4px">Déposez votre relevé mensuel PDF</p>
-        <p style="font-size:13px;color:var(--txt-muted);margin:0">Prix d'achat, prix de vente, quantités — l'IA fait les calculs</p>
-      </div>
-      <input type="file" id="marge-file-input" accept=".pdf" style="display:none" onchange="margePdfLoaded(this.files[0])"/>
-
-      <!-- Pas de clé IA détectée -->
-      <div id="marge-no-key" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:12px 16px;font-size:13px;color:#92400E;margin-bottom:12px">
-        <i class="ti ti-alert-triangle"></i> Aucune clé API Claude configurée — ajoutez-en une dans <strong>Paramètres admin → Clé API</strong> pour activer l'analyse IA.
+      <!-- Alerte clé manquante -->
+      <div id="marge-no-key" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:12px 16px;font-size:13px;color:#92400E;margin-bottom:16px">
+        <i class="ti ti-alert-triangle"></i> Aucune clé API Claude — ajoutez-en une dans <strong>Paramètres admin → Clé API</strong>.
       </div>
 
-      <!-- Résultats -->
-      <div id="marge-result" style="display:none">
+      <!-- ZONE D'IMPORT (2 PDFs) -->
+      <div id="marge-upload-zone">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
 
-        <!-- Période & indicateur global -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-          <div id="marge-periode" style="font-size:13px;color:var(--txt-muted);font-weight:600"></div>
-          <button onclick="resetMargeMensuelle()" style="background:#FFF1F2;border:1px solid #FECDD3;color:#E11D48;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-trash"></i> Nouveau calcul</button>
+          <!-- PDF 1 : Relevé mensuel -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--txt-secondary);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+              <span style="width:20px;height:20px;border-radius:50%;background:#059669;color:#fff;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">1</span>
+              Relevé mensuel <span style="color:#E11D48">*</span>
+            </div>
+            <div id="marge-drop-1" onclick="document.getElementById('marge-file-1').click()"
+                 ondragover="event.preventDefault();this.style.borderColor='#059669';this.style.background='#F0FDF4'"
+                 ondragleave="this.style.borderColor='';this.style.background=''"
+                 ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';margeLoadPdf(event.dataTransfer.files[0],1)"
+                 style="border:2px dashed var(--bdr-medium);border-radius:14px;padding:24px 16px;text-align:center;cursor:pointer;transition:0.15s;background:var(--surf-secondary);min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+              <i class="ti ti-file-analytics" style="font-size:32px;color:#059669"></i>
+              <div style="font-size:13px;font-weight:700;color:var(--txt-primary)">Prix achat / Prix vente</div>
+              <div style="font-size:11px;color:var(--txt-muted)">Relevé avec quantités vendues</div>
+            </div>
+            <input type="file" id="marge-file-1" accept=".pdf" style="display:none" onchange="margeLoadPdf(this.files[0],1)"/>
+            <div id="marge-status-1" style="display:none;margin-top:8px;padding:8px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;font-size:12px;color:#059669;font-weight:600;display:flex;align-items:center;gap:6px"><i class="ti ti-check"></i> <span></span></div>
+          </div>
+
+          <!-- PDF 2 : Taux de remboursement -->
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--txt-secondary);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+              <span style="width:20px;height:20px;border-radius:50%;background:#185FA5;color:#fff;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center">2</span>
+              Taux de remboursement verre <span style="font-size:10px;color:var(--txt-muted)">(optionnel)</span>
+            </div>
+            <div id="marge-drop-2" onclick="document.getElementById('marge-file-2').click()"
+                 ondragover="event.preventDefault();this.style.borderColor='#185FA5';this.style.background='#EFF6FF'"
+                 ondragleave="this.style.borderColor='';this.style.background=''"
+                 ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';margeLoadPdf(event.dataTransfer.files[0],2)"
+                 style="border:2px dashed var(--bdr-medium);border-radius:14px;padding:24px 16px;text-align:center;cursor:pointer;transition:0.15s;background:var(--surf-secondary);min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+              <i class="ti ti-receipt-refund" style="font-size:32px;color:#185FA5"></i>
+              <div style="font-size:13px;font-weight:700;color:var(--txt-primary)">Remboursements mutuelles</div>
+              <div style="font-size:11px;color:var(--txt-muted)">Taux de prise en charge par réseau</div>
+            </div>
+            <input type="file" id="marge-file-2" accept=".pdf" style="display:none" onchange="margeLoadPdf(this.files[0],2)"/>
+            <div id="marge-status-2" style="display:none;margin-top:8px;padding:8px 12px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;font-size:12px;color:#185FA5;font-weight:600;display:flex;align-items:center;gap:6px"><i class="ti ti-check"></i> <span></span></div>
+          </div>
         </div>
 
-        <!-- KPI cards -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px" id="marge-kpi-grid"></div>
+        <!-- Bouton Analyser -->
+        <button id="marge-analyse-btn" onclick="margeLancer()" disabled
+          style="width:100%;padding:14px;background:#E5E7EB;color:#9CA3AF;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:not-allowed;font-family:inherit;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:8px">
+          <i class="ti ti-cpu"></i> Analyser avec l'IA
+        </button>
+        <div style="text-align:center;font-size:11px;color:var(--txt-muted);margin-top:8px">Le PDF n°1 est obligatoire pour lancer l'analyse</div>
+      </div>
 
-        <!-- Tableau détail -->
-        <div style="border:1px solid var(--bdr-light);border-radius:14px;overflow:hidden">
-          <div style="background:var(--surf-secondary);padding:12px 16px;font-size:12px;font-weight:700;color:var(--txt-muted);display:grid;grid-template-columns:1fr 80px 80px 80px 80px;gap:8px;text-transform:uppercase;letter-spacing:0.05em">
-            <span>Produit</span><span style="text-align:right">Qté</span><span style="text-align:right">P. Achat</span><span style="text-align:right">P. Vente</span><span style="text-align:right">Marge</span>
+      <!-- Loader -->
+      <div id="marge-loader" style="display:none;text-align:center;padding:40px 20px">
+        <i class="ti ti-cpu" style="font-size:48px;color:#059669;display:block;margin-bottom:16px;animation:spin 1.2s linear infinite"></i>
+        <div id="marge-loader-msg" style="font-size:15px;font-weight:700;color:#059669"></div>
+        <div style="font-size:12px;color:var(--txt-muted);margin-top:6px">Veuillez patienter...</div>
+      </div>
+
+      <!-- RÉSULTATS -->
+      <div id="marge-result" style="display:none">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div id="marge-periode" style="font-size:13px;color:var(--txt-muted);font-weight:600;display:flex;align-items:center;gap:6px"></div>
+          <button onclick="resetMargeMensuelle()" style="background:#FFF1F2;border:1px solid #FECDD3;color:#E11D48;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit"><i class="ti ti-refresh"></i> Nouveau calcul</button>
+        </div>
+
+        <!-- KPI principaux -->
+        <div id="marge-kpi-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px"></div>
+
+        <!-- Barre totale -->
+        <div id="marge-total-bar" style="margin-bottom:20px;padding:18px 22px;border-radius:14px;background:linear-gradient(135deg,#065F46,#059669);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px"></div>
+
+        <!-- Tableau détail produits -->
+        <div style="border:1px solid var(--bdr-light);border-radius:14px;overflow:hidden;margin-bottom:20px">
+          <div style="background:var(--surf-secondary);padding:11px 16px;font-size:11px;font-weight:700;color:var(--txt-muted);display:grid;grid-template-columns:1fr 60px 80px 80px 90px;gap:8px;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--bdr-light)">
+            <span>Produit</span><span style="text-align:right">Qté</span><span style="text-align:right">P.Achat</span><span style="text-align:right">P.Vente</span><span style="text-align:right">Marge</span>
           </div>
           <div id="marge-lignes"></div>
         </div>
 
-        <!-- Pied de page / total -->
-        <div id="marge-total-bar" style="margin-top:14px;padding:16px 20px;border-radius:14px;background:linear-gradient(135deg,#065F46,#059669);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"></div>
+        <!-- EXPLICATION : Pourquoi ce résultat -->
+        <div id="marge-explication-card" style="margin-bottom:16px;border-radius:14px;border:1.5px solid #BFDBFE;background:#EFF6FF;overflow:hidden;display:none">
+          <div style="padding:12px 16px;background:#185FA5;display:flex;align-items:center;gap:8px">
+            <i class="ti ti-bulb" style="color:#fff;font-size:18px"></i>
+            <span style="font-size:14px;font-weight:800;color:#fff">Pourquoi ce résultat ?</span>
+          </div>
+          <div id="marge-explication-txt" style="padding:16px;font-size:13px;color:#1E3A8A;line-height:1.8"></div>
+        </div>
 
-        <!-- Commentaire IA -->
-        <div id="marge-comment" style="margin-top:14px;padding:14px 16px;border-radius:12px;background:var(--surf-secondary);border:1px solid var(--bdr-light);font-size:13px;color:var(--txt-secondary);line-height:1.7;display:none"></div>
+        <!-- CONSEILS : Comment améliorer -->
+        <div id="marge-conseils-card" style="border-radius:14px;border:1.5px solid #BBF7D0;background:#F0FDF4;overflow:hidden;display:none">
+          <div style="padding:12px 16px;background:linear-gradient(135deg,#065F46,#059669);display:flex;align-items:center;gap:8px">
+            <i class="ti ti-target" style="color:#fff;font-size:18px"></i>
+            <span style="font-size:14px;font-weight:800;color:#fff">Comment améliorer votre marge ?</span>
+          </div>
+          <div id="marge-conseils-list" style="padding:16px;display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+
       </div>
-
     </div>
   </div>
 
@@ -4038,191 +4098,241 @@ function resetPdfDrop(){
 // ══════════════════════════════════════════════════════════════════
 // MARGE MENSUELLE
 // ══════════════════════════════════════════════════════════════════
+let _margeTextReleve = '';   // texte PDF 1 (relevé)
+let _margeTextTaux   = '';   // texte PDF 2 (remboursements)
+
 function openMargeMensuelle(){
-  const m = document.getElementById('marge-modal');
-  m.style.display = 'flex';
-  const hasKey = !!localStorage.getItem('maneo_claude_key');
-  document.getElementById('marge-no-key').style.display = hasKey ? 'none' : 'block';
+  document.getElementById('marge-modal').style.display = 'flex';
+  document.getElementById('marge-no-key').style.display = localStorage.getItem('maneo_claude_key') ? 'none' : 'block';
 }
 function closeMargeMensuelle(){
   document.getElementById('marge-modal').style.display = 'none';
 }
 function resetMargeMensuelle(){
-  document.getElementById('marge-result').style.display = 'none';
-  document.getElementById('marge-drop-zone').style.display = 'block';
-  document.getElementById('marge-file-input').value = '';
+  _margeTextReleve = ''; _margeTextTaux = '';
+  document.getElementById('marge-result').style.display  = 'none';
+  document.getElementById('marge-loader').style.display  = 'none';
+  document.getElementById('marge-upload-zone').style.display = 'block';
+  ['marge-file-1','marge-file-2'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['marge-status-1','marge-status-2'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
+  _margeResetDrop(1); _margeResetDrop(2); _margeUpdateBtn();
+}
+function _margeResetDrop(n){
+  const dz = document.getElementById('marge-drop-' + n);
+  if(!dz) return;
+  if(n===1){
+    dz.innerHTML = `<i class="ti ti-file-analytics" style="font-size:32px;color:#059669"></i><div style="font-size:13px;font-weight:700;color:var(--txt-primary)">Prix achat / Prix vente</div><div style="font-size:11px;color:var(--txt-muted)">Relevé avec quantités vendues</div>`;
+  } else {
+    dz.innerHTML = `<i class="ti ti-receipt-refund" style="font-size:32px;color:#185FA5"></i><div style="font-size:13px;font-weight:700;color:var(--txt-primary)">Remboursements mutuelles</div><div style="font-size:11px;color:var(--txt-muted)">Taux de prise en charge par réseau</div>`;
+  }
+}
+function _margeUpdateBtn(){
+  const btn = document.getElementById('marge-analyse-btn');
+  if(!btn) return;
+  const ready = !!_margeTextReleve;
+  btn.disabled = !ready;
+  btn.style.cssText = ready
+    ? 'width:100%;padding:14px;background:linear-gradient(135deg,#065F46,#059669);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:8px'
+    : 'width:100%;padding:14px;background:#E5E7EB;color:#9CA3AF;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:not-allowed;font-family:inherit;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:8px';
 }
 
-function margePdfLoaded(file){
+function margeLoadPdf(file, slot){
   if(!file || file.type !== 'application/pdf'){ showToast('Veuillez sélectionner un fichier PDF.'); return; }
-  const key = localStorage.getItem('maneo_claude_key');
-  if(!key){
-    document.getElementById('marge-no-key').style.display = 'block';
-    showToast('Clé API Claude requise — configurez-la dans les paramètres admin.');
-    return;
-  }
-  // Affichage loader
-  const dz = document.getElementById('marge-drop-zone');
-  dz.innerHTML = `<i class="ti ti-loader-2" style="font-size:40px;color:#059669;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#059669;font-weight:700">Lecture du PDF en cours...</p><p style="font-size:12px;color:#aaa;margin-top:6px">${file.name}</p>`;
-
+  const dz = document.getElementById('marge-drop-' + slot);
+  dz.innerHTML = `<i class="ti ti-loader-2" style="font-size:28px;color:${slot===1?'#059669':'#185FA5'};animation:spin 1s linear infinite"></i><div style="font-size:12px;color:var(--txt-muted);margin-top:4px">Lecture...</div>`;
   const reader = new FileReader();
   reader.onload = async (evt) => {
     try {
-      // Extraction texte via PDF.js (réutilise l'infrastructure existante)
       const buf = evt.target.result;
       if(typeof pdfjsLib === 'undefined'){
-        const sc = document.createElement('script');
-        sc.src = _PDFJS + '/pdf.min.js';
-        sc.onload = () => _margeExtractAndAnalyze(buf, file.name, key);
-        document.head.appendChild(sc);
-      } else {
-        await _margeExtractAndAnalyze(buf, file.name, key);
-      }
-    } catch(e){ _margeError('Erreur lecture PDF : ' + e.message); }
+        if(!document.getElementById('_pdfjs_script')){
+          const sc = document.createElement('script');
+          sc.id = '_pdfjs_script'; sc.src = _PDFJS + '/pdf.min.js';
+          sc.onload = () => _margeReadPdf(buf, file.name, slot);
+          document.head.appendChild(sc);
+        } else { const wait=setInterval(()=>{ if(typeof pdfjsLib!=='undefined'){ clearInterval(wait); _margeReadPdf(buf,file.name,slot); }},200); }
+      } else { await _margeReadPdf(buf, file.name, slot); }
+    } catch(e){ dz.innerHTML=`<i class="ti ti-alert-circle" style="color:#E11D48;font-size:28px"></i><div style="font-size:12px;color:#E11D48">Erreur</div>`; }
   };
   reader.readAsArrayBuffer(file);
 }
 
-async function _margeExtractAndAnalyze(buf, fname, key){
-  const dz = document.getElementById('marge-drop-zone');
-  try {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS + '/pdf.worker.min.js';
-    const pdf = await pdfjsLib.getDocument({data: buf}).promise;
-    let fullText = '';
-    dz.innerHTML = `<i class="ti ti-loader-2" style="font-size:40px;color:#059669;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#059669;font-weight:700">Extraction du texte (0/${pdf.numPages} pages)...</p>`;
-    for(let i = 1; i <= Math.min(pdf.numPages, 40); i++){
-      const page = await pdf.getPage(i);
-      const tc = await page.getTextContent();
-      fullText += tc.items.map(it => it.str).join(' ') + '\n';
-      dz.innerHTML = `<i class="ti ti-loader-2" style="font-size:40px;color:#059669;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#059669;font-weight:700">Extraction du texte (${i}/${pdf.numPages} pages)...</p>`;
-    }
-    if(!fullText.trim()){ _margeError('Le PDF semble être scanné (image). Utilisez un PDF avec texte sélectionnable.'); return; }
-    dz.innerHTML = `<i class="ti ti-cpu" style="font-size:40px;color:#7C3AED;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#7C3AED;font-weight:700">Claude IA calcule les marges...</p><p style="font-size:12px;color:#aaa;margin-top:6px">Analyse prix d'achat / prix de vente</p>`;
-    await _margeCallClaude(fullText, fname, key);
-  } catch(e){ _margeError('Erreur : ' + e.message); }
+async function _margeReadPdf(buf, fname, slot){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS + '/pdf.worker.min.js';
+  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+  let txt = '';
+  for(let i=1; i<=Math.min(pdf.numPages,40); i++){
+    const page = await pdf.getPage(i);
+    const tc   = await page.getTextContent();
+    txt += tc.items.map(it=>it.str).join(' ') + '\n';
+  }
+  if(slot===1) _margeTextReleve = txt;
+  else          _margeTextTaux   = txt;
+
+  // Afficher le statut
+  const st = document.getElementById('marge-status-' + slot);
+  const dz = document.getElementById('marge-drop-' + slot);
+  if(st){ st.style.display='flex'; st.querySelector('span').textContent = fname + ' — ' + pdf.numPages + ' page(s)'; }
+  if(dz){ dz.innerHTML = `<i class="ti ti-circle-check" style="font-size:28px;color:${slot===1?'#059669':'#185FA5'}"></i><div style="font-size:12px;font-weight:700;color:var(--txt-primary)">${fname}</div><div style="font-size:11px;color:var(--txt-muted)">${pdf.numPages} page(s) · OK</div>`; }
+  _margeUpdateBtn();
 }
 
-async function _margeCallClaude(pdfText, fname, key){
-  const prompt = `Tu es un expert-comptable spécialisé en optique opticien. Analyse ce relevé mensuel PDF.
+async function margeLancer(){
+  if(!_margeTextReleve){ showToast('Déposez d\'abord le PDF relevé mensuel.'); return; }
+  const key = localStorage.getItem('maneo_claude_key');
+  if(!key){ document.getElementById('marge-no-key').style.display='block'; return; }
+  document.getElementById('marge-upload-zone').style.display = 'none';
+  document.getElementById('marge-loader').style.display = 'block';
+  document.getElementById('marge-result').style.display  = 'none';
+  await _margeCallClaude(key);
+}
 
-TEXTE DU DOCUMENT (${pdfText.length} caractères):
-${pdfText.substring(0, 20000)}
+function _margeSetLoader(msg){ const el=document.getElementById('marge-loader-msg'); if(el) el.textContent=msg; }
 
-MISSION : Identifie tous les produits/verres avec leurs prix d'achat et prix de vente, puis calcule la marge brute.
+async function _margeCallClaude(key){
+  _margeSetLoader('Claude IA analyse vos données...');
+  const hasTaux = !!_margeTextTaux;
+  const prompt = `Tu es un expert-comptable spécialisé en optique opticien. Analyse les documents suivants.
 
-Réponds UNIQUEMENT avec ce JSON valide, rien d'autre :
+═══ DOCUMENT 1 — RELEVÉ MENSUEL (${_margeTextReleve.length} car.) ═══
+${_margeTextReleve.substring(0, 14000)}
+
+${hasTaux ? `═══ DOCUMENT 2 — TAUX DE REMBOURSEMENT (${_margeTextTaux.length} car.) ═══\n${_margeTextTaux.substring(0, 6000)}` : '(Pas de document de remboursement fourni)'}
+
+═══ MISSION ═══
+1. Identifie tous les produits/verres avec prix d'achat, prix de vente et quantités.
+2. Calcule la marge brute par ligne et le total.
+3. ${hasTaux ? 'Intègre les taux de remboursement mutuelle pour calculer la marge nette réelle.' : 'Pas de données de remboursement : calcule uniquement la marge brute.'}
+4. Explique en détail POURQUOI ce niveau de marge (quels produits tirent vers le haut ou le bas, structure des coûts, etc.)
+5. Donne des conseils concrets et actionnables pour améliorer la marge.
+
+Réponds UNIQUEMENT avec ce JSON valide :
 {
-  "periode": "période ou mois identifié dans le document (ex: Juin 2025), ou 'Non précisé'",
+  "periode": "mois/année détecté ou 'Non précisé'",
   "lignes": [
-    {
-      "produit": "nom du produit ou verre",
-      "quantite": 1,
-      "prix_achat": 0.00,
-      "prix_vente": 0.00,
-      "marge_euro": 0.00,
-      "marge_pct": 0.0
-    }
+    { "produit": "nom", "quantite": 1, "prix_achat": 0.00, "prix_vente": 0.00, "marge_euro": 0.00, "marge_pct": 0.0, "remboursement": 0.00 }
   ],
   "totaux": {
     "ca_total": 0.00,
     "achats_total": 0.00,
-    "marge_totale_euro": 0.00,
-    "marge_totale_pct": 0.0
+    "remboursements_total": 0.00,
+    "marge_brute_euro": 0.00,
+    "marge_brute_pct": 0.0,
+    "marge_nette_euro": 0.00,
+    "marge_nette_pct": 0.0
   },
-  "commentaire": "Analyse courte en 2 phrases : niveau de marge et recommandation."
+  "explication": "Explication claire en 4-5 phrases : pourquoi ce taux de marge, quels produits influencent le plus, facteurs positifs et négatifs.",
+  "ameliorations": [
+    "Conseil 1 concret et chiffré si possible",
+    "Conseil 2",
+    "Conseil 3",
+    "Conseil 4"
+  ]
 }
-
-RÈGLES :
-- marge_euro = (prix_vente - prix_achat) * quantite
-- marge_pct = (marge_euro / ca_total_ligne) * 100, arrondi à 1 décimale
-- Si quantité non précisée, mettre 1
-- Si un prix manque pour une ligne, ne pas l'inclure
-- Si aucune donnée trouvée : lignes:[], totaux tous à 0, commentaire explicatif`;
+RÈGLES : marge_euro=(prix_vente-prix_achat)*quantite, marge_pct=marge_euro/ca_ligne*100. Si prix manquant pour une ligne, ne pas l'inclure. Si rien trouvé : lignes vides, explication explicative.`;
 
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify({ model:'claude-haiku-4-5', max_tokens:4096, messages:[{role:'user', content:prompt}] })
+      body: JSON.stringify({ model:'claude-haiku-4-5', max_tokens:6000, messages:[{role:'user',content:prompt}] })
     });
-    if(!resp.ok){ const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || `HTTP ${resp.status}`); }
+    if(!resp.ok){ const e=await resp.json().catch(()=>({})); throw new Error(e.error?.message||`HTTP ${resp.status}`); }
     const data = await resp.json();
-    const rawJson = data.content[0].text.trim();
-    const match = rawJson.match(/\{[\s\S]*\}/);
+    const match = data.content[0].text.trim().match(/\{[\s\S]*\}/);
     if(!match) throw new Error('Réponse IA invalide');
     _margeAfficherResultats(JSON.parse(match[0]));
   } catch(e){
-    _margeError('Erreur IA : ' + e.message);
+    document.getElementById('marge-loader').style.display  = 'none';
+    document.getElementById('marge-upload-zone').style.display = 'block';
+    showToast('Erreur IA : ' + e.message);
   }
 }
 
 function _margeAfficherResultats(r){
-  const dz = document.getElementById('marge-drop-zone');
-  dz.style.display = 'none';
-  const res = document.getElementById('marge-result');
-  res.style.display = 'block';
+  document.getElementById('marge-loader').style.display  = 'none';
+  document.getElementById('marge-result').style.display  = 'block';
+
+  const t   = r.totaux || {};
+  const pct = parseFloat(t.marge_nette_pct || t.marge_brute_pct) || 0;
+  const pctBrut = parseFloat(t.marge_brute_pct) || 0;
+  const color = pct>=50?'#059669':pct>=30?'#D97706':'#DC2626';
+  const label = pct>=50?'Excellente':pct>=30?'Correcte':'À améliorer';
+  const hasTaux = !!_margeTextTaux;
 
   // Période
-  document.getElementById('marge-periode').textContent = r.periode ? '📅 ' + r.periode : '';
+  document.getElementById('marge-periode').innerHTML = r.periode ? `<i class="ti ti-calendar"></i> ${r.periode}` : '';
 
-  // KPI
-  const t = r.totaux || {};
-  const pct = parseFloat(t.marge_totale_pct) || 0;
-  const color = pct >= 50 ? '#059669' : pct >= 30 ? '#D97706' : '#DC2626';
-  const label = pct >= 50 ? 'Excellente' : pct >= 30 ? 'Correcte' : 'Insuffisante';
+  // KPI grid
+  const hasNette = hasTaux && (t.marge_nette_euro != null);
   document.getElementById('marge-kpi-grid').innerHTML = `
     <div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:14px;padding:16px">
-      <div style="font-size:11px;color:#059669;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px"><i class="ti ti-cash"></i> Chiffre d'affaires</div>
-      <div style="font-size:22px;font-weight:900;color:#065F46">${(t.ca_total||0).toLocaleString('fr-FR',{minimumFractionDigits:2})} €</div>
+      <div style="font-size:11px;color:#059669;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px"><i class="ti ti-cash"></i> Chiffre d'affaires</div>
+      <div style="font-size:24px;font-weight:900;color:#065F46">${(t.ca_total||0).toLocaleString('fr-FR',{minimumFractionDigits:2})} €</div>
     </div>
     <div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:14px;padding:16px">
-      <div style="font-size:11px;color:#185FA5;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px"><i class="ti ti-shopping-cart"></i> Total achats</div>
-      <div style="font-size:22px;font-weight:900;color:#1E3A8A">${(t.achats_total||0).toLocaleString('fr-FR',{minimumFractionDigits:2})} €</div>
+      <div style="font-size:11px;color:#185FA5;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px"><i class="ti ti-shopping-cart"></i> Total achats</div>
+      <div style="font-size:24px;font-weight:900;color:#1E3A8A">${(t.achats_total||0).toLocaleString('fr-FR',{minimumFractionDigits:2})} €</div>
     </div>
-    <div style="background:${pct>=50?'#F0FDF4':pct>=30?'#FFFBEB':'#FFF1F2'};border:1.5px solid ${pct>=50?'#BBF7D0':pct>=30?'#FDE68A':'#FECDD3'};border-radius:14px;padding:16px">
-      <div style="font-size:11px;color:${color};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px"><i class="ti ti-trending-up"></i> Marge brute</div>
-      <div style="font-size:22px;font-weight:900;color:${color}">${(t.marge_totale_euro||0).toLocaleString('fr-FR',{minimumFractionDigits:2})} €</div>
-      <div style="font-size:14px;font-weight:700;color:${color};margin-top:2px">${pct.toFixed(1)} % — ${label}</div>
-    </div>`;
+    <div style="background:${pctBrut>=50?'#F0FDF4':pctBrut>=30?'#FFFBEB':'#FFF1F2'};border:1.5px solid ${pctBrut>=50?'#BBF7D0':pctBrut>=30?'#FDE68A':'#FECDD3'};border-radius:14px;padding:16px">
+      <div style="font-size:11px;color:${pctBrut>=50?'#059669':pctBrut>=30?'#D97706':'#DC2626'};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px"><i class="ti ti-trending-up"></i> Marge brute</div>
+      <div style="font-size:24px;font-weight:900;color:${pctBrut>=50?'#065F46':pctBrut>=30?'#92400E':'#991B1B'}">${(t.marge_brute_euro||0).toLocaleString('fr-FR',{minimumFractionDigits:2})} €</div>
+      <div style="font-size:13px;font-weight:700;color:${pctBrut>=50?'#059669':pctBrut>=30?'#D97706':'#DC2626'};margin-top:2px">${pctBrut.toFixed(1)} %</div>
+    </div>
+    ${hasNette ? `<div style="background:${pct>=50?'#F0FDF4':pct>=30?'#FFFBEB':'#FFF1F2'};border:1.5px solid ${pct>=50?'#BBF7D0':pct>=30?'#FDE68A':'#FECDD3'};border-radius:14px;padding:16px;grid-column:1/-1">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:11px;color:${color};font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px"><i class="ti ti-coin"></i> Marge nette (après remboursements mutuelles)</div>
+          <div style="font-size:28px;font-weight:900;color:${color}">${(t.marge_nette_euro||0).toLocaleString('fr-FR',{minimumFractionDigits:2})} €</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:40px;font-weight:900;color:${color};line-height:1">${pct.toFixed(1)} %</div>
+          <div style="font-size:13px;font-weight:700;color:${color}">${label}</div>
+        </div>
+      </div>
+    </div>` : ''}`;
 
-  // Lignes détail
-  const lignes = r.lignes || [];
-  const lignesHTML = lignes.length ? lignes.map(l => {
-    const mp = parseFloat(l.marge_pct)||0;
-    const mc = mp >= 50 ? '#059669' : mp >= 30 ? '#D97706' : '#DC2626';
-    return `<div style="display:grid;grid-template-columns:1fr 80px 80px 80px 80px;gap:8px;padding:11px 16px;border-top:1px solid var(--bdr-light);font-size:13px;align-items:center">
-      <span style="font-weight:600;color:var(--txt-primary)">${l.produit||'—'}</span>
-      <span style="text-align:right;color:var(--txt-muted)">${l.quantite||1}</span>
-      <span style="text-align:right;color:var(--txt-secondary)">${(parseFloat(l.prix_achat)||0).toFixed(2)} €</span>
-      <span style="text-align:right;color:var(--txt-secondary)">${(parseFloat(l.prix_vente)||0).toFixed(2)} €</span>
-      <span style="text-align:right;font-weight:700;color:${mc}">${(parseFloat(l.marge_euro)||0).toFixed(2)} €<br><span style="font-size:11px">${mp.toFixed(1)} %</span></span>
-    </div>`;
-  }).join('')
-  : `<div style="padding:20px;text-align:center;color:var(--txt-muted);font-size:13px"><i class="ti ti-mood-empty" style="font-size:24px;display:block;margin-bottom:8px"></i>Aucune ligne détectée dans ce document.</div>`;
-  document.getElementById('marge-lignes').innerHTML = lignesHTML;
-
-  // Total bar
+  // Barre totale
   document.getElementById('marge-total-bar').innerHTML = `
     <div style="color:#fff">
-      <div style="font-size:11px;opacity:0.8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Marge totale</div>
-      <div style="font-size:24px;font-weight:900">${(t.marge_totale_euro||0).toLocaleString('fr-FR',{minimumFractionDigits:2})} €</div>
+      <div style="font-size:11px;opacity:0.75;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Résultat final — Marge ${hasTaux?'nette':'brute'}</div>
+      <div style="font-size:26px;font-weight:900">${((hasNette?t.marge_nette_euro:t.marge_brute_euro)||0).toLocaleString('fr-FR',{minimumFractionDigits:2})} €</div>
     </div>
     <div style="text-align:right;color:#fff">
-      <div style="font-size:11px;opacity:0.8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Taux de marge</div>
-      <div style="font-size:32px;font-weight:900;line-height:1">${pct.toFixed(1)} %</div>
+      <div style="font-size:11px;opacity:0.75;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Taux de marge ${hasTaux?'nette':'brute'}</div>
+      <div style="font-size:38px;font-weight:900;line-height:1">${pct.toFixed(1)} %</div>
+      <div style="font-size:13px;font-weight:700;opacity:0.9;margin-top:2px">${label}</div>
     </div>`;
 
-  // Commentaire IA
-  if(r.commentaire){
-    const cmt = document.getElementById('marge-comment');
-    cmt.innerHTML = `<i class="ti ti-robot" style="color:#7C3AED;margin-right:6px"></i><strong style="color:#7C3AED">Analyse IA :</strong> ${r.commentaire}`;
-    cmt.style.display = 'block';
-  }
-}
+  // Lignes produits
+  const lignes = r.lignes || [];
+  document.getElementById('marge-lignes').innerHTML = lignes.length ? lignes.map(l => {
+    const mp=parseFloat(l.marge_pct)||0, mc=mp>=50?'#059669':mp>=30?'#D97706':'#DC2626';
+    return `<div style="display:grid;grid-template-columns:1fr 60px 80px 80px 90px;gap:8px;padding:10px 16px;border-top:1px solid var(--bdr-light);font-size:12px;align-items:center">
+      <span style="font-weight:600;color:var(--txt-primary)">${l.produit||'—'}</span>
+      <span style="text-align:right;color:var(--txt-muted)">${l.quantite||1}</span>
+      <span style="text-align:right;color:#185FA5">${(parseFloat(l.prix_achat)||0).toFixed(2)} €</span>
+      <span style="text-align:right;color:#059669">${(parseFloat(l.prix_vente)||0).toFixed(2)} €</span>
+      <span style="text-align:right;font-weight:700;color:${mc}">${(parseFloat(l.marge_euro)||0).toFixed(2)} €<br><span style="font-size:10px">${mp.toFixed(1)} %</span></span>
+    </div>`;
+  }).join('') : `<div style="padding:20px;text-align:center;color:var(--txt-muted);font-size:13px"><i class="ti ti-mood-empty" style="font-size:24px;display:block;margin-bottom:8px"></i>Aucune ligne détectée.</div>`;
 
-function _margeError(msg){
-  const dz = document.getElementById('marge-drop-zone');
-  dz.innerHTML = `<i class="ti ti-alert-circle" style="font-size:40px;color:#E11D48;display:block;margin-bottom:12px"></i><p style="color:#E11D48;font-weight:700">${msg}</p><p style="font-size:12px;color:#aaa;margin-top:8px;cursor:pointer" onclick="resetMargeMensuelle()">Réessayer</p>`;
+  // Explication
+  if(r.explication){
+    document.getElementById('marge-explication-card').style.display = 'block';
+    document.getElementById('marge-explication-txt').innerHTML = r.explication.replace(/\n/g,'<br>');
+  }
+
+  // Conseils amélioration
+  if(r.ameliorations && r.ameliorations.length){
+    document.getElementById('marge-conseils-card').style.display = 'block';
+    document.getElementById('marge-conseils-list').innerHTML = r.ameliorations.map((c,i) =>
+      `<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:#fff;border-radius:10px;border:1px solid #BBF7D0">
+        <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#065F46,#059669);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+        <div style="font-size:13px;color:#065F46;line-height:1.6">${c}</div>
+      </div>`
+    ).join('');
+  }
 }
 
 function applyPdfPrix(){
