@@ -2002,20 +2002,21 @@ select option{background:#fff;color:var(--txt-primary)}
       <div class="eye-grid">
         <div class="eye-block eye-od">
           <div class="eye-title"><i class="ti ti-circle-dotted"></i> Œil droit (OD)</div>
-          <div class="field-row"><label>Sphère</label><select id="od-sph"></select></div>
-          <div class="field-row"><label>Cylindre</label><select id="od-cyl"></select></div>
+          <div class="field-row"><label>Sphère</label><select id="od-sph" onchange="_updateS3Hint()"></select></div>
+          <div class="field-row"><label>Cylindre</label><select id="od-cyl" onchange="_updateS3Hint()"></select></div>
           <div class="field-row"><label>Axe (°)</label><input type="number" id="od-axe" min="0" max="180" placeholder="0 – 180"/></div>
           <div class="field-row" id="od-add-row" style="display:none"><label>Addition</label><select id="od-add"></select></div>
         </div>
         <div class="eye-block eye-og">
           <div class="eye-title"><i class="ti ti-circle-dotted"></i> Œil gauche (OG)</div>
-          <div class="field-row"><label>Sphère</label><select id="og-sph"></select></div>
-          <div class="field-row"><label>Cylindre</label><select id="og-cyl"></select></div>
+          <div class="field-row"><label>Sphère</label><select id="og-sph" onchange="_updateS3Hint()"></select></div>
+          <div class="field-row"><label>Cylindre</label><select id="og-cyl" onchange="_updateS3Hint()"></select></div>
           <div class="field-row"><label>Axe (°)</label><input type="number" id="og-axe" min="0" max="180" placeholder="0 – 180"/></div>
           <div class="field-row" id="og-add-row" style="display:none"><label>Addition</label><select id="og-add"></select></div>
         </div>
       </div>
-      <button class="btn-primary" onclick="goMontureFromS3()"><i class="ti ti-arrow-right"></i> Continuer</button>
+      <div id="s3-ai-hint"></div>
+      <button class="btn-primary" onclick="goMontureFromS3()" style="margin-top:14px"><i class="ti ti-arrow-right"></i> Continuer</button>
     </div>
   </div>
 
@@ -2795,15 +2796,77 @@ function _buildRemiseMontureHTML(mut){
 
 function goMontureFromS3(){
   if(!state.vision){ showToast('Veuillez choisir le type de vision'); go(2); return; }
-  if(!selectedMonture) selectedMonture = 'cercle';
-  if(window._priseType === 'sante') selectedMonture = 'cercle';
-  selectedTraits = new Set();
-  try {
-    showVerres();
-  } catch(e){
-    console.error('[goMontureFromS3] Erreur showVerres:', e);
-    showToast('Erreur lors du chargement des verres : ' + e.message);
-  }
+  _backFrom3 = 3;
+  goMonture();
+}
+
+// ─── HINT IA TEMPS RÉEL — écran correction (S3) ──────────────
+function _updateS3Hint(){
+  const el = document.getElementById('s3-ai-hint');
+  if(!el) return;
+  const odSph = parseFloat(document.getElementById('od-sph')?.value)||0;
+  const ogSph = parseFloat(document.getElementById('og-sph')?.value)||0;
+  const odCyl = parseFloat(document.getElementById('od-cyl')?.value)||0;
+  const ogCyl = parseFloat(document.getElementById('og-cyl')?.value)||0;
+
+  const eqOD = Math.abs(odSph) + Math.abs(odCyl)/2;
+  const eqOG = Math.abs(ogSph) + Math.abs(ogCyl)/2;
+  const eqMax = Math.max(eqOD, eqOG);
+
+  if(eqMax === 0){ el.innerHTML=''; return; }
+
+  const indiceRec = getIndiceRec(eqMax);
+  const needsAminci = indiceRec !== '1.50';
+  const indiceColors = {'1.50':'#50d090','1.60':'#60aaee','1.67':'#f0c040','1.74':'#ff8060'};
+  const indiceColor = indiceColors[indiceRec]||'#fff';
+
+  const convParsed = state.mutuelle ? _getConvParsed(state.mutuelle.id) : null;
+  const seuil = convParsed?.seuil_complexe || 6.0;
+  const visionId = state.vision?.id;
+  let verreType = '—';
+  if(visionId === 'progressif') verreType = 'Progressif';
+  else if(visionId) verreType = eqMax > seuil ? 'Unifocal Complexe' : 'Unifocal Simple';
+
+  const aminciMsg = needsAminci
+    ? `<div style="margin-top:8px;background:#1a1200;border:1px solid #5a4000;border-radius:8px;padding:7px 12px;font-size:12px;color:#f0b030;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-layers" style="font-size:14px;flex-shrink:0"></i>
+        <span><strong>Amincissement indice ${indiceRec} requis</strong> — verre plus fin et plus léger, recommandé pour cette correction</span>
+       </div>`
+    : `<div style="margin-top:8px;background:#0a2e1a;border:1px solid #1a5a30;border-radius:8px;padding:7px 12px;font-size:12px;color:#50d090;display:flex;align-items:center;gap:8px">
+        <i class="ti ti-check" style="font-size:14px;flex-shrink:0"></i>
+        <span>Indice standard 1.50 suffisant pour cette correction</span>
+       </div>`;
+
+  const convRow = convParsed
+    ? `<div style="grid-column:1/-1;margin-top:4px;font-size:11px;color:#a78bfa;display:flex;align-items:center;gap:6px"><i class="ti ti-cpu" style="font-size:11px"></i> Tarif ${state.mutuelle?.label||'réseau'} actif — type : <strong style="color:#c4b5fd">${verreType}</strong></div>`
+    : '';
+
+  el.innerHTML = `
+    <div style="background:#0d1b2a;border:1.5px solid #1e3a5e;border-radius:12px;padding:13px 16px;margin-top:12px">
+      <div style="font-size:11px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-cpu" style="font-size:12px"></i> Analyse de la correction
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;${convParsed?'grid-template-columns:1fr 1fr 1fr 1fr':''}">
+        <div style="background:#0a1622;border:1px solid #1a3040;border-radius:8px;padding:8px;text-align:center">
+          <div style="font-size:9px;color:#6080a0;font-weight:700;text-transform:uppercase;margin-bottom:3px">Éq. sph. OD</div>
+          <div style="font-size:15px;font-weight:800;color:#60aaee">${eqOD.toFixed(2)} D</div>
+        </div>
+        <div style="background:#0a1622;border:1px solid #1a3040;border-radius:8px;padding:8px;text-align:center">
+          <div style="font-size:9px;color:#6080a0;font-weight:700;text-transform:uppercase;margin-bottom:3px">Éq. sph. OG</div>
+          <div style="font-size:15px;font-weight:800;color:#60aaee">${eqOG.toFixed(2)} D</div>
+        </div>
+        <div style="background:#0a1622;border:1px solid #1a3040;border-radius:8px;padding:8px;text-align:center">
+          <div style="font-size:9px;color:#6080a0;font-weight:700;text-transform:uppercase;margin-bottom:3px">Indice recommandé</div>
+          <div style="font-size:16px;font-weight:800;color:${indiceColor}">${indiceRec}${needsAminci?' ★':''}</div>
+        </div>
+        ${convParsed?`<div style="background:#1a0d2e;border:1px solid #3a1a60;border-radius:8px;padding:8px;text-align:center">
+          <div style="font-size:9px;color:#8060c0;font-weight:700;text-transform:uppercase;margin-bottom:3px">Type verre</div>
+          <div style="font-size:12px;font-weight:800;color:#c080ff">${verreType}</div>
+        </div>`:''}
+        ${convRow}
+      </div>
+      ${aminciMsg}
+    </div>`;
 }
 
 function genSph(){let o='';for(let v=-20;v<=20;v+=0.25) o+=`<option value="${v}" ${v===0?'selected':''}>${v>0?'+':''}${v.toFixed(2)}</option>`;return o}
