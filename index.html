@@ -944,6 +944,33 @@ select option{background:#fff;color:var(--txt-primary)}
 .ia-apply-btn:hover{background:#15803D}
 .ia-apply-all{background:linear-gradient(135deg,#16A34A,#15803D);border:none;border-radius:9px;padding:10px 16px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;transition:.15s;margin-top:12px;width:100%;justify-content:center}
 .ia-apply-all:hover{opacity:.87}
+/* ─── ACCORDS FOURNISSEURS ─── */
+.accord-verrier-card{background:var(--surf-secondary);border:1.5px solid var(--bdr-light);border-radius:14px;padding:16px;margin-bottom:14px}
+.accord-verrier-hdr{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.accord-verrier-name{font-size:15px;font-weight:800;color:var(--txt-primary)}
+.accord-row{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid var(--bdr-light)}
+.accord-row:last-child{border-bottom:none;padding-bottom:0}
+.accord-row-hdr{display:flex;align-items:center;gap:8px}
+.accord-tag-chip{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.accord-tag-ar{background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE}
+.accord-tag-lb{background:#F5F3FF;color:#6D28D9;border:1px solid #DDD6FE}
+.accord-tag-tr{background:#FFF7ED;color:#C2410C;border:1px solid #FED7AA}
+.accord-fields{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.accord-field-lbl{font-size:11px;color:var(--txt-muted);font-weight:600;white-space:nowrap}
+.accord-field-input{border:1.5px solid var(--bdr-light);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:700;width:90px;background:var(--surf-base);color:var(--txt-primary);font-family:inherit;transition:.15s}
+.accord-field-input:focus{outline:none;border-color:#16A34A;box-shadow:0 0 0 2px #DCFCE7}
+.accord-check-label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--txt-secondary);cursor:pointer;font-weight:600;padding:4px 8px;border-radius:8px;border:1.5px solid var(--bdr-light);background:var(--surf-base)}
+.accord-note-input{border:1.5px solid var(--bdr-light);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--txt-muted);flex:1;background:var(--surf-base);font-family:inherit;min-width:140px;transition:.15s}
+.accord-note-input:focus{outline:none;border-color:#94A3B8}
+.accord-badge-saving{display:inline-flex;align-items:center;gap:4px;background:#F0FDF4;color:#16A34A;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;border:1px solid #BBF7D0}
+.accord-add-card{display:flex;flex-direction:column;gap:10px;padding:14px;background:#F8FAFC;border:1.5px dashed var(--bdr-light);border-radius:12px;margin-bottom:14px}
+.accord-add-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.accord-add-select{border:1.5px solid var(--bdr-light);border-radius:8px;padding:8px 10px;font-size:13px;font-weight:600;background:var(--surf-base);color:var(--txt-primary);font-family:inherit;flex:1}
+.accord-add-btn{background:#7C3AED;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.accord-pdf-drop{border:2px dashed #A78BFA;border-radius:12px;padding:22px;text-align:center;cursor:pointer;background:#F5F3FF;color:#6D28D9;font-weight:600;font-size:13px;transition:0.15s;margin-bottom:14px}
+.accord-pdf-drop:hover,.accord-pdf-drop.drag{background:#EDE9FE;border-color:#7C3AED}
+.accord-pdf-drop i{font-size:30px;display:block;margin-bottom:8px;opacity:.8}
+.accord-marge-badge{display:inline-flex;align-items:center;gap:3px;background:#F0FDF4;color:#16A34A;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;border:1px solid #BBF7D0;margin-left:4px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -1128,6 +1155,7 @@ select option{background:#fff;color:var(--txt-primary)}
         <button class="vadmin-tab active" onclick="switchVTab('prix')"><i class="ti ti-coin"></i> Modifier les prix</button>
         <button class="vadmin-tab" onclick="switchVTab('pdf')"><i class="ti ti-file-text"></i> Importer PDF catalogue</button>
         <button class="vadmin-tab" onclick="switchVTab('ia')"><i class="ti ti-cpu"></i> Analyse IA</button>
+        <button class="vadmin-tab" onclick="switchVTab('accords')"><i class="ti ti-handshake"></i> Accords</button>
       </div>
       <!-- PANEL PRIX -->
       <div class="vadmin-panel active" id="vtab-prix">
@@ -1170,6 +1198,41 @@ select option{background:#fff;color:var(--txt-primary)}
         </div>
         <input type="file" id="ia-pdf-input" accept=".pdf" style="display:none" onchange="handleIaPdfFile(this.files[0])"/>
         <div id="ia-results" style="display:none"></div>
+      </div>
+      <!-- PANEL ACCORDS FOURNISSEURS -->
+      <div class="vadmin-panel" id="vtab-accords">
+        <div style="font-size:13px;color:#64748B;margin-bottom:14px;line-height:1.6">
+          Enregistrez les <strong style="color:#1A202C">accords négociés avec vos fournisseurs</strong> — réductions sur traitements, traitements offerts. Les marges se mettent à jour automatiquement dans les calculs.
+        </div>
+        <!-- Zone PDF IA -->
+        <div class="accord-pdf-drop" id="accord-pdf-drop"
+             onclick="document.getElementById('accord-pdf-input').click()"
+             ondragover="event.preventDefault();this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="handleAccordPdfDrop(event)">
+          <i class="ti ti-cpu" style="color:#7C3AED"></i>
+          <p><strong>Déposer un accord commercial PDF</strong></p>
+          <p style="font-size:12px;margin-top:4px;opacity:.7">L'IA extrait automatiquement les prix négociés par verrier</p>
+        </div>
+        <input type="file" id="accord-pdf-input" accept=".pdf" style="display:none" onchange="handleAccordPdfFile(this.files[0])"/>
+        <div id="accord-ia-status" style="margin-bottom:12px"></div>
+        <!-- Ajout manuel -->
+        <div class="accord-add-card">
+          <div style="font-size:11px;font-weight:800;color:var(--txt-muted);letter-spacing:.05em;text-transform:uppercase"><i class="ti ti-pencil"></i> Saisie manuelle</div>
+          <div class="accord-add-row">
+            <select class="accord-add-select" id="accord-new-marque">
+              <option value="">— Choisir verrier —</option>
+            </select>
+            <select class="accord-add-select" id="accord-new-tag" style="max-width:190px">
+              <option value="ar">Anti-reflet (AR)</option>
+              <option value="lb">Lumière bleue (LB)</option>
+              <option value="tr">Photochromique (TR)</option>
+            </select>
+            <button class="accord-add-btn" onclick="addAccord()"><i class="ti ti-plus"></i> Ajouter</button>
+          </div>
+        </div>
+        <!-- Liste des accords -->
+        <div id="accords-list"></div>
       </div>
     </div>
   </div>
@@ -3087,6 +3150,24 @@ function renderVerreLigne(v){
       </div>
     </div>` : '';
 
+  // Détail accords fournisseur (réductions achat)
+  const _accordsApplied = v._accordsApplied || [];
+  const achatReducTotal = v.achatReducTotal || 0;
+  const achatBase = v.achatBase || v.achat;
+  const accordDetailHtml = _accordsApplied.length > 0 ? `
+    <div style="margin-top:8px;background:#0a2e1a;border:1px solid #1a6040;border-radius:8px;padding:8px 12px;font-size:11px;color:#60d090">
+      <span style="font-weight:700;color:#50e0a0"><i class="ti ti-handshake" style="font-size:10px"></i> Accord fournisseur actif</span>
+      ${_accordsApplied.map(a=>{
+        const tagLabel = a.tag==='ar'?'Anti-reflet':a.tag==='lb'?'Lumière bleue':'Photochromique';
+        return `<div style="margin-top:4px;color:#80e0b0">${tagLabel}: ${a.inclus?'<span style="color:#50ffaa;font-weight:700">Inclus</span> — ':''}<strong style="color:#50ffaa">−${a.reduction}€</strong>${a.note?` <span style="opacity:.7">(${a.note})</span>`:''}`;
+      }).join('')}
+      <div style="margin-top:6px;padding-top:6px;border-top:1px solid #1a6040;display:flex;gap:12px">
+        <span>Achat catalogue: <strong style="color:#aaa;text-decoration:line-through">${achatBase}€</strong></span>
+        <span>Achat réel: <strong style="color:#50ffaa">${v.achat}€</strong></span>
+        <span>Économie: <strong style="color:#50ffaa">−${achatReducTotal}€ / verre</strong></span>
+      </div>
+    </div>` : '';
+
   // Détail conv IA (base + amincissement si applicable)
   const convDetailHtml = isConvIA && _convData ? `
     <div style="margin-top:8px;background:#0a1a2e;border:1px solid #1a3a5e;border-radius:8px;padding:8px 12px;font-size:11px;color:#80b0e0">
@@ -3117,12 +3198,13 @@ function renderVerreLigne(v){
       <td class="vt-saisie">${v.vente} €</td>
       <td class="vt-saisie">${precalSaisie}</td>
       <td class="vt-saisie">${teinteSaisie}</td>
-      <td style="text-align:right"><div class="vt-marge ${margeClass}"><span class="vt-marge-pct">${taux}%</span><span class="vt-marge-detail">+${marge} € / verre · +${marge*2} € / paire</span></div></td>
+      <td style="text-align:right"><div class="vt-marge ${margeClass}"><span class="vt-marge-pct">${taux}%</span><span class="vt-marge-detail">+${marge.toFixed(2)} € / verre · +${(marge*2).toFixed(2)} € / paire${achatReducTotal>0?`<br><span class="accord-marge-badge"><i class="ti ti-handshake" style="font-size:8px"></i> Accord −${achatReducTotal}€</span>`:''}</span></div></td>
     </tr>
     <tr class="vt-detail" id="vt-${v.id}">
       <td colspan="8">
         <div class="vt-detail-inner">
           ${trHTML}
+          ${accordDetailHtml}
           ${convDetailHtml}
           ${plafondHTML}
           <div style="display:flex;gap:8px;align-items:center;margin-left:auto;margin-top:8px">
@@ -3321,6 +3403,9 @@ function showVerres(){
   // Choose catalogue based on prise type
   const activeCatalogue = (window._priseType === 'sante') ? verresClasseA : catalogue;
 
+  // Charger les accords fournisseurs une seule fois (hors de la boucle)
+  const _allAccords = _loadAccords();
+
   const compat=activeCatalogue.filter(v=>{
     if(!v.compatible.includes(state.vision.id)) return false;
     if(sphMax>v.sphMax) return false;
@@ -3341,8 +3426,24 @@ function showVerres(){
     const ind=getBestIndice(v,indiceRec);
     if(!ind) return null;
     let vente=v.indices[ind];
-    const achat=v.achats[ind];
-    if(!vente||!achat) return null;
+    const achatBase=v.achats[ind];
+    if(!vente||!achatBase) return null;
+    // ── Accord fournisseur : réduction sur achat ──
+    const _accordKey = Object.keys(_allAccords).find(k => k.toLowerCase()===(v.marque||'').toLowerCase());
+    const _accordData = _accordKey ? _allAccords[_accordKey] : null;
+    let achat = achatBase;
+    let achatReducTotal = 0;
+    const _accordsApplied = [];
+    if(_accordData && v.tags){
+      v.tags.forEach(tag=>{
+        const a = _accordData[tag];
+        if(a && a.reduction > 0){
+          achat = Math.max(0, achat - a.reduction);
+          achatReducTotal += a.reduction;
+          _accordsApplied.push({ tag, reduction: a.reduction, inclus: a.inclus, note: a.note });
+        }
+      });
+    }
     const mutId=state.mutuelle?.id;
     // Tarif réseau hard-codé (tarifsReseau) — priorité basse
     if(mutId && v.tarifsReseau && v.tarifsReseau[mutId]?.[ind] != null){
@@ -3359,7 +3460,7 @@ function showVerres(){
     const plafond = state.mutuelle?.plafond_verre ?? null;
     const resteCharge = plafond != null ? Math.max(0, Math.round((vente - plafond)*100)/100) : null;
     const priseEnCharge = plafond != null ? Math.min(vente, plafond) : null;
-    return{...v,indiceChoisi:ind,vente,achat,marge:vente-achat,taux:Math.round((vente-achat)/vente*100),resteCharge,priseEnCharge,_convData};
+    return{...v,indiceChoisi:ind,vente,achat,achatBase,achatReducTotal,_accordsApplied,marge:vente-achat,taux:Math.round((vente-achat)/vente*100),resteCharge,priseEnCharge,_convData};
   }).filter(Boolean).sort((a,b)=>b.marge-a.marge);
 
   const haut=compat.filter(v=>v.gamme==='haut');
@@ -4390,11 +4491,13 @@ function closeVerresAdmin(){
 }
 function switchVTab(tab){
   document.querySelectorAll('.vadmin-tab').forEach((t,i)=>{
-    t.classList.toggle('active', (i===0&&tab==='prix')||(i===1&&tab==='pdf')||(i===2&&tab==='ia'));
+    t.classList.toggle('active', (i===0&&tab==='prix')||(i===1&&tab==='pdf')||(i===2&&tab==='ia')||(i===3&&tab==='accords'));
   });
   document.getElementById('vtab-prix').classList.toggle('active', tab==='prix');
   document.getElementById('vtab-pdf').classList.toggle('active', tab==='pdf');
   document.getElementById('vtab-ia').classList.toggle('active', tab==='ia');
+  document.getElementById('vtab-accords').classList.toggle('active', tab==='accords');
+  if(tab==='accords') renderAccordsPanel();
 }
 
 function renderVerresEdit(){
@@ -5126,6 +5229,228 @@ async function _iaExtractAndAnalyze(arrayBuffer){
 function resetIaPdfDrop(){
   const drop = document.getElementById('ia-pdf-drop');
   if(drop) drop.innerHTML = `<i class="ti ti-cpu" style="color:#7C3AED"></i><p><strong>Cliquez ou glissez un PDF tarif / réseau</strong></p><p style="font-size:12px;margin-top:6px">L'IA analyse les prix et propose des noms commerciaux</p>`;
+}
+
+// ─── ACCORDS FOURNISSEURS ─────────────────────────────────────────────────────
+
+function _loadAccords(){
+  try{ return JSON.parse(localStorage.getItem('maneo_accords')||'{}'); }catch(e){ return {}; }
+}
+function _saveAccords(data){ localStorage.setItem('maneo_accords', JSON.stringify(data)); }
+
+function _getAccord(marque){
+  if(!marque) return null;
+  const all = _loadAccords();
+  const key = Object.keys(all).find(k => k.toLowerCase() === marque.toLowerCase());
+  return key ? all[key] : null;
+}
+
+function renderAccordsPanel(){
+  const accords = _loadAccords();
+  // Peupler le select verrier depuis le catalogue
+  const marques = [...new Set([...catalogue,...catalogue2e].map(v=>v.marque).filter(Boolean))].sort();
+  const sel = document.getElementById('accord-new-marque');
+  if(sel){
+    sel.innerHTML = '<option value="">— Choisir verrier —</option>'
+      + marques.map(m=>`<option value="${m}">${m}</option>`).join('');
+  }
+  const list = document.getElementById('accords-list');
+  if(!list) return;
+  if(!Object.keys(accords).length){
+    list.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--txt-muted);font-size:13px"><i class="ti ti-handshake" style="font-size:32px;display:block;margin-bottom:10px;opacity:.25"></i>Aucun accord enregistré.<br><span style="font-size:12px">Ajoutez-en un manuellement ou déposez un PDF accord ci-dessus.</span></div>`;
+    return;
+  }
+  const tagInfo = { ar:{label:'Anti-reflet',cls:'accord-tag-ar'}, lb:{label:'Lumière bleue',cls:'accord-tag-lb'}, tr:{label:'Photochromique',cls:'accord-tag-tr'} };
+  list.innerHTML = Object.entries(accords).map(([marque, tags])=>{
+    const nbActifs = Object.values(tags).filter(d => d.inclus || d.reduction > 0).length;
+    const tagsHTML = Object.entries(tags).map(([tag, data])=>{
+      const ti = tagInfo[tag] || {label:tag, cls:'accord-tag-ar'};
+      const totalRed = data.inclus ? data.reduction || 0 : (data.reduction||0);
+      return `
+        <div class="accord-row">
+          <div class="accord-row-hdr">
+            <span class="accord-tag-chip ${ti.cls}">${ti.label}</span>
+            ${totalRed > 0 ? `<span class="accord-badge-saving"><i class="ti ti-trending-down" style="font-size:9px"></i> −${totalRed} € / verre</span>` : ''}
+            <button onclick="deleteAccord('${marque}','${tag}')" style="margin-left:auto;background:none;border:none;color:#EF4444;cursor:pointer;font-size:12px;padding:2px 6px;border-radius:6px;font-family:inherit" title="Supprimer"><i class="ti ti-trash"></i></button>
+          </div>
+          <div class="accord-fields">
+            <label class="accord-check-label">
+              <input type="checkbox" id="acc-inc-${marque}-${tag}" ${data.inclus?'checked':''} onchange="saveAccordField('${marque}','${tag}','inclus',this.checked)"/>
+              Traitement inclus
+            </label>
+            <span class="accord-field-lbl">Réduction :</span>
+            <input class="accord-field-input" type="number" min="0" step="0.50"
+              value="${data.reduction||0}" placeholder="0.00"
+              onchange="saveAccordField('${marque}','${tag}','reduction',parseFloat(this.value)||0)"/>
+            <span class="accord-field-lbl">€ / verre</span>
+            <input class="accord-note-input" type="text" placeholder="Ex: SCC+UV au prix ECC+UV"
+              value="${(data.note||'').replace(/"/g,'&quot;')}"
+              onchange="saveAccordField('${marque}','${tag}','note',this.value)"/>
+          </div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="accord-verrier-card">
+        <div class="accord-verrier-hdr">
+          <i class="ti ti-building-factory-2" style="font-size:16px;opacity:.4"></i>
+          <span class="accord-verrier-name">${marque}</span>
+          ${nbActifs > 0 ? `<span style="font-size:11px;font-weight:700;color:#16A34A;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:20px;padding:3px 9px;margin-left:auto"><i class="ti ti-check" style="font-size:10px"></i> ${nbActifs} accord(s) actif(s)</span>` : ''}
+        </div>
+        ${tagsHTML}
+      </div>`;
+  }).join('');
+}
+
+function addAccord(){
+  const marque = document.getElementById('accord-new-marque')?.value;
+  const tag    = document.getElementById('accord-new-tag')?.value;
+  if(!marque){ showToast('Choisissez un verrier'); return; }
+  const all = _loadAccords();
+  if(!all[marque]) all[marque] = {};
+  if(all[marque][tag]){ showToast('Accord déjà existant pour ce verrier / traitement'); return; }
+  all[marque][tag] = { inclus:false, reduction:0, note:'' };
+  _saveAccords(all);
+  renderAccordsPanel();
+  showToast('Accord ajouté ✓');
+}
+
+function deleteAccord(marque, tag){
+  const all = _loadAccords();
+  if(all[marque]){ delete all[marque][tag]; if(!Object.keys(all[marque]).length) delete all[marque]; }
+  _saveAccords(all);
+  renderAccordsPanel();
+  showToast('Accord supprimé');
+}
+
+function saveAccordField(marque, tag, field, value){
+  const all = _loadAccords();
+  if(!all[marque]) all[marque] = {};
+  if(!all[marque][tag]) all[marque][tag] = { inclus:false, reduction:0, note:'' };
+  all[marque][tag][field] = value;
+  _saveAccords(all);
+  renderAccordsPanel();
+}
+
+function handleAccordPdfDrop(e){
+  e.preventDefault();
+  document.getElementById('accord-pdf-drop').classList.remove('drag');
+  const file = e.dataTransfer?.files[0];
+  if(file) handleAccordPdfFile(file);
+}
+
+function handleAccordPdfFile(file){
+  if(!file || file.type!=='application/pdf'){ showToast('Fichier PDF requis'); return; }
+  const key = localStorage.getItem('maneo_claude_key');
+  if(!key){ showToast('⚠️ Clé Claude manquante — configurez-la dans Paramètres'); return; }
+  const drop = document.getElementById('accord-pdf-drop');
+  if(drop) drop.innerHTML = `<i class="ti ti-loader-2" style="font-size:30px;color:#7C3AED;animation:spin 1s linear infinite;display:block;margin-bottom:8px"></i><p style="color:#7C3AED;font-weight:600">Lecture du PDF accord…</p>`;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const buf = e.target.result;
+    if(typeof pdfjsLib === 'undefined'){
+      const sc = document.createElement('script');
+      sc.src = _PDFJS+'/pdf.min.js';
+      sc.onload = () => _accordExtractAndAnalyze(buf, key);
+      sc.onerror = () => { _resetAccordPdfDrop(); showToast('Erreur chargement PDF.js'); };
+      document.head.appendChild(sc);
+    } else { _accordExtractAndAnalyze(buf, key); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function _accordExtractAndAnalyze(arrayBuffer, key){
+  const drop = document.getElementById('accord-pdf-drop');
+  const statusEl = document.getElementById('accord-ia-status');
+  try{
+    pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS+'/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({data:arrayBuffer}).promise;
+    let fullText = '';
+    for(let i=1;i<=Math.min(pdf.numPages,20);i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(s=>s.str).join(' ')+'\n';
+      if(drop) drop.innerHTML = `<i class="ti ti-loader-2" style="font-size:30px;color:#7C3AED;animation:spin 1s linear infinite;display:block;margin-bottom:8px"></i><p style="color:#7C3AED;font-weight:600">Extraction — page ${i}/${pdf.numPages}…</p>`;
+    }
+    if(statusEl) statusEl.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Analyse IA en cours…</div>`;
+    await _analyzeAccordWithClaude(fullText, key, statusEl);
+    _resetAccordPdfDrop();
+  } catch(err){
+    _resetAccordPdfDrop();
+    if(statusEl) statusEl.innerHTML = `<div style="background:#FFF1F2;border:1px solid #FECDD3;border-radius:10px;padding:10px 14px;font-size:13px;color:#DC2626;font-weight:600">Erreur : ${err.message}</div>`;
+  }
+}
+
+function _resetAccordPdfDrop(){
+  const drop = document.getElementById('accord-pdf-drop');
+  if(drop) drop.innerHTML = `<i class="ti ti-cpu" style="color:#7C3AED"></i><p><strong>Déposer un accord commercial PDF</strong></p><p style="font-size:12px;margin-top:4px;opacity:.7">L'IA extrait automatiquement les prix négociés par verrier</p>`;
+}
+
+async function _analyzeAccordWithClaude(text, key, statusEl){
+  const prompt = `Tu es un assistant pour opticiens. Analyse cet accord commercial fournisseur et extrait les conditions négociées par verrier.
+
+TEXTE DU PDF:
+${text.substring(0,9000)}
+
+MISSION: Pour chaque verrier cité (Nikon, Essilor, Zeiss, Hoya, BBGR, Novacel, etc.), identifier les avantages négociés sur les traitements.
+
+CODES TRAITEMENTS:
+- "ar" = anti-reflet (ECC, SCC, HCC, Crizal, DuraVision, Hi-Vision, Novatek, etc.)
+- "lb" = lumière bleue (SeeCoat Blue, Pure Blue, Crizal Prevencia, BlueGuard, Recharge, BlueControl, etc.)
+- "tr" = photochromique (Transitions, PhotoFusion, Sensity, Reactiv, ColorMatic, etc.)
+
+RÉPONDS UNIQUEMENT en JSON valide:
+{
+  "accords": [
+    {
+      "marque": "Nikon",
+      "tag": "ar",
+      "inclus": false,
+      "reduction": 18.00,
+      "note": "SCC+UV facturé au prix ECC+UV"
+    },
+    {
+      "marque": "Essilor",
+      "tag": "ar",
+      "inclus": true,
+      "reduction": 12.00,
+      "note": "Crizal offert pour commandes > 50 unités/mois"
+    }
+  ]
+}
+
+Règles:
+- "inclus":true = traitement offert gratuitement (indiquer quand même le prix habituel dans "reduction")
+- "reduction" = montant en € soustrait du prix d'achat catalogue par verre
+- Si pas d'accord détecté pour un verrier/traitement: ne pas l'inclure
+- "marque" doit correspondre EXACTEMENT au nom du verrier tel qu'il apparaît dans le PDF`;
+
+  const resp = await sbFetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+    body: JSON.stringify({model:'claude-haiku-4-5',max_tokens:2000,messages:[{role:'user',content:prompt}]})
+  });
+  if(!resp.ok){ const e=await resp.text(); throw new Error('API '+resp.status+': '+e.substring(0,200)); }
+  const json = await resp.json();
+  const raw = json.content?.[0]?.text||'';
+  const match = raw.match(/\{[\s\S]*\}/);
+  if(!match) throw new Error('Réponse IA invalide');
+  const data = JSON.parse(match[0]);
+  const accords = data.accords||[];
+  if(!accords.length){
+    if(statusEl) statusEl.innerHTML=`<div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400E;">Aucun accord détecté dans ce PDF. Vérifiez le contenu.</div>`;
+    return;
+  }
+  const all = _loadAccords();
+  let count = 0;
+  accords.forEach(a=>{
+    if(!a.marque||!a.tag) return;
+    if(!all[a.marque]) all[a.marque]={};
+    all[a.marque][a.tag]={ inclus:!!a.inclus, reduction:parseFloat(a.reduction)||0, note:a.note||'' };
+    count++;
+  });
+  _saveAccords(all);
+  renderAccordsPanel();
+  if(statusEl) statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px 14px;font-size:13px;color:#16A34A;font-weight:700"><i class="ti ti-check"></i> ${count} accord(s) extrait(s) et enregistré(s) ✓</div>`;
 }
 
 async function analyzeIaVerresWithClaude(pdfText){
