@@ -4468,8 +4468,9 @@ function savePrixVerre(vid){
 
 function loadSavedPrix(){
   try{
-    const saved = JSON.parse(localStorage.getItem('maneo_prix')||'{}');
-    const savedAppel = JSON.parse(localStorage.getItem('maneo_appel')||'{}');
+    const saved     = JSON.parse(localStorage.getItem('maneo_prix') ||'{}');
+    const savedAppel= JSON.parse(localStorage.getItem('maneo_appel')||'{}');
+    const savedTags = JSON.parse(localStorage.getItem('maneo_tags') ||'{}');
     const all = [...catalogue, ...catalogue2e];
     all.forEach(v => {
       if(saved[v.id]){
@@ -4477,6 +4478,10 @@ function loadSavedPrix(){
         v.achats  = {...v.achats,  ...saved[v.id].achats};
       }
       if(savedAppel[v.id]) v.appel = savedAppel[v.id];
+      // Fusionner les tags sauvegardés (sans écraser les tags d'origine)
+      if(savedTags[v.id]){
+        v.tags = [...new Set([...(v.tags||[]), ...savedTags[v.id]])];
+      }
     });
   }catch(e){}
 }
@@ -4738,10 +4743,18 @@ Réponds UNIQUEMENT avec ce JSON valide, rien d'autre:
         "1.60": 165.00,
         "1.67": 195.00,
         "1.74": 240.00
-      }
+      },
+      "traitements": ["ar", "lb"]
     }
   ]
 }
+
+CODES TRAITEMENTS (à détecter dans le PDF pour chaque verre):
+- "ar" = anti-reflet (antireflet, AR, ECC, SCC, HCC, SeeCoat, etc.)
+- "lb" = filtre lumière bleue (Blue, Bleu, BlueControl, SeeCoat Blue, Pure Blue, etc.)
+- "tr" = photochromique / Transitions (Transitions, Reactiv, PhotoFusion, Sensity, etc.)
+Si le traitement n'est pas mentionné pour ce verre, ne pas l'inclure.
+Si aucune info traitement dans le PDF: mettre ["ar"] par défaut pour tous les verres.
 
 RÈGLES STRICTES:
 - Inclure UNIQUEMENT les verres dont tu trouves des prix concrets dans le PDF
@@ -4823,7 +4836,11 @@ function _applyClaudeResults(parsed, textLen){
     }
     if(!target) return; // verre inconnu du catalogue, on skip
 
-    const detected = {id: target.id, nom: target.nom, marque: target.marque, prix: {}};
+    const validTags = ['ar','lb','tr'];
+    const detectedTags = Array.isArray(item.traitements)
+      ? item.traitements.filter(t => validTags.includes(t))
+      : ['ar']; // défaut : anti-reflet
+    const detected = {id: target.id, nom: target.nom, marque: target.marque, prix: {}, traitements: detectedTags};
     Object.entries(item.indices).forEach(([ind, prix]) => {
       const p = parseFloat(prix);
       if(target.indices[ind] != null && !isNaN(p) && p > 5 && p < 2000){
@@ -5668,21 +5685,37 @@ function applyPdfPrix(){
   if(!pdfPrixDetectes.length) return;
   const all = [...catalogue, ...catalogue2e];
   let count = 0;
+  let tagsCount = 0;
   pdfPrixDetectes.forEach(det => {
     const v = all.find(x => x.id === det.id);
     if(!v) return;
+    // Appliquer les prix
     Object.entries(det.prix).forEach(([ind, prix]) => {
       if(v.indices[ind] != null){ v.indices[ind] = prix; count++; }
     });
+    // Appliquer les traitements détectés (fusionner avec les tags existants)
+    if(det.traitements && det.traitements.length){
+      const existingTags = v.tags || [];
+      const merged = [...new Set([...existingTags, ...det.traitements])];
+      if(merged.length !== existingTags.length){
+        v.tags = merged;
+        tagsCount++;
+      }
+    }
   });
   try{
     const saved = JSON.parse(localStorage.getItem('maneo_prix')||'{}');
-    all.forEach(v => { saved[v.id] = {indices:{...v.indices}, achats:{...v.achats}}; });
+    const savedTags = JSON.parse(localStorage.getItem('maneo_tags')||'{}');
+    all.forEach(v => {
+      saved[v.id] = {indices:{...v.indices}, achats:{...v.achats}};
+      if(v.tags) savedTags[v.id] = [...v.tags];
+    });
     localStorage.setItem('maneo_prix', JSON.stringify(saved));
+    localStorage.setItem('maneo_tags', JSON.stringify(savedTags));
   }catch(e){}
   document.getElementById('pdf-result').style.display = 'none';
   renderVerresEdit();
-  showToast(`${count} prix mis à jour depuis le PDF !`);
+  showToast(`${count} prix mis à jour${tagsCount?' · '+tagsCount+' traitements détectés':''} depuis le PDF !`);
   pdfPrixDetectes = [];
 }
 
