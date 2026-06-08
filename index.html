@@ -7554,11 +7554,13 @@ let _pdfCurrentSlot = null; // slot en cours de sélection
 // ── Ouvrir les modales ──────────────────────────────────────
 function openConventionnement(){
   const grid = document.getElementById('conv-slots-grid');
+  const _convCanIA = !!(currentUser?.admin || isSuperhote());
   grid.innerHTML = _CONV_RESEAUX.map(r => `
     <div class="conv-slot">
       <div class="conv-slot-hdr" style="background:linear-gradient(135deg,${r.color}cc,${r.color})">
         <i class="ti ti-file-certificate" style="font-size:20px"></i>
         <span class="conv-slot-lbl">${r.label}</span>
+        ${_convCanIA ? '<span style="margin-left:auto;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.42);border-radius:20px;padding:2px 9px;font-size:10px;font-weight:800;letter-spacing:.04em;display:flex;align-items:center;gap:4px"><i class="ti ti-cpu" style="font-size:11px"></i> IA</span>' : ''}
       </div>
       <div class="conv-slot-body" id="conv-body-${r.id}">
         ${_renderConvBody(r.id)}
@@ -7588,17 +7590,19 @@ function _renderConvBody(id){
     const info = JSON.parse(stored);
     const aiStored = localStorage.getItem('conv_parsed_' + id);
     const aiHtml = aiStored ? _renderConvAiCard(JSON.parse(aiStored)) : '';
+    const canIA = !!(currentUser?.admin || isSuperhote());
+    const iaBtn = canIA
+      ? `<button class="pdf-btn-ia" id="conv-ai-btn-${id}" onclick="analyzeConvPdfWithAI('${id}')"><i class="ti ti-cpu"></i> ${aiStored ? 'Réanalyser IA' : 'Analyser IA'}</button>`
+      : '';
     return `<div class="pdf-file-info">
       <span class="pdf-file-name"><i class="ti ti-file-type-pdf" style="color:#E11D48;font-size:16px"></i>${info.name}</span>
       <div class="pdf-file-actions">
         <button class="pdf-btn-view" onclick="pdfView('${key}')"><i class="ti ti-eye"></i> Voir</button>
+        ${iaBtn}
         <button class="pdf-btn-del" onclick="pdfDel('${key}','conv-body-${id}','${id}',true)"><i class="ti ti-trash"></i></button>
       </div>
     </div>
-    <button class="conv-ai-btn" id="conv-ai-btn-${id}" onclick="analyzeConvPdfWithAI('${id}')">
-      <i class="ti ti-cpu"></i> ${aiStored ? 'Réanalyser avec IA' : 'Analyser avec IA'}
-    </button>
-    <div id="conv-ai-res-${id}">${aiHtml}</div>`;
+    <div id="conv-ai-res-${id}" style="margin-top:8px">${aiHtml}</div>`;
   }
   return `<div class="pdf-drop-zone" onclick="pdfPickFile('conv_${id}')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'conv_${id}')">
     <i class="ti ti-cloud-upload" style="font-size:28px;color:var(--bdr-medium);display:block;margin-bottom:6px"></i>
