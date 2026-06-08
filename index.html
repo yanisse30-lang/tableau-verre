@@ -275,24 +275,24 @@ select option{background:#fff;color:var(--txt-primary)}
 .login-box{width:100%;max-width:380px}
 .login-brand{display:flex;align-items:center;gap:10px;margin-bottom:34px}
 .login-brand-icon{width:34px;height:34px;background:#111;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.login-brand-name{font-size:17px;font-weight:800;color:#111;letter-spacing:-0.02em}
-.login-title{font-size:26px;font-weight:800;color:#111;margin-bottom:6px;text-align:left}
-.login-sub{font-size:13px;color:#999;margin-bottom:26px;text-align:left;line-height:1.55}
-.login-field{margin-bottom:16px}
-.login-field label{display:block;font-size:13px;font-weight:500;color:#555;margin-bottom:7px}
-.login-field input{width:100%;padding:12px 15px;border-radius:10px;border:1.5px solid #E5E7EB;background:#fff;color:#111;font-size:14px;font-family:inherit;outline:none;transition:border-color 0.2s,box-shadow 0.2s;box-sizing:border-box}
+.login-brand-name{font-size:20px;font-weight:800;color:#111;letter-spacing:-0.02em}
+.login-title{font-size:34px;font-weight:800;color:#111;margin-bottom:8px;text-align:left}
+.login-sub{font-size:15px;color:#888;margin-bottom:28px;text-align:left;line-height:1.6}
+.login-field{margin-bottom:18px}
+.login-field label{display:block;font-size:15px;font-weight:600;color:#444;margin-bottom:8px}
+.login-field input{width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid #E5E7EB;background:#fff;color:#111;font-size:16px;font-family:inherit;outline:none;transition:border-color 0.2s,box-shadow 0.2s;box-sizing:border-box}
 .login-field input:focus{border-color:#185FA5;box-shadow:0 0 0 3px rgba(24,95,165,0.13)}
-.btn-login{width:100%;padding:13px;background:#111;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;transition:background 0.15s,transform 0.1s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-login{width:100%;padding:15px;background:#111;color:#fff;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit;transition:background 0.15s,transform 0.1s;display:flex;align-items:center;justify-content:center;gap:8px}
 .btn-login:hover{background:#333}
 .btn-login:active{transform:scale(0.98)}
-.login-error{background:#FFF1F2;border:1px solid #FECDD3;color:#E11D48;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;text-align:center}
-.login-footer{text-align:center;font-size:11px;color:#ccc;margin-top:22px}
+.login-error{background:#FFF1F2;border:1px solid #FECDD3;color:#E11D48;border-radius:10px;padding:11px 15px;font-size:14px;margin-bottom:16px;display:none;text-align:center}
+.login-footer{text-align:center;font-size:12px;color:#ccc;margin-top:22px}
 /* RIGHT PANEL CONTENT */
-.login-right-content{position:relative;z-index:2;max-width:340px}
-.login-sparkle-wrap{margin-bottom:28px}
-.login-right-title{font-size:28px;font-weight:800;color:#fff;line-height:1.28;margin-bottom:18px;letter-spacing:-0.025em}
+.login-right-content{position:relative;z-index:2;max-width:380px}
+.login-sparkle-wrap{margin-bottom:32px}
+.login-right-title{font-size:38px;font-weight:800;color:#fff;line-height:1.22;margin-bottom:20px;letter-spacing:-0.03em}
 .login-right-title em{color:#93C5FD;font-style:normal}
-.login-right-desc{font-size:14px;color:rgba(255,255,255,0.68);line-height:1.75}
+.login-right-desc{font-size:16px;color:rgba(255,255,255,0.75);line-height:1.8}
 /* STARS SCINTILLANTES */
 @keyframes star-twinkle{0%,100%{opacity:0.05;transform:scale(0.3) rotate(0deg)}45%{opacity:1;transform:scale(1.2) rotate(20deg)}70%{opacity:0.6;transform:scale(0.85) rotate(-8deg)}}
 #login-stars-strip{position:absolute;top:0;left:-28px;width:56px;height:100%;pointer-events:none;z-index:3;overflow:visible}
@@ -930,10 +930,10 @@ select option{background:#fff;color:var(--txt-primary)}
     <div class="login-right-content">
       <!-- Icône sparkle -->
       <div class="login-sparkle-wrap">
-        <svg viewBox="0 0 64 64" width="56" height="56" fill="none">
-          <path d="M26 6L29.5 23L46 26L29.5 29.5L26 46L22.5 29.5L6 26L22.5 23Z" fill="#93C5FD"/>
-          <path d="M48 10L50 18L58 20L50 22L48 30L46 22L38 20L46 18Z" fill="#93C5FD" opacity="0.65"/>
-          <path d="M54 38L55.5 43L61 44.5L55.5 46L54 51.5L52.5 46L47 44.5L52.5 43Z" fill="#93C5FD" opacity="0.4"/>
+        <svg viewBox="0 0 80 80" width="80" height="80" fill="none">
+          <path d="M32 4L36.5 27L58 32L36.5 36.5L32 58L27.5 36.5L6 32L27.5 27Z" fill="#93C5FD"/>
+          <path d="M62 10L65 22L76 25L65 28L62 40L59 28L48 25L59 22Z" fill="#93C5FD" opacity="0.65"/>
+          <path d="M70 50L72 58L80 60L72 62L70 70L68 62L60 60L68 58Z" fill="#93C5FD" opacity="0.45"/>
         </svg>
       </div>
 
@@ -3801,10 +3801,10 @@ function _initLoginStars(){
   const strip = document.getElementById('login-stars-strip');
   if(!strip) return;
   strip.innerHTML = '';
-  for(let i = 0; i < 22; i++){
-    const top    = (i / 21 * 94 + 3).toFixed(1);
-    const offset = ((Math.random() - 0.5) * 44).toFixed(1);
-    const size   = (Math.random() * 11 + 7).toFixed(1);
+  for(let i = 0; i < 28; i++){
+    const top    = (i / 27 * 94 + 3).toFixed(1);
+    const offset = ((Math.random() - 0.5) * 60).toFixed(1);
+    const size   = (Math.random() * 22 + 16).toFixed(1);
     const dur    = (Math.random() * 2.2 + 1.4).toFixed(2);
     const del    = (Math.random() * 3.5).toFixed(2);
     const s = document.createElement('div');
@@ -3868,8 +3868,8 @@ async function doLogin(){
       err.innerHTML='<i class="ti ti-alert-circle"></i> Identifiant ou mot de passe incorrect';
       document.getElementById('login-pass').value='';
       document.getElementById('login-pass').focus();
-      document.querySelector('.login-box').style.animation='shake 0.4s ease';
-      setTimeout(()=>document.querySelector('.login-box').style.animation='',400);
+      btn.innerHTML='<i class="ti ti-login"></i> Se connecter';
+      btn.disabled=false;
     }
   } catch(e) {
     err.style.display='block';
@@ -3879,10 +3879,11 @@ async function doLogin(){
     } else {
       err.innerHTML='<i class="ti ti-wifi-off"></i> Erreur de connexion. Vérifiez votre connexion internet.';
     }
-  } finally {
     btn.innerHTML='<i class="ti ti-login"></i> Se connecter';
     btn.disabled=false;
   }
+  // Pas de finally : sur succès le bouton reste désactivé pendant l'animation
+  // pour éviter un double-clic qui casserait la transition
 }
 
 function openAdmin(){
