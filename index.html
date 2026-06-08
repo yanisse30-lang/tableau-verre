@@ -912,6 +912,8 @@ select option{background:#fff;color:var(--txt-primary)}
 .form-zone-bar{display:flex;flex-direction:column;gap:3px;margin:12px 0;border-radius:10px;overflow:hidden;border:1px solid var(--bdr-light)}
 .form-zone{padding:9px 14px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
 
+/* ── CONV IA prix badge ────────────────────────────────────── */
+.vt-prix.conv-ia{color:#a78bfa;font-weight:800}
 /* ── CONV AI ───────────────────────────────────────────────── */
 .conv-ai-btn{width:100%;margin-top:8px;background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
 .conv-ai-btn:hover{opacity:.87;transform:translateY(-1px)}
@@ -2981,17 +2983,26 @@ function renderVerreLigne(v){
   const marge = v.vente - v.achat;
   const taux  = Math.round(marge / v.vente * 100);
   const mutId = state.mutuelle?.id;
-  // isReseau : vrai pour TOUS les réseaux ayant un tarif conventionné pour ce verre
-  const isReseau = mutId && v.tarifsReseau && v.tarifsReseau[mutId]?.[v.indiceChoisi] != null;
+  const _convData = v._convData || null;
+  // isConvIA : prix calculé depuis le PDF conventionnement IA
+  const isConvIA = !!_convData;
+  // isReseau : tarif réseau hard-codé (si pas de conv IA)
+  const isReseau = !isConvIA && mutId && v.tarifsReseau && v.tarifsReseau[mutId]?.[v.indiceChoisi] != null;
   const reseauLabel = isReseau ? (state.mutuelle?.label || mutId.toUpperCase()) : null;
   const gcColor = v.gamme==='haut'?'#9060e0':v.gamme==='milieu'?'#378ADD':'#3B6D11';
-  const _precalPrix    = state.mutuelle?.prixPrecalibrage ?? 15;
-  const _precalInclus  = state.mutuelle?.optislimInclus  ?? false;
+  // Précalibrage : depuis conv IA si dispo, sinon depuis mutuelle
+  const _precalPrix    = _convData?.precalibrage_max ?? state.mutuelle?.prixPrecalibrage ?? 15;
+  const _precalInclus  = state.mutuelle?.optislimInclus ?? false;
   const precalSaisie   = v.precalibrage
     ? (_precalInclus
         ? `<span style="display:inline-block;background:#0a2e1a;color:#50f0a0;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;border:1.5px solid #1a6040">Inclus</span>`
-        : `<span style="display:inline-block;background:#1a1040;color:#c080ff;font-size:12px;font-weight:800;padding:3px 9px;border-radius:20px;border:1.5px solid #5030a0">+${_precalPrix} €</span>`)
-    : `<span style="display:inline-block;background:#1a1200;color:#f0b030;font-size:10px;font-weight:700;padding:3px 7px;border-radius:20px;border:1.5px solid #5a4000;line-height:1.3;text-align:center">💡 Conseillé<br><strong style="font-size:11px">+${_precalPrix} €</strong></span>`;
+        : `<span style="display:inline-block;background:#1a1040;color:#c080ff;font-size:12px;font-weight:800;padding:3px 9px;border-radius:20px;border:1.5px solid #5030a0">+${_precalPrix} €${isConvIA?' <span style="font-size:9px;opacity:.7">max</span>':''}</span>`)
+    : `<span style="display:inline-block;background:#1a1200;color:#f0b030;font-size:10px;font-weight:700;padding:3px 7px;border-radius:20px;border:1.5px solid #5a4000;line-height:1.3;text-align:center">💡 Conseillé<br><strong style="font-size:11px">+${_precalPrix} €${isConvIA?' max':''}</strong></span>`;
+  // Teinte photochromique : depuis conv IA si dispo
+  const _teintePrix = _convData?.photochromique_supp ?? null;
+  const teinteSaisie = _teintePrix != null
+    ? `<span style="display:inline-block;background:#0a1a2e;color:#60c0ff;font-size:12px;font-weight:800;padding:3px 9px;border-radius:20px;border:1.5px solid #1a4080">+${_teintePrix} €</span>`
+    : '—';
   const margeClass = taux >= 45 ? 'high' : '';
   const trHTML = v.traitements.slice(0,3).map(t =>
     `<div class="vt-trait"><strong><i class="ti ${t.icon}" style="margin-right:4px;color:#378ADD"></i>${t.nom}</strong>${t.desc.substring(0,90)}…</div>`
@@ -3014,6 +3025,15 @@ function renderVerreLigne(v){
       </div>
     </div>` : '';
 
+  // Détail conv IA (base + amincissement si applicable)
+  const convDetailHtml = isConvIA && _convData ? `
+    <div style="margin-top:8px;background:#0a1a2e;border:1px solid #1a3a5e;border-radius:8px;padding:8px 12px;font-size:11px;color:#80b0e0">
+      <span style="font-weight:700;color:#7C3AED"><i class="ti ti-cpu" style="font-size:10px"></i> Tarif ${state.mutuelle?.label||'Réseau'}</span> —
+      Base ${_convData.verreType.replace('_',' ')}: <strong style="color:#fff">${_convData.base}€</strong>
+      ${_convData.amincissement>0?`+ Amincissement ind.${v.indiceChoisi}: <strong style="color:#fff">${_convData.amincissement}€</strong>`:''}
+      = <strong style="color:#60d090">${_convData.venteConv}€</strong>
+    </div>` : '';
+
   return `
     <tr class="verre-row" onclick="toggleVT('vt-${v.id}')">
       <td class="col-info">
@@ -3021,7 +3041,7 @@ function renderVerreLigne(v){
         <div class="vr-meta">
           <span class="vr-gamme-dot" style="background:${gcColor}"></span>
           <span class="vr-marque">${v.marque}</span>
-          ${isReseau ? `<span class="vr-reseau-badge">${reseauLabel}</span>` : ''}
+          ${isConvIA ? `<span class="vr-reseau-badge" style="background:#5B21B6;border-color:#7C3AED"><i class="ti ti-cpu" style="font-size:9px"></i> IA ${state.mutuelle?.label||''}</span>` : (isReseau ? `<span class="vr-reseau-badge">${reseauLabel}</span>` : '')}
         </div>
       </td>
       <td><span class="vt-indice">${v.indiceChoisi}</span></td>
@@ -3029,18 +3049,19 @@ function renderVerreLigne(v){
         ? `<span class="vt-precal-incl"><i class="ti ti-check" style="font-size:10px;margin-right:3px"></i>Inclus</span>`
         : `<span class="vt-precal-non">—</span>`}</td>
       <td style="text-align:right">
-        <span class="vt-prix ${isReseau?'reseau':''}">${v.vente} €</span>
+        <span class="vt-prix ${isReseau?'reseau':''} ${isConvIA?'conv-ia':''}">${v.vente} €</span>
         ${plafond!=null&&state.mutuelle?.section==='sous'?`<br><span style="font-size:10px;color:${resteC===0?'#50d090':'#ff8080'}">RAC: ${resteC===0?'0 €':resteC+' €'}</span>`:''}
       </td>
       <td class="vt-saisie">${v.vente} €</td>
       <td class="vt-saisie">${precalSaisie}</td>
-      <td class="vt-saisie">—</td>
+      <td class="vt-saisie">${teinteSaisie}</td>
       <td style="text-align:right"><div class="vt-marge ${margeClass}"><span class="vt-marge-pct">${taux}%</span><span class="vt-marge-detail">+${marge} € / verre · +${marge*2} € / paire</span></div></td>
     </tr>
     <tr class="vt-detail" id="vt-${v.id}">
       <td colspan="8">
         <div class="vt-detail-inner">
           ${trHTML}
+          ${convDetailHtml}
           ${plafondHTML}
           <div style="display:flex;gap:8px;align-items:center;margin-left:auto;margin-top:8px">
             <button class="btn-comparer" id="cmp-${v.id}" onclick="event.stopPropagation();toggleCompareBtn(this,'${v.id}')"><i class="ti ti-layout-columns"></i> Comparer</button>
@@ -3259,15 +3280,22 @@ function showVerres(){
     const achat=v.achats[ind];
     if(!vente||!achat) return null;
     const mutId=state.mutuelle?.id;
-    // Tarif réseau : s'applique à TOUS les réseaux ayant un tarifsReseau pour cette mutuelle
+    // Tarif réseau hard-codé (tarifsReseau) — priorité basse
     if(mutId && v.tarifsReseau && v.tarifsReseau[mutId]?.[ind] != null){
       vente = v.tarifsReseau[mutId][ind];
+    }
+    // Tarif conv IA — priorité haute (calculé depuis PDF conventionnement)
+    const convParsed = _getConvParsed(mutId);
+    let _convData = null;
+    if(convParsed){
+      _convData = _calcConvVerre(v, ind, state.vision?.id, eqMax, convParsed);
+      if(_convData && _convData.venteConv > 0) vente = _convData.venteConv;
     }
     // Plafond mutuelle : calcul reste à charge patient
     const plafond = state.mutuelle?.plafond_verre ?? null;
     const resteCharge = plafond != null ? Math.max(0, Math.round((vente - plafond)*100)/100) : null;
     const priseEnCharge = plafond != null ? Math.min(vente, plafond) : null;
-    return{...v,indiceChoisi:ind,vente,achat,marge:vente-achat,taux:Math.round((vente-achat)/vente*100),resteCharge,priseEnCharge};
+    return{...v,indiceChoisi:ind,vente,achat,marge:vente-achat,taux:Math.round((vente-achat)/vente*100),resteCharge,priseEnCharge,_convData};
   }).filter(Boolean).sort((a,b)=>b.marge-a.marge);
 
   const haut=compat.filter(v=>v.gamme==='haut');
@@ -4774,7 +4802,8 @@ function resetPdfDrop(){
 }
 
 // ══════════════════════════════════════════════════════════════════
-// IA CONVENTIONNEMENT — analyse un PDF de réseau mutuelle
+// ══════════════════════════════════════════════════════════════════
+// IA CONVENTIONNEMENT — extrait la grille tarifaire par verrier
 // ══════════════════════════════════════════════════════════════════
 async function analyzeConvPdfWithAI(id){
   const key = 'pdf_conv_' + id;
@@ -4790,25 +4819,21 @@ async function analyzeConvPdfWithAI(id){
   if(resEl) resEl.innerHTML = '';
 
   try {
-    // Lire le PDF depuis le base64 stocké
     const info = JSON.parse(stored);
     const base64 = info.data.split(',')[1];
     const binaryStr = atob(base64);
     const bytes = new Uint8Array(binaryStr.length);
     for(let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
 
-    // Charger PDF.js si nécessaire
     if(typeof pdfjsLib === 'undefined'){
       await new Promise((resolve, reject) => {
         const s = document.createElement('script');
         s.src = _PDFJS + '/pdf.min.js';
-        s.onload = resolve;
-        s.onerror = reject;
+        s.onload = resolve; s.onerror = reject;
         document.head.appendChild(s);
       });
     }
 
-    // Extraire le texte
     pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS + '/pdf.worker.min.js';
     const pdf = await pdfjsLib.getDocument({data: bytes.buffer}).promise;
     let fullText = '';
@@ -4818,43 +4843,50 @@ async function analyzeConvPdfWithAI(id){
       fullText += content.items.map(s => s.str).join(' ') + '\n';
     }
 
-    // Trouver le label du réseau
     const reseauInfo = _CONV_RESEAUX.find(r => r.id === id);
     const reseauLabel = reseauInfo ? reseauInfo.label : id;
 
-    const prompt = `Tu es un expert en conventionnement optique en France. Analyse ce texte extrait d'un document de convention réseau optique (${reseauLabel}).
+    const prompt = `Tu es un expert en conventionnement optique en France. Analyse ce texte extrait d'un document de conventionnement réseau optique (${reseauLabel}).
 
-TEXTE DU DOCUMENT (${fullText.length} caractères):
+CONTEXTE OPTIQUE:
+Un verre ophtalmique est composé de :
+- Base verre selon le TYPE: unifocal_simple (correction faible), unifocal_complexe (forte correction), progressif (avec addition)
+- Le type SIMPLE vs COMPLEXE dépend de l'équivalent sphérique = |sphère + cylindre/2| comparé à un seuil (souvent 6 dioptries)
+- L'amincissement (indice 1.60, 1.67, 1.74) peut être un supplément séparé ou inclus
+- Supplément photochromique = teinte qui fonce au soleil (Transitions, Reactiv, etc.)
+- Supplément précalibrage = découpe verre sur mesure monture
+
+VERRIERS CONNUS: Nikon, Essilor, Zeiss, Hoya, Novacel, BBGR, Indo, Seiko, Rodenstock, Shamir, Kodak
+
+TEXTE DU PDF (${fullText.length} caractères):
 ${fullText.substring(0, 20000)}
 
-MISSION: Extrais les informations clés de ce conventionnement pour un opticien.
-Recherche spécifiquement:
-- Plafonds de remboursement Sécurité Sociale (base SS, tarif de responsabilité)
-- Plafonds de remboursement mutuelle par classe de verre (A, B, C ou équivalent)
-- Conditions d'accès au réseau (agrément, délai minimum entre deux équipements)
-- Tiers payant (prise en charge directe ou avance de frais)
-- Tarifs plafonds des verres si mentionnés
-- Délais de règlement / paiement
-- Conditions particulières (ordonnance, renouvellement, etc.)
+MISSION: Extrait la grille tarifaire par verrier (prix plafonds remboursés ou prix de vente max du réseau).
 
 Réponds UNIQUEMENT avec ce JSON valide:
 {
   "reseau": "${reseauLabel}",
-  "rows": [
-    {"l": "Base SS", "v": "valeur ou info"},
-    {"l": "Plafond verre A", "v": "valeur"},
-    {"l": "Plafond verre B", "v": "valeur"},
-    {"l": "Tiers payant", "v": "oui/non + conditions"},
-    {"l": "Délai renouvellement", "v": "durée"},
-    {"l": "Conditions réseau", "v": "description courte"}
-  ]
+  "seuil_complexe": 6.0,
+  "verriers": {
+    "Nikon": {
+      "unifocal_simple":   {"1.50": 45.00, "1.60": 55.00, "1.67": 68.00, "1.74": 88.00},
+      "unifocal_complexe": {"1.50": 68.00, "1.60": 80.00, "1.67": 97.00, "1.74": 122.00},
+      "progressif":        {"1.50": 120.00, "1.60": 145.00, "1.67": 175.00},
+      "amincissement":     {"1.60": 14.00, "1.67": 24.00, "1.74": 38.00},
+      "precalibrage_max":  50.00,
+      "photochromique_supp": 32.00
+    }
+  }
 }
 
-RÈGLES:
-- N'inclure que les informations réellement trouvées dans le document
-- Si une info est absente: ne pas inclure la ligne correspondante
-- Valeurs courtes et précises (max 80 caractères par valeur)
-- Si aucune info pertinente trouvée: {"reseau":"${reseauLabel}","rows":[{"l":"Document","v":"Aucune information de conventionnement détectée"}]}`;
+RÈGLES STRICTES:
+- Inclure UNIQUEMENT les verriers ET indices trouvés dans le document avec des prix concrets
+- seuil_complexe: seuil en dioptries séparant simple/complexe (cherche "fort" "complexe" "sphéro-cylindrique" — défaut 6.0)
+- amincissement: supplément pour les indices amincis (si non trouvé, omettre le champ)
+- precalibrage_max: montant max du supplément précalibrage (si non trouvé, omettre)
+- photochromique_supp: supplément teinte photochromique par verre (si non trouvé, omettre)
+- Ne pas inventer de prix
+- Si aucun verrier identifié: {"reseau":"${reseauLabel}","seuil_complexe":6.0,"verriers":{}}`;
 
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -4866,7 +4898,7 @@ RÈGLES:
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
-        max_tokens: 1024,
+        max_tokens: 3000,
         messages: [{role: 'user', content: prompt}]
       })
     });
@@ -4882,11 +4914,12 @@ RÈGLES:
     if(!jsonMatch) throw new Error('Réponse IA invalide');
     const parsed = JSON.parse(jsonMatch[0]);
 
-    // Sauvegarder et afficher
-    localStorage.setItem('conv_ai_' + id, JSON.stringify(parsed));
+    // Stocker les données structurées (utilisées pour le calcul de prix dans showVerres)
+    localStorage.setItem('conv_parsed_' + id, JSON.stringify(parsed));
     if(resEl) resEl.innerHTML = _renderConvAiCard(parsed);
     if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Réanalyser avec IA'; }
-    showToast(`Analyse ${reseauLabel} terminée — ${parsed.rows?.length||0} informations extraites.`);
+    const nbVerriers = Object.keys(parsed.verriers||{}).length;
+    showToast(`${reseauLabel} analysé — ${nbVerriers} verrier(s) détecté(s). Prix appliqués automatiquement.`);
 
   } catch(e) {
     console.error('Conv AI error:', e);
@@ -4897,6 +4930,35 @@ RÈGLES:
       showToast('Erreur IA : ' + e.message);
     }
   }
+}
+
+// ─── Helpers conv parsed ──────────────────────────────────────
+function _getConvParsed(mutId){
+  try{ const s=localStorage.getItem('conv_parsed_'+mutId); return s?JSON.parse(s):null; }catch(e){ return null; }
+}
+
+function _calcConvVerre(v, ind, visionId, eqSph, convParsed){
+  if(!convParsed||!convParsed.verriers) return null;
+  const marque=(v.marque||'').toLowerCase();
+  const verrieurKey=Object.keys(convParsed.verriers).find(k=>{
+    const kl=k.toLowerCase();
+    return kl===marque||marque.includes(kl)||kl.includes(marque);
+  });
+  if(!verrieurKey) return null;
+  const verrier=convParsed.verriers[verrieurKey];
+  const seuil=parseFloat(convParsed.seuil_complexe)||6.0;
+  let verreType;
+  if(visionId==='progressif') verreType='progressif';
+  else verreType=(eqSph>seuil)?'unifocal_complexe':'unifocal_simple';
+  const tarifs=verrier[verreType];
+  if(!tarifs||tarifs[ind]==null) return null;
+  const base=parseFloat(tarifs[ind]);
+  if(isNaN(base)||base<=0) return null;
+  const amincissement=verrier.amincissement?.[ind]?parseFloat(verrier.amincissement[ind]):0;
+  const precalibrage_max=verrier.precalibrage_max!=null?parseFloat(verrier.precalibrage_max):null;
+  const photochromique_supp=verrier.photochromique_supp!=null?parseFloat(verrier.photochromique_supp):null;
+  const venteConv=Math.round((base+amincissement)*100)/100;
+  return{verreType,base,amincissement,precalibrage_max,photochromique_supp,venteConv,verrieurKey};
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -6989,7 +7051,7 @@ function _renderConvBody(id){
   const stored = localStorage.getItem(key);
   if(stored){
     const info = JSON.parse(stored);
-    const aiStored = localStorage.getItem('conv_ai_' + id);
+    const aiStored = localStorage.getItem('conv_parsed_' + id);
     const aiHtml = aiStored ? _renderConvAiCard(JSON.parse(aiStored)) : '';
     return `<div class="pdf-file-info">
       <span class="pdf-file-name"><i class="ti ti-file-type-pdf" style="color:#E11D48;font-size:16px"></i>${info.name}</span>
@@ -7010,11 +7072,28 @@ function _renderConvBody(id){
 }
 
 function _renderConvAiCard(data){
-  if(!data || !data.rows || !data.rows.length) return '';
-  const rows = data.rows.map(r => `<div class="conv-ai-row"><span class="conv-ai-lbl">${r.l}</span><span class="conv-ai-val">${r.v}</span></div>`).join('');
+  if(!data||!data.verriers) return '';
+  const verriers=Object.keys(data.verriers);
+  if(!verriers.length) return `<div class="conv-ai-result"><div class="conv-ai-res-hd"><i class="ti ti-cpu"></i> Analyse IA — ${data.reseau||'Convention'}</div><div class="conv-ai-res-body"><div class="conv-ai-row"><span class="conv-ai-lbl">Résultat</span><span class="conv-ai-val">Aucun verrier détecté dans ce PDF</span></div></div></div>`;
+  const rows=verriers.map(vk=>{
+    const ve=data.verriers[vk];
+    const types=[];
+    if(ve.unifocal_simple) types.push('Unifocal simple');
+    if(ve.unifocal_complexe) types.push('Unifocal complexe');
+    if(ve.progressif) types.push('Progressif');
+    const suppl=[];
+    if(ve.amincissement) suppl.push('Amincissement');
+    if(ve.photochromique_supp!=null) suppl.push(`Teinte +${ve.photochromique_supp}€`);
+    if(ve.precalibrage_max!=null) suppl.push(`Précal max ${ve.precalibrage_max}€`);
+    return `<div class="conv-ai-row">
+      <span class="conv-ai-lbl">${vk}</span>
+      <span class="conv-ai-val">${types.join(', ')}${suppl.length?' · <em>'+suppl.join(' / ')+'</em>':''}</span>
+    </div>`;
+  }).join('');
+  const seuil=data.seuil_complexe||6.0;
   return `<div class="conv-ai-result">
-    <div class="conv-ai-res-hd"><i class="ti ti-cpu"></i> Analyse IA — ${data.reseau||'Convention'}</div>
-    <div class="conv-ai-res-body">${rows}</div>
+    <div class="conv-ai-res-hd"><i class="ti ti-cpu"></i> Grille tarifaire IA — ${data.reseau||'Convention'} · Seuil complexe: ${seuil}D</div>
+    <div class="conv-ai-res-body">${rows}<div class="conv-ai-row" style="margin-top:6px;border-top:1px solid #EDE9FE;padding-top:6px"><span class="conv-ai-lbl" style="color:#059669">✓ Actif</span><span class="conv-ai-val" style="color:#059669;font-weight:600">Prix appliqués automatiquement dans l'onglet Verre</span></div></div>
   </div>`;
 }
 
@@ -7101,7 +7180,7 @@ function pdfDel(key, bodyId, id, isConv){
   localStorage.removeItem(key);
   if(isConv){
     // Supprimer aussi le cache IA du réseau
-    localStorage.removeItem('conv_ai_' + id);
+    localStorage.removeItem('conv_parsed_' + id);
     const bodyEl = document.getElementById(bodyId);
     if(bodyEl) bodyEl.innerHTML = _renderConvBody(id);
   } else {
