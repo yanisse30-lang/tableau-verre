@@ -266,6 +266,7 @@ select option{background:#fff;color:var(--txt-primary)}
 
 /* FOOTER */
 .footer-note{text-align:center;font-size:12px;color:var(--txt-muted);margin-top:24px;padding-top:16px;border-top:1px solid var(--bdr-light)}
+.footer-github{display:none}
 
 /* LOGIN REDESIGN */
 #login-screen{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:row;z-index:9999;overflow:hidden}
@@ -2029,7 +2030,7 @@ select option{background:#fff;color:var(--txt-primary)}
       <div class="summary-box" id="recap"></div>
       <div id="verres-list"></div>
     </div>
-    <div class="footer-note">Confidentiel · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#378ADD;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
+    <div class="footer-note footer-github">Confidentiel · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#378ADD;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
   </div>
 
   <!-- S5 VERRES 2EME PAIRE -->
@@ -2045,7 +2046,7 @@ select option{background:#fff;color:var(--txt-primary)}
       <div class="section-label"><i class="ti ti-trophy"></i> Verres 2e paire recommandés</div>
       <div id="verres-list-2"></div>
     </div>
-    <div class="footer-note">Confidentiel · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#378ADD;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
+    <div class="footer-note footer-github">Confidentiel · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#378ADD;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
   </div>
 
   <!-- FORMATION ──────────────────────────────────────────────── -->
@@ -2202,7 +2203,7 @@ select option{background:#fff;color:var(--txt-primary)}
     <div style="margin-top:4px">
       <button class="btn-back" onclick="go('0')"><i class="ti ti-arrow-left"></i> Retour à l'accueil</button>
     </div>
-    <div class="footer-note">Confidentiel · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#378ADD;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
+    <div class="footer-note footer-github">Confidentiel · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#378ADD;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
   </div>
 
 <script>
@@ -3852,6 +3853,7 @@ async function doLogin(){
         }
         if(currentUser.admin){ document.getElementById('admin-btn').style.display='flex'; document.getElementById('verres-admin-btn').style.display='flex'; }
         document.getElementById('formation-btn').style.display='flex';
+        if(isSuperhote()) document.querySelectorAll('.footer-github').forEach(el=>el.style.display='block');
         setTimeout(()=> showToast('Bienvenue, ' + currentUser.nom + ' !'), 200);
         // Log connexion + notification superhote
         _getPublicIP().then(ip => {
@@ -4035,6 +4037,7 @@ function doLogout(){
   document.getElementById('verres-admin-btn').style.display='none';
   document.getElementById('formation-btn').style.display='none';
   document.getElementById('logout-bar').style.display='none';
+  document.querySelectorAll('.footer-github').forEach(el=>el.style.display='');
   go('0');
   showToast('Déconnecté avec succès.');
 }
