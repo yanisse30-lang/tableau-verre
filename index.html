@@ -955,6 +955,7 @@ select option{background:#fff;color:var(--txt-primary)}
 .accord-tag-ar{background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE}
 .accord-tag-lb{background:#F5F3FF;color:#6D28D9;border:1px solid #DDD6FE}
 .accord-tag-tr{background:#FFF7ED;color:#C2410C;border:1px solid #FED7AA}
+.accord-tag-stock{background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0}
 .accord-fields{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
 .accord-field-lbl{font-size:11px;color:var(--txt-muted);font-weight:600;white-space:nowrap}
 .accord-field-input{border:1.5px solid var(--bdr-light);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:700;width:90px;background:var(--surf-base);color:var(--txt-primary);font-family:inherit;transition:.15s}
@@ -1227,6 +1228,7 @@ select option{background:#fff;color:var(--txt-primary)}
               <option value="ar">Anti-reflet (AR)</option>
               <option value="lb">Lumière bleue (LB)</option>
               <option value="tr">Photochromique (TR)</option>
+              <option value="stock">Verres de stock</option>
             </select>
             <button class="accord-add-btn" onclick="addAccord()"><i class="ti ti-plus"></i> Ajouter</button>
           </div>
@@ -2549,7 +2551,7 @@ const catalogue = [
    ]},
 
   // ECC+UV Sphérique stock unifocal | achat:21.30/31/40/52 | CB:57/63/82/100 | marge:62.6%/50.8%
-  {id:'nk_e3',nom:'Nikon ECC+UV Sphérique',marque:'Nikon',gamme:'entree',
+  {id:'nk_e3',nom:'Nikon ECC+UV Sphérique',marque:'Nikon',gamme:'entree',stock:true,
    compatible:['loin','pres','intermediaire'],sphMax:16,cylMax:4,aspherique:false,precalibrage:false,
    indices:{'1.50':99,'1.60':109,'1.67':145,'1.74':178},
    achats:{'1.50':21.30,'1.60':31,'1.67':40,'1.74':52},
@@ -2577,7 +2579,7 @@ const catalogue = [
    ]},
 
   // Pure Blue UV Sphérique stock LB | achat:41.10/51 | CB:70/80 | marge:41.3%/36.3%
-  {id:'nk_e5',nom:'Nikon Pure Blue UV Sphérique',marque:'Nikon',gamme:'entree',
+  {id:'nk_e5',nom:'Nikon Pure Blue UV Sphérique',marque:'Nikon',gamme:'entree',stock:true,
    compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:4,aspherique:false,precalibrage:false,
    indices:{'1.50':128,'1.60':145},
    achats:{'1.50':41.10,'1.60':51},
@@ -2620,7 +2622,7 @@ const catalogue2e = [
    ]},
 
   // ── LUMIÈRE BLEUE ─────────────────────────────────────────────
-  {id:'sg3',nom:'Sign Unisign Blue Defender',marque:'Sign by BBGR',gamme:'milieu',
+  {id:'sg3',nom:'Sign Unisign Blue Defender',marque:'Sign by BBGR',gamme:'milieu',stock:true,
    compatible:['loin','pres','intermediaire','progressif'],sphMax:10,cylMax:4,aspherique:false,precalibrage:true,
    indices:{'1.50':113,'1.60':138},achats:{'1.50':34.20,'1.60':42},
    traitements:[
@@ -2631,7 +2633,7 @@ const catalogue2e = [
    ]},
 
   // ── SOLAIRE STANDARD ──────────────────────────────────────────
-  {id:'sg4',nom:'Sign Unisign Teinté Cat.3',marque:'Sign by BBGR',gamme:'entree',
+  {id:'sg4',nom:'Sign Unisign Teinté Cat.3',marque:'Sign by BBGR',gamme:'entree',stock:true,
    compatible:['loin','pres','intermediaire'],sphMax:8,cylMax:3,aspherique:false,precalibrage:false,
    indices:{'1.50':26,'1.60':40},achats:{'1.50':8,'1.60':12},
    traitements:[
@@ -3159,7 +3161,7 @@ function renderVerreLigne(v){
     <div style="margin-top:8px;background:#0a2e1a;border:1px solid #1a6040;border-radius:8px;padding:8px 12px;font-size:11px;color:#60d090">
       <span style="font-weight:700;color:#50e0a0"><i class="ti ti-handshake" style="font-size:10px"></i> Accord fournisseur actif</span>
       ${_accordsApplied.map(a=>{
-        const tagLabel = a.tag==='ar'?'Anti-reflet':a.tag==='lb'?'Lumière bleue':'Photochromique';
+        const tagLabel = a.tag==='ar'?'Anti-reflet':a.tag==='lb'?'Lumière bleue':a.tag==='tr'?'Photochromique':'Verre de stock';
         return `<div style="margin-top:4px;color:#80e0b0">${tagLabel}: ${a.inclus?'<span style="color:#50ffaa;font-weight:700">Inclus</span> — ':''}<strong style="color:#50ffaa">−${a.reduction}€</strong>${a.note?` <span style="opacity:.7">(${a.note})</span>`:''}`;
       }).join('')}
       <div style="margin-top:6px;padding-top:6px;border-top:1px solid #1a6040;display:flex;gap:12px">
@@ -3185,6 +3187,7 @@ function renderVerreLigne(v){
         <div class="vr-meta">
           <span class="vr-gamme-dot" style="background:${gcColor}"></span>
           <span class="vr-marque">${v.marque}</span>
+          ${v.stock ? `<span class="vr-reseau-badge" style="background:#15803D;border-color:#16A34A;color:#fff"><i class="ti ti-package" style="font-size:9px"></i> Stock J+1</span>` : ''}
           ${isConvIA ? `<span class="vr-reseau-badge" style="background:#5B21B6;border-color:#7C3AED"><i class="ti ti-cpu" style="font-size:9px"></i> IA ${state.mutuelle?.label||''}</span>` : (isReseau ? `<span class="vr-reseau-badge">${reseauLabel}</span>` : '')}
         </div>
       </td>
@@ -3435,15 +3438,25 @@ function showVerres(){
     let achat = achatBase;
     let achatReducTotal = 0;
     const _accordsApplied = [];
-    if(_accordData && v.tags){
-      v.tags.forEach(tag=>{
-        const a = _accordData[tag];
-        if(a && a.reduction > 0){
-          achat = Math.max(0, achat - a.reduction);
-          achatReducTotal += a.reduction;
-          _accordsApplied.push({ tag, reduction: a.reduction, inclus: a.inclus, note: a.note });
-        }
-      });
+    if(_accordData){
+      // Accord sur traitements (ar, lb, tr)
+      if(v.tags){
+        v.tags.forEach(tag=>{
+          const a = _accordData[tag];
+          if(a && a.reduction > 0){
+            achat = Math.max(0, achat - a.reduction);
+            achatReducTotal += a.reduction;
+            _accordsApplied.push({ tag, reduction: a.reduction, inclus: a.inclus, note: a.note });
+          }
+        });
+      }
+      // Accord spécifique verres de stock
+      if(v.stock && _accordData.stock && _accordData.stock.reduction > 0){
+        const a = _accordData.stock;
+        achat = Math.max(0, achat - a.reduction);
+        achatReducTotal += a.reduction;
+        _accordsApplied.push({ tag:'stock', reduction: a.reduction, inclus: a.inclus, note: a.note });
+      }
     }
     const mutId=state.mutuelle?.id;
     // Tarif réseau hard-codé (tarifsReseau) — priorité basse
@@ -4576,9 +4589,10 @@ function savePrixVerre(vid){
 
 function loadSavedPrix(){
   try{
-    const saved     = JSON.parse(localStorage.getItem('maneo_prix') ||'{}');
-    const savedAppel= JSON.parse(localStorage.getItem('maneo_appel')||'{}');
-    const savedTags = JSON.parse(localStorage.getItem('maneo_tags') ||'{}');
+    const saved      = JSON.parse(localStorage.getItem('maneo_prix')  ||'{}');
+    const savedAppel = JSON.parse(localStorage.getItem('maneo_appel') ||'{}');
+    const savedTags  = JSON.parse(localStorage.getItem('maneo_tags')  ||'{}');
+    const savedStock = JSON.parse(localStorage.getItem('maneo_stock') ||'{}');
     const all = [...catalogue, ...catalogue2e];
     all.forEach(v => {
       if(saved[v.id]){
@@ -4590,6 +4604,8 @@ function loadSavedPrix(){
       if(savedTags[v.id]){
         v.tags = [...new Set([...(v.tags||[]), ...savedTags[v.id]])];
       }
+      // Restaurer le flag stock (détecté par IA ou hardcodé)
+      if(savedStock[v.id]) v.stock = true;
     });
   }catch(e){}
 }
@@ -4826,11 +4842,11 @@ async function analyzeWithClaudeAI(pdfText){
 
   // Construire le contexte du catalogue existant
   const all = [...catalogue, ...catalogue2e];
-  const catCtx = all.map(v => `${v.id}|${v.nom}|${v.marque}|[${Object.keys(v.indices||{}).join(',')}]`).join('\n');
+  const catCtx = all.map(v => `${v.id}|${v.nom}|${v.marque}|[${Object.keys(v.indices||{}).join(',')}]${v.stock?'|STOCK':''}`).join('\n');
 
   const prompt = `Tu es un expert en optique ophtalmique. Analyse ce texte extrait d'un PDF de tarif/catalogue verre.
 
-CATALOGUE EXISTANT (id|nom|marque|indices disponibles):
+CATALOGUE EXISTANT (id|nom|marque|indices|STOCK si verre de stock):
 ${catCtx}
 
 TEXTE DU PDF (${pdfText.length} caractères):
@@ -4839,6 +4855,9 @@ ${pdfText.substring(0, 18000)}
 MISSION: Extrais TOUS les verres avec leurs prix depuis le PDF.
 Pour chaque verre trouvé, cherche la correspondance dans le catalogue existant (par nom ou marque).
 
+VERRE DE STOCK = verre sphérique pré-fabriqué, non surfacé, livraison J+1, prix catalogue fixe.
+Mots-clés stock dans le PDF: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made", "série".
+
 Réponds UNIQUEMENT avec ce JSON valide, rien d'autre:
 {
   "verres": [
@@ -4846,6 +4865,7 @@ Réponds UNIQUEMENT avec ce JSON valide, rien d'autre:
       "id": "id_catalogue_si_correspondance_sinon_null",
       "nom": "nom exact du verre tel qu'il apparaît dans le PDF",
       "marque": "fabricant/marque",
+      "stock": false,
       "indices": {
         "1.50": 145.00,
         "1.60": 165.00,
@@ -4900,6 +4920,7 @@ RÈGLES STRICTES:
 - Les prix sont des prix d'achat en euros (HT ou TTC selon le PDF)
 - N'invente aucun prix — si tu n'es pas sûr, ne l'inclus pas
 - Inclure seulement les indices pour lesquels un prix est clairement indiqué
+- "stock": true si le verre est identifié comme verre de stock/série dans le PDF, false sinon
 - Si aucun verre ni prix trouvé: {"verres":[]}`;
 
   try {
@@ -4979,7 +5000,9 @@ function _applyClaudeResults(parsed, textLen){
     const detectedTags = Array.isArray(item.traitements)
       ? item.traitements.filter(t => validTags.includes(t))
       : ['ar']; // défaut : anti-reflet
-    const detected = {id: target.id, nom: target.nom, marque: target.marque, prix: {}, traitements: detectedTags};
+    // Détection verre de stock
+    const isStock = item.stock === true;
+    const detected = {id: target.id, nom: target.nom, marque: target.marque, prix: {}, traitements: detectedTags, stock: isStock};
     Object.entries(item.indices).forEach(([ind, prix]) => {
       const p = parseFloat(prix);
       if(target.indices[ind] != null && !isNaN(p) && p > 5 && p < 2000){
@@ -5070,10 +5093,15 @@ async function analyzeConvPdfWithAI(id){
 
 CONTEXTE OPTIQUE:
 Un verre ophtalmique est composé de :
-- Base verre selon le TYPE: unifocal_simple (correction faible), unifocal_complexe (forte correction), progressif (avec addition)
-- Le type SIMPLE vs COMPLEXE dépend de l'équivalent sphérique = |sphère + cylindre/2| comparé à un seuil (souvent 6 dioptries)
+- Base verre selon le TYPE:
+  • unifocal_stock    = verre sphérique PRÉ-FABRIQUÉ de stock (livraison J+1, pas de surfaçage, prix catalogue fixe, le moins cher)
+  • unifocal_simple   = verre unifocal surfacé/taillé, correction faible (éq. sphérique ≤ seuil)
+  • unifocal_complexe = verre unifocal surfacé, forte correction (éq. sphérique > seuil)
+  • progressif        = verre avec addition (presbytie)
+- IMPORTANT: dans le PDF, les termes "stock", "de stock", "sphérique de stock", "verre stock", "non surfacé", "Ready-Made" désignent unifocal_stock
+- Le type SIMPLE vs COMPLEXE dépend de l'équivalent sphérique = |sphère + cylindre/2| comparé au seuil (souvent 6D)
 - L'amincissement (indice 1.60, 1.67, 1.74) peut être un supplément séparé ou inclus
-- Supplément photochromique = teinte qui fonce au soleil (Transitions, Reactiv, etc.)
+- Supplément photochromique = teinte qui fonce au soleil (Transitions, Reactiv, PhotoFusion, Sensity…)
 - Supplément précalibrage = découpe verre sur mesure monture
 
 VERRIERS CONNUS: Nikon, Essilor, Zeiss, Hoya, Novacel, BBGR, Indo, Seiko, Rodenstock, Shamir, Kodak
@@ -5089,6 +5117,7 @@ Réponds UNIQUEMENT avec ce JSON valide:
   "seuil_complexe": 6.0,
   "verriers": {
     "Nikon": {
+      "unifocal_stock":    {"1.50": 35.00, "1.60": 42.00},
       "unifocal_simple":   {"1.50": 45.00, "1.60": 55.00, "1.67": 68.00, "1.74": 88.00},
       "unifocal_complexe": {"1.50": 68.00, "1.60": 80.00, "1.67": 97.00, "1.74": 122.00},
       "progressif":        {"1.50": 120.00, "1.60": 145.00, "1.67": 175.00},
@@ -5101,6 +5130,7 @@ Réponds UNIQUEMENT avec ce JSON valide:
 
 RÈGLES STRICTES:
 - Inclure UNIQUEMENT les verriers ET indices trouvés dans le document avec des prix concrets
+- unifocal_stock: si le PDF mentionne "stock", "de série", "ready-made" → extraire cette ligne séparément
 - seuil_complexe: seuil en dioptries séparant simple/complexe (cherche "fort" "complexe" "sphéro-cylindrique" — défaut 6.0)
 - amincissement: supplément pour les indices amincis (si non trouvé, omettre le champ)
 - precalibrage_max: montant max du supplément précalibrage (si non trouvé, omettre)
@@ -5169,8 +5199,11 @@ function _calcConvVerre(v, ind, visionId, eqSph, convParsed){
   const seuil=parseFloat(convParsed.seuil_complexe)||6.0;
   let verreType;
   if(visionId==='progressif') verreType='progressif';
+  else if(v.stock && verrier.unifocal_stock) verreType='unifocal_stock';  // verre de stock → tarif dédié
   else verreType=(eqSph>seuil)?'unifocal_complexe':'unifocal_simple';
-  const tarifs=verrier[verreType];
+  let tarifs=verrier[verreType];
+  // Fallback : si unifocal_stock non trouvé dans le PDF, utiliser unifocal_simple
+  if((!tarifs||tarifs[ind]==null) && verreType==='unifocal_stock') tarifs=verrier['unifocal_simple'];
   if(!tarifs||tarifs[ind]==null) return null;
   const base=parseFloat(tarifs[ind]);
   if(isNaN(base)||base<=0) return null;
@@ -5265,7 +5298,7 @@ function renderAccordsPanel(){
     list.innerHTML = `<div style="text-align:center;padding:32px 16px;color:var(--txt-muted);font-size:13px"><i class="ti ti-handshake" style="font-size:32px;display:block;margin-bottom:10px;opacity:.25"></i>Aucun accord enregistré.<br><span style="font-size:12px">Ajoutez-en un manuellement ou déposez un PDF accord ci-dessus.</span></div>`;
     return;
   }
-  const tagInfo = { ar:{label:'Anti-reflet',cls:'accord-tag-ar'}, lb:{label:'Lumière bleue',cls:'accord-tag-lb'}, tr:{label:'Photochromique',cls:'accord-tag-tr'} };
+  const tagInfo = { ar:{label:'Anti-reflet',cls:'accord-tag-ar'}, lb:{label:'Lumière bleue',cls:'accord-tag-lb'}, tr:{label:'Photochromique',cls:'accord-tag-tr'}, stock:{label:'Verres de stock',cls:'accord-tag-stock'} };
   list.innerHTML = Object.entries(accords).map(([marque, tags])=>{
     const nbActifs = Object.values(tags).filter(d => d.inclus || d.reduction > 0).length;
     const tagsHTML = Object.entries(tags).map(([tag, data])=>{
@@ -5398,10 +5431,11 @@ ${text.substring(0,9000)}
 
 MISSION: Pour chaque verrier cité (Nikon, Essilor, Zeiss, Hoya, BBGR, Novacel, etc.), identifier les avantages négociés sur les traitements.
 
-CODES TRAITEMENTS:
-- "ar" = anti-reflet (ECC, SCC, HCC, Crizal, DuraVision, Hi-Vision, Novatek, etc.)
-- "lb" = lumière bleue (SeeCoat Blue, Pure Blue, Crizal Prevencia, BlueGuard, Recharge, BlueControl, etc.)
-- "tr" = photochromique (Transitions, PhotoFusion, Sensity, Reactiv, ColorMatic, etc.)
+CODES TRAITEMENTS ET CATÉGORIES:
+- "ar"    = anti-reflet (ECC, SCC, HCC, Crizal, DuraVision, Hi-Vision, Novatek, etc.)
+- "lb"    = lumière bleue (SeeCoat Blue, Pure Blue, Crizal Prevencia, BlueGuard, Recharge, BlueControl, etc.)
+- "tr"    = photochromique (Transitions, PhotoFusion, Sensity, Reactiv, ColorMatic, etc.)
+- "stock" = verres de STOCK (sphériques pré-fabriqués, "de stock", "de série", "ready-made", "non surfacé") — IMPORTANT: tarif d'achat beaucoup plus bas que les verres surfacés. À extraire séparément si le PDF mentionne des prix différents pour le stock.
 
 RÉPONDS UNIQUEMENT en JSON valide:
 {
@@ -5412,6 +5446,13 @@ RÉPONDS UNIQUEMENT en JSON valide:
       "inclus": false,
       "reduction": 18.00,
       "note": "SCC+UV facturé au prix ECC+UV"
+    },
+    {
+      "marque": "Nikon",
+      "tag": "stock",
+      "inclus": false,
+      "reduction": 3.00,
+      "note": "Remise volume sur verres ECC+UV stock sphérique"
     },
     {
       "marque": "Essilor",
@@ -5426,7 +5467,8 @@ RÉPONDS UNIQUEMENT en JSON valide:
 Règles:
 - "inclus":true = traitement offert gratuitement (indiquer quand même le prix habituel dans "reduction")
 - "reduction" = montant en € soustrait du prix d'achat catalogue par verre
-- Si pas d'accord détecté pour un verrier/traitement: ne pas l'inclure
+- "stock" = accord spécifique aux verres de stock (prix fixes, remises volume)
+- Si pas d'accord détecté pour un verrier/catégorie: ne pas l'inclure
 - "marque" doit correspondre EXACTEMENT au nom du verrier tel qu'il apparaît dans le PDF`;
 
   const resp = await sbFetch('https://api.anthropic.com/v1/messages',{
@@ -5470,20 +5512,24 @@ async function analyzeIaVerresWithClaude(pdfText){
   if(drop) drop.innerHTML = `<i class="ti ti-cpu" style="font-size:36px;color:#7C3AED;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#7C3AED;font-weight:600">Claude IA analyse les verres...</p><p style="font-size:12px;color:#aaa;margin-top:6px">Détection des prix et noms commerciaux</p>`;
 
   const all = [...catalogue, ...catalogue2e];
-  const catCtx = all.map(v => `${v.id}|${v.nom}|${v.marque}|${v.gamme}|[${Object.keys(v.indices||{}).join(',')}]`).join('\n');
+  const catCtx = all.map(v => `${v.id}|${v.nom}|${v.marque}|${v.gamme}|[${Object.keys(v.indices||{}).join(',')}]${v.stock?'|STOCK':''}`).join('\n');
 
   const prompt = `Tu es un expert en optique ophtalmique et commerce de détail optique en France.
 Analyse ce texte extrait d'un PDF de tarif ou de conventionnement réseau optique.
 
-CATALOGUE EXISTANT (id|nom|marque|gamme|indices):
+CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
 ${catCtx}
 
 TEXTE DU PDF (${pdfText.length} caractères):
 ${pdfText.substring(0, 18000)}
 
+VERRE DE STOCK = verre sphérique pré-fabriqué, non surfacé, livraison J+1, prix catalogue fixe (beaucoup moins cher).
+Mots-clés stock dans le PDF: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made", "de série".
+
 MISSION:
 1. Extrais les prix d'achat et/ou de vente pour les verres du catalogue
-2. Pour chaque verre identifié, propose une APPELLATION COMMERCIALE courte et vendeuse (max 40 car.) adaptée au grand public (ex: "Progressif Premium Nikon", "Anti-fatigue HD", "Unifocal Haute Précision")
+2. Détecte si le verre est un verre DE STOCK (stock:true) ou un verre surfacé (stock:false)
+3. Pour chaque verre identifié, propose une APPELLATION COMMERCIALE courte et vendeuse (max 40 car.) adaptée au grand public (ex: "Progressif Premium Nikon", "Anti-fatigue HD", "Unifocal Stock J+1")
 
 Réponds UNIQUEMENT avec ce JSON valide:
 {
@@ -5492,6 +5538,7 @@ Réponds UNIQUEMENT avec ce JSON valide:
       "id": "id_du_catalogue",
       "nom": "nom technique catalogue",
       "appel": "Appellation commerciale proposée",
+      "stock": false,
       "achats": {"1.50": 145.00, "1.60": 170.00},
       "ventes": {"1.50": 285.00, "1.60": 310.00}
     }
@@ -5500,6 +5547,7 @@ Réponds UNIQUEMENT avec ce JSON valide:
 
 RÈGLES:
 - id: doit correspondre exactement à un id du catalogue existant
+- stock: true si identifié comme verre de stock/série dans le PDF, false sinon
 - appel: proposition de nom commercial clair et attractif pour le client final
 - achats/ventes: uniquement si des prix sont clairement indiqués dans le PDF
 - Ne pas inventer de prix — si absent du PDF, omettre le champ
@@ -6064,19 +6112,30 @@ function applyPdfPrix(){
       }
     }
   });
+  // Appliquer le flag stock si détecté par l'IA
+  let stockCount = 0;
+  pdfPrixDetectes.forEach(det => {
+    if(det.stock === true){
+      const v = all.find(x => x.id === det.id);
+      if(v && !v.stock){ v.stock = true; stockCount++; }
+    }
+  });
   try{
     const saved = JSON.parse(localStorage.getItem('maneo_prix')||'{}');
     const savedTags = JSON.parse(localStorage.getItem('maneo_tags')||'{}');
+    const savedStock = JSON.parse(localStorage.getItem('maneo_stock')||'{}');
     all.forEach(v => {
       saved[v.id] = {indices:{...v.indices}, achats:{...v.achats}};
       if(v.tags) savedTags[v.id] = [...v.tags];
+      if(v.stock) savedStock[v.id] = true;
     });
     localStorage.setItem('maneo_prix', JSON.stringify(saved));
     localStorage.setItem('maneo_tags', JSON.stringify(savedTags));
+    localStorage.setItem('maneo_stock', JSON.stringify(savedStock));
   }catch(e){}
   document.getElementById('pdf-result').style.display = 'none';
   renderVerresEdit();
-  showToast(`${count} prix mis à jour${tagsCount?' · '+tagsCount+' traitements détectés':''} depuis le PDF !`);
+  showToast(`${count} prix mis à jour${tagsCount?' · '+tagsCount+' traitements':''} ${stockCount?' · '+stockCount+' verres stock identifiés':''} depuis le PDF !`);
   pdfPrixDetectes = [];
 }
 
