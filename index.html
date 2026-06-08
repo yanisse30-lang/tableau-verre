@@ -3328,7 +3328,9 @@ function showVerres(){
     if(forcePrecalibrage && !v.precalibrage) return false;
     // Filtre par traitement sélectionné (lb = lumière bleue, tr = photochromique)
     if(selectedTraits.size > 0){
-      const specific=[...(selectedTraits)].filter(t=>t!=='ar');
+      // ar et lb = traitements de surface applicables à tous les verres → pas de filtre strict
+      // tr = Transitions = produit spécifique → filtre strict par tag
+      const specific=[...(selectedTraits)].filter(t=>t!=='ar' && t!=='lb');
       if(specific.length>0){
         if(!v.tags) return false;
         if(!specific.every(t=>v.tags.includes(t))) return false;
