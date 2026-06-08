@@ -1156,7 +1156,6 @@ select option{background:#fff;color:var(--txt-primary)}
         <button class="vadmin-tab active" onclick="switchVTab('prix')"><i class="ti ti-coin"></i> Modifier les prix</button>
         <button class="vadmin-tab" onclick="switchVTab('pdf')"><i class="ti ti-file-text"></i> Importer PDF catalogue</button>
         <button class="vadmin-tab" onclick="switchVTab('ia')"><i class="ti ti-cpu"></i> Analyse IA</button>
-        <button class="vadmin-tab" id="accord-tab-btn" onclick="switchVTab('accords')" style="display:none"><i class="ti ti-handshake"></i> Accords</button>
       </div>
       <!-- PANEL PRIX -->
       <div class="vadmin-panel active" id="vtab-prix">
@@ -1199,42 +1198,6 @@ select option{background:#fff;color:var(--txt-primary)}
         </div>
         <input type="file" id="ia-pdf-input" accept=".pdf" style="display:none" onchange="handleIaPdfFile(this.files[0])"/>
         <div id="ia-results" style="display:none"></div>
-      </div>
-      <!-- PANEL ACCORDS FOURNISSEURS -->
-      <div class="vadmin-panel" id="vtab-accords">
-        <div style="font-size:13px;color:#64748B;margin-bottom:14px;line-height:1.6">
-          Enregistrez les <strong style="color:#1A202C">accords négociés avec vos fournisseurs</strong> — réductions sur traitements, traitements offerts. Les marges se mettent à jour automatiquement dans les calculs.
-        </div>
-        <!-- Zone PDF IA -->
-        <div class="accord-pdf-drop" id="accord-pdf-drop"
-             onclick="document.getElementById('accord-pdf-input').click()"
-             ondragover="event.preventDefault();this.classList.add('drag')"
-             ondragleave="this.classList.remove('drag')"
-             ondrop="handleAccordPdfDrop(event)">
-          <i class="ti ti-cpu" style="color:#7C3AED"></i>
-          <p><strong>Déposer un accord commercial PDF</strong></p>
-          <p style="font-size:12px;margin-top:4px;opacity:.7">L'IA extrait automatiquement les prix négociés par verrier</p>
-        </div>
-        <input type="file" id="accord-pdf-input" accept=".pdf" style="display:none" onchange="handleAccordPdfFile(this.files[0])"/>
-        <div id="accord-ia-status" style="margin-bottom:12px"></div>
-        <!-- Ajout manuel -->
-        <div class="accord-add-card">
-          <div style="font-size:11px;font-weight:800;color:var(--txt-muted);letter-spacing:.05em;text-transform:uppercase"><i class="ti ti-pencil"></i> Saisie manuelle</div>
-          <div class="accord-add-row">
-            <select class="accord-add-select" id="accord-new-marque">
-              <option value="">— Choisir verrier —</option>
-            </select>
-            <select class="accord-add-select" id="accord-new-tag" style="max-width:190px">
-              <option value="ar">Anti-reflet (AR)</option>
-              <option value="lb">Lumière bleue (LB)</option>
-              <option value="tr">Photochromique (TR)</option>
-              <option value="stock">Verres de stock</option>
-            </select>
-            <button class="accord-add-btn" onclick="addAccord()"><i class="ti ti-plus"></i> Ajouter</button>
-          </div>
-        </div>
-        <!-- Liste des accords -->
-        <div id="accords-list"></div>
       </div>
     </div>
   </div>
@@ -1319,6 +1282,15 @@ select option{background:#fff;color:var(--txt-primary)}
               <div style="flex:1">
                 <div class="tool-name">Catalogue verre</div>
                 <div class="tool-sub">Catalogue, tarifs et code EDI de votre fournisseur</div>
+              </div>
+              <div style="font-size:11px;font-weight:700;color:#7C3AED;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:8px;padding:4px 10px;white-space:nowrap;flex-shrink:0">IA <i class="ti ti-cpu" style="font-size:10px"></i></div>
+            </div>
+            <!-- Accords fournisseurs : admin/superhôte uniquement -->
+            <div class="tool-card" id="accords-card" onclick="openAccords()" style="display:none;border-color:#15803D">
+              <div class="tool-icon" style="background:linear-gradient(135deg,#14532D,#15803D)"><i class="ti ti-handshake"></i></div>
+              <div style="flex:1">
+                <div class="tool-name">Accords fournisseurs</div>
+                <div class="tool-sub">Négociations traitements et verres de stock — marges corrigées automatiquement</div>
               </div>
               <div style="font-size:11px;font-weight:700;color:#7C3AED;background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:8px;padding:4px 10px;white-space:nowrap;flex-shrink:0">IA <i class="ti ti-cpu" style="font-size:10px"></i></div>
             </div>
@@ -2019,6 +1991,59 @@ select option{background:#fff;color:var(--txt-primary)}
 
     <button class="oc-back-btn" onclick="go('0')"><i class="ti ti-arrow-left"></i> Retour à l'accueil</button>
   </div>
+  </div>
+
+  <!-- ══════════ MODAL ACCORDS FOURNISSEURS ══════════ -->
+  <div id="accords-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(240,244,248,0.96);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;z-index:9995;overflow-y:auto;padding:24px">
+    <div style="background:#fff;border:1px solid var(--bdr-light);border-radius:24px;padding:32px;width:100%;max-width:760px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.09)">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#14532D,#15803D);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="ti ti-handshake" style="color:#fff;font-size:22px"></i>
+          </div>
+          <div>
+            <div style="font-size:18px;font-weight:800;color:var(--txt-primary)">Accords fournisseurs</div>
+            <div style="font-size:12px;color:var(--txt-muted)">Négociations commerciales · marges corrigées en temps réel</div>
+          </div>
+        </div>
+        <button onclick="closeAccords()" style="background:var(--surf-secondary);border:1px solid var(--bdr-light);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--txt-secondary)"><i class="ti ti-x"></i> Fermer</button>
+      </div>
+      <!-- Contenu -->
+      <div style="font-size:13px;color:#64748B;margin-bottom:18px;line-height:1.6">
+        Enregistrez ici les <strong style="color:#1A202C">accords négociés avec vos fournisseurs</strong> — réductions sur traitements, traitements offerts, prix verres de stock. Les marges se mettent à jour automatiquement dans tous les calculs.
+      </div>
+      <!-- Zone PDF IA -->
+      <div class="accord-pdf-drop" id="accord-pdf-drop"
+           onclick="document.getElementById('accord-pdf-input').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleAccordPdfDrop(event)">
+        <i class="ti ti-cpu" style="color:#7C3AED"></i>
+        <p><strong>Déposer un accord commercial PDF</strong></p>
+        <p style="font-size:12px;margin-top:4px;opacity:.7">L'IA extrait automatiquement les prix négociés par verrier</p>
+      </div>
+      <input type="file" id="accord-pdf-input" accept=".pdf" style="display:none" onchange="handleAccordPdfFile(this.files[0])"/>
+      <div id="accord-ia-status" style="margin-bottom:12px"></div>
+      <!-- Ajout manuel -->
+      <div class="accord-add-card">
+        <div style="font-size:11px;font-weight:800;color:var(--txt-muted);letter-spacing:.05em;text-transform:uppercase"><i class="ti ti-pencil"></i> Saisie manuelle</div>
+        <div class="accord-add-row">
+          <select class="accord-add-select" id="accord-new-marque">
+            <option value="">— Choisir verrier —</option>
+          </select>
+          <select class="accord-add-select" id="accord-new-tag" style="max-width:200px">
+            <option value="ar">Anti-reflet (AR)</option>
+            <option value="lb">Lumière bleue (LB)</option>
+            <option value="tr">Photochromique (TR)</option>
+            <option value="stock">Verres de stock</option>
+          </select>
+          <button class="accord-add-btn" onclick="addAccord()"><i class="ti ti-plus"></i> Ajouter</button>
+        </div>
+      </div>
+      <!-- Liste des accords -->
+      <div id="accords-list"></div>
+    </div>
   </div>
 
   <!-- S1 MUTUELLE -->
@@ -4293,6 +4318,7 @@ async function doLogin(){
           roleBadge.textContent = 'Collaborateur';
         }
         if(currentUser.admin){ document.getElementById('admin-btn').style.display='flex'; document.getElementById('verres-admin-btn').style.display='flex'; }
+        if(currentUser.admin || isSuperhote()){ const ac=document.getElementById('accords-card'); if(ac) ac.style.display='flex'; }
         document.getElementById('formation-btn').style.display='flex';
         if(isSuperhote()) document.querySelectorAll('.footer-github').forEach(el=>el.style.display='block');
         if(currentUser.admin){
@@ -4498,10 +4524,6 @@ let pdfPrixDetectes = [];
 
 function openVerresAdmin(){
   document.getElementById('verres-admin-screen').classList.add('open');
-  // Onglet Accords : visible uniquement pour admin et superhôte
-  const canSeeAccords = !!(currentUser?.admin || isSuperhote());
-  const accordBtn = document.getElementById('accord-tab-btn');
-  if(accordBtn) accordBtn.style.display = canSeeAccords ? '' : 'none';
   renderVerresEdit();
 }
 function closeVerresAdmin(){
@@ -4509,13 +4531,11 @@ function closeVerresAdmin(){
 }
 function switchVTab(tab){
   document.querySelectorAll('.vadmin-tab').forEach((t,i)=>{
-    t.classList.toggle('active', (i===0&&tab==='prix')||(i===1&&tab==='pdf')||(i===2&&tab==='ia')||(i===3&&tab==='accords'));
+    t.classList.toggle('active', (i===0&&tab==='prix')||(i===1&&tab==='pdf')||(i===2&&tab==='ia'));
   });
   document.getElementById('vtab-prix').classList.toggle('active', tab==='prix');
   document.getElementById('vtab-pdf').classList.toggle('active', tab==='pdf');
   document.getElementById('vtab-ia').classList.toggle('active', tab==='ia');
-  document.getElementById('vtab-accords').classList.toggle('active', tab==='accords');
-  if(tab==='accords') renderAccordsPanel();
 }
 
 function renderVerresEdit(){
@@ -5751,6 +5771,16 @@ function _margeModeDemo(){
 }
 function closeMargeMensuelle(){
   document.getElementById('marge-modal').style.display = 'none';
+}
+
+function openAccords(){
+  if(!(currentUser?.admin || isSuperhote())){ showToast('Accès réservé aux administrateurs.'); return; }
+  const modal = document.getElementById('accords-modal');
+  modal.style.display = 'flex';
+  renderAccordsPanel();
+}
+function closeAccords(){
+  document.getElementById('accords-modal').style.display = 'none';
 }
 function resetMargeMensuelle(){
   _margeTextReleve = ''; _margeTextTaux = '';
