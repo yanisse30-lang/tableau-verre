@@ -959,7 +959,7 @@ select option{background:#fff;color:var(--txt-primary)}
     </div>
     <button class="admin-btn-top" id="admin-btn" style="display:none" onclick="openAdmin()"><i class="ti ti-settings"></i> Comptes</button>
     <button class="admin-btn-verres" id="verres-admin-btn" style="display:none" onclick="openVerresAdmin()"><i class="ti ti-pencil"></i> Verres</button>
-    <button class="admin-btn-formation" id="formation-btn" style="display:none" onclick="go('formation')"><i class="ti ti-school"></i> Formation</button>
+    <button class="admin-btn-formation" id="formation-btn" style="display:none" onclick="event.stopPropagation();go('formation')"><i class="ti ti-school"></i> Formation</button>
 
   </div>
 
