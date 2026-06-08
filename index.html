@@ -460,6 +460,16 @@ select option{background:#fff;color:var(--txt-primary)}
 .pdf-file-actions{display:flex;gap:6px;flex-shrink:0}
 .pdf-btn-view{background:#EFF6FF;border:1px solid #BFDBFE;color:var(--blue-600);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
 .pdf-btn-del{background:#FFF1F2;border:1px solid #FECDD3;color:#E11D48;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.pdf-btn-ia{background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px}
+.pdf-btn-ia:hover{opacity:.87}
+.cat-ia-result{margin-top:12px;border:1.5px solid #DDD6FE;border-radius:12px;overflow:hidden}
+.cat-ia-hdr{background:#7C3AED;color:#fff;font-size:12px;font-weight:700;padding:8px 14px;display:flex;align-items:center;gap:7px}
+.cat-ia-body{padding:12px 14px;background:#FAFBFE;max-height:400px;overflow-y:auto}
+.cat-ia-verre{display:flex;flex-direction:column;gap:4px;padding:8px 0;border-bottom:1px solid #EDE9FE}
+.cat-ia-verre:last-child{border-bottom:none}
+.cat-ia-nom{font-size:13px;font-weight:700;color:var(--txt-primary)}
+.cat-ia-prix{font-size:12px;color:#5B21B6}
+.cat-ia-apply{width:100%;margin-top:10px;background:linear-gradient(135deg,#16A34A,#15803D);border:none;border-radius:9px;padding:10px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px}
 /* conv slots grid */
 .conv-slot{background:#fff;border:1.5px solid var(--bdr-light);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
 .conv-slot-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(135deg,#b45309,#D97706);color:#fff}
@@ -7629,19 +7639,274 @@ function _refreshCatSlot(type){
   if(!bodyEl) return;
   if(stored){
     const info = JSON.parse(stored);
-    bodyEl.innerHTML = `<div class="pdf-file-info">
-      <span class="pdf-file-name"><i class="ti ti-file-type-pdf" style="color:#E11D48;font-size:16px"></i>${info.name}</span>
-      <div class="pdf-file-actions">
-        <button class="pdf-btn-view" onclick="pdfView('${key}')"><i class="ti ti-eye"></i> Voir</button>
-        <button class="pdf-btn-del" onclick="pdfDel('${key}','slot-${type}-body','${type}',false)"><i class="ti ti-trash"></i></button>
+    const canIA = !!(currentUser?.admin || isSuperhote());
+    const iaBtn = canIA
+      ? `<button class="pdf-btn-ia" onclick="_catLaunchIA('${type}')"><i class="ti ti-cpu"></i> Analyser IA</button>`
+      : '';
+    // Vérifier si une analyse IA a déjà été faite pour ce slot
+    const hasIaResult = localStorage.getItem('cat_ia_result_' + type);
+    bodyEl.innerHTML = `
+      <div class="pdf-file-info">
+        <span class="pdf-file-name"><i class="ti ti-file-type-pdf" style="color:#E11D48;font-size:16px"></i>${info.name}</span>
+        <div class="pdf-file-actions">
+          <button class="pdf-btn-view" onclick="pdfView('${key}')"><i class="ti ti-eye"></i> Voir</button>
+          ${iaBtn}
+          <button class="pdf-btn-del" onclick="pdfDel('${key}','slot-${type}-body','${type}',false)"><i class="ti ti-trash"></i></button>
+        </div>
       </div>
-    </div>`;
+      <div id="slot-${type}-ia-zone"></div>`;
+    // Si résultat IA déjà sauvegardé, le ré-afficher
+    if(canIA && hasIaResult){
+      try{
+        const cached = JSON.parse(hasIaResult);
+        _catRenderIAResults(type, cached, false);
+      }catch(e){}
+    }
   } else {
     bodyEl.innerHTML = `<div class="pdf-drop-zone" onclick="pdfPickFile('${type}')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'${type}')">
       <i class="ti ti-cloud-upload" style="font-size:32px;color:var(--bdr-medium);display:block;margin-bottom:8px"></i>
       <div style="font-size:13px;font-weight:600;color:var(--txt-muted)">Cliquez ou glissez un PDF ici</div>
       <div style="font-size:11px;color:var(--txt-muted);margin-top:4px">Fichier PDF uniquement</div>
     </div>`;
+  }
+}
+
+// ── Analyse IA inline pour catalogue / tarif ─────────────────
+async function _catLaunchIA(type){
+  const key = localStorage.getItem('maneo_claude_key');
+  if(!key){ showToast('⚠️ Clé Claude manquante — configurez-la dans Paramètres'); return; }
+  const stored = localStorage.getItem('pdf_cat_' + type);
+  if(!stored){ showToast('Aucun PDF chargé pour ce slot'); return; }
+
+  const zone = document.getElementById('slot-' + type + '-ia-zone');
+  if(!zone) return;
+  zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Extraction du PDF…</div>`;
+
+  try{
+    // Base64 → ArrayBuffer
+    const info = JSON.parse(stored);
+    const base64 = info.data.includes(',') ? info.data.split(',')[1] : info.data;
+    const binary = atob(base64);
+    const buf = new ArrayBuffer(binary.length);
+    const view = new Uint8Array(buf);
+    for(let i=0;i<binary.length;i++) view[i] = binary.charCodeAt(i);
+
+    // Charger PDF.js si besoin
+    if(typeof pdfjsLib === 'undefined'){
+      await new Promise((res,rej)=>{
+        const sc=document.createElement('script');
+        sc.src=_PDFJS+'/pdf.min.js';
+        sc.onload=res; sc.onerror=rej;
+        document.head.appendChild(sc);
+      });
+    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS+'/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+    let fullText = '';
+    for(let i=1;i<=Math.min(pdf.numPages,30);i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(s=>s.str).join(' ')+'\n';
+      zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Extraction — page ${i}/${pdf.numPages}…</div>`;
+    }
+
+    zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Claude IA analyse le PDF…</div>`;
+
+    const all = [...catalogue, ...catalogue2e];
+    const catCtx = all.map(v=>`${v.id}|${v.nom}|${v.marque}|${v.gamme}|[${Object.keys(v.indices||{}).join(',')}]${v.stock?'|STOCK':''}`).join('\n');
+
+    // Prompt adapté selon le type de slot
+    let prompt;
+    if(type === 'catalogue'){
+      prompt = `Tu es un expert en optique ophtalmique. Analyse ce PDF catalogue verre fournisseur.
+
+CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
+${catCtx}
+
+TEXTE DU PDF (${fullText.length} car.):
+${fullText.substring(0,18000)}
+
+VERRE DE STOCK = verre sphérique pré-fabriqué, livraison J+1, prix catalogue fixe.
+Mots-clés stock: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made", "de série".
+
+MISSION:
+1. Identifie les verres du catalogue ci-dessus présents dans le PDF
+2. Extrais leurs prix d'achat (achat HT opticien) et/ou prix de vente conseillés
+3. Détecte le traitement de chaque verre selon les appellations par verrier
+4. Détecte si le verre est de stock (stock:true)
+5. Propose une appellation commerciale courte (max 40 car.) pour le client
+
+CODES TRAITEMENTS PAR VERRIER:
+"ar" = ECC+UV/SCC+UV/HCC/SeeCoat(Nikon) · Crizal(Essilor) · DuraVision(Zeiss) · Hi-Vision(Hoya) · Novatek(BBGR) · Novalux(Novacel)
+"lb" = Pure Blue/SeeCoat Blue(Nikon) · Crizal Prevencia/Eyezen+(Essilor) · BlueGuard(Zeiss) · Recharge/BlueControl(Hoya) · BlueUV(BBGR)
+"tr" = Transitions/GEN8/XTRActive · PhotoFusion X(Zeiss) · Sensity(Hoya) · Reactiv(BBGR) · ColorMatic(Rodenstock)
+
+Réponds UNIQUEMENT JSON valide:
+{"verres":[{"id":"id_catalogue","nom":"nom PDF","appel":"Appellation commerciale","stock":false,"achats":{"1.50":21.30},"ventes":{"1.50":99.00},"traitements":["ar"]}]}
+RÈGLES: Ne pas inventer de prix · stock:true si verre de stock · id = id catalogue existant · Si rien trouvé: {"verres":[]}`;
+    } else {
+      // tarif → focus sur les prix d'achat
+      prompt = `Tu es un expert en optique ophtalmique. Analyse ce PDF de grille tarifaire fournisseur.
+
+CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
+${catCtx}
+
+TEXTE DU PDF (${fullText.length} car.):
+${fullText.substring(0,18000)}
+
+MISSION: Extrait TOUS les prix d'achat HT opticien pour les verres du catalogue. Les verres de stock ont des prix beaucoup plus bas que les verres surfacés.
+
+VERRE DE STOCK = termes: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made" → stock:true
+
+Réponds UNIQUEMENT JSON valide:
+{"verres":[{"id":"id_catalogue","nom":"nom PDF","stock":false,"achats":{"1.50":21.30,"1.60":31.00},"traitements":["ar"]}]}
+RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de stock · Si rien trouvé: {"verres":[]}`;
+    }
+
+    const resp = await sbFetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:4096,messages:[{role:'user',content:prompt}]})
+    });
+    if(!resp.ok){ const e=await resp.text(); throw new Error('API '+resp.status+': '+e.substring(0,200)); }
+    const data = await resp.json();
+    const raw = data.content?.[0]?.text||'';
+    const match = raw.match(/\{[\s\S]*\}/);
+    if(!match) throw new Error('Réponse IA invalide');
+    const parsed = JSON.parse(match[0]);
+
+    // Sauvegarder le résultat en cache
+    localStorage.setItem('cat_ia_result_'+type, JSON.stringify(parsed));
+    _catRenderIAResults(type, parsed, true);
+
+  } catch(err){
+    if(zone) zone.innerHTML = `<div style="margin-top:10px;background:#FFF1F2;border:1px solid #FECDD3;border-radius:10px;padding:10px 14px;font-size:13px;color:#DC2626;font-weight:600"><i class="ti ti-alert-circle"></i> Erreur : ${err.message}</div>`;
+  }
+}
+
+function _catRenderIAResults(type, parsed, freshAnalysis){
+  const zone = document.getElementById('slot-'+type+'-ia-zone');
+  if(!zone) return;
+  const all = [...catalogue, ...catalogue2e];
+  const verres = (parsed.verres||[]).filter(item => {
+    let t = item.id ? all.find(v=>v.id===item.id) : null;
+    if(!t) t = all.find(v=>v.nom.toLowerCase()===(item.nom||'').toLowerCase());
+    return !!t;
+  });
+
+  if(!verres.length){
+    zone.innerHTML = `<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400E;">Aucun verre du catalogue identifié dans ce PDF.</div>`;
+    return;
+  }
+
+  // Enrichir avec les données catalogue
+  const enriched = verres.map(item=>{
+    let target = item.id ? all.find(v=>v.id===item.id) : null;
+    if(!target) target = all.find(v=>v.nom.toLowerCase()===(item.nom||'').toLowerCase());
+    return {...item, _target: target};
+  });
+
+  const lignes = enriched.map(item=>{
+    const v = item._target;
+    const stockBadge = item.stock ? `<span style="font-size:10px;font-weight:700;color:#15803D;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:20px;padding:2px 7px;margin-left:6px"><i class="ti ti-package" style="font-size:9px"></i> Stock</span>` : '';
+    const achatStr = item.achats && Object.keys(item.achats).length
+      ? Object.entries(item.achats).map(([i,p])=>`<span style="font-size:11px;background:#FEF9C3;border:1px solid #FDE047;border-radius:6px;padding:2px 6px">Ind.${i}: <strong>${p}€</strong></span>`).join(' ')
+      : '';
+    const venteStr = item.ventes && Object.keys(item.ventes||{}).length
+      ? Object.entries(item.ventes).map(([i,p])=>`<span style="font-size:11px;background:#DBEAFE;border:1px solid #93C5FD;border-radius:6px;padding:2px 6px">Ind.${i}: <strong>${p}€</strong></span>`).join(' ')
+      : '';
+    const appelStr = item.appel ? `<div style="font-size:11px;color:#7C3AED;font-style:italic;margin-top:3px">↳ "${item.appel}"</div>` : '';
+    return `<div class="cat-ia-verre">
+      <div class="cat-ia-nom">${v.nom} <span style="font-size:11px;color:#aaa;font-weight:400">${v.marque}</span>${stockBadge}</div>
+      ${appelStr}
+      ${achatStr ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px"><span style="font-size:10px;color:#92400E;font-weight:700">Achat:</span>${achatStr}</div>` : ''}
+      ${venteStr ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:3px"><span style="font-size:10px;color:#1D4ED8;font-weight:700">Vente:</span>${venteStr}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  const freshNote = freshAnalysis
+    ? `<i class="ti ti-cpu"></i> ${enriched.length} verre(s) détecté(s) — cliquez Appliquer`
+    : `<i class="ti ti-history"></i> Dernière analyse · ${enriched.length} verre(s)`;
+
+  zone.innerHTML = `
+    <div class="cat-ia-result">
+      <div class="cat-ia-hdr">${freshNote}</div>
+      <div class="cat-ia-body">${lignes}</div>
+    </div>
+    <button class="cat-ia-apply" onclick="_catApplyIA('${type}')"><i class="ti ti-check"></i> Appliquer les prix et appellations au catalogue</button>`;
+}
+
+function _catApplyIA(type){
+  const stored = localStorage.getItem('cat_ia_result_'+type);
+  if(!stored){ showToast('Aucun résultat IA à appliquer'); return; }
+  const parsed = JSON.parse(stored);
+  const all = [...catalogue, ...catalogue2e];
+  let countPrix=0, countAppel=0, countTags=0, countStock=0;
+  const savedPrix  = JSON.parse(localStorage.getItem('maneo_prix') ||'{}');
+  const savedAppel = JSON.parse(localStorage.getItem('maneo_appel')||'{}');
+  const savedTags  = JSON.parse(localStorage.getItem('maneo_tags') ||'{}');
+  const savedStock = JSON.parse(localStorage.getItem('maneo_stock')||'{}');
+
+  (parsed.verres||[]).forEach(item=>{
+    let v = item.id ? all.find(x=>x.id===item.id) : null;
+    if(!v) v = all.find(x=>x.nom.toLowerCase()===(item.nom||'').toLowerCase());
+    if(!v) return;
+    // Prix d'achat
+    if(item.achats && Object.keys(item.achats).length){
+      Object.entries(item.achats).forEach(([ind,p])=>{
+        const val = parseFloat(p);
+        if(v.achats[ind]!=null && !isNaN(val) && val>0 && val<2000){
+          v.achats[ind]=Math.round(val*100)/100; countPrix++;
+        }
+      });
+    }
+    // Prix de vente
+    if(item.ventes && Object.keys(item.ventes).length){
+      Object.entries(item.ventes).forEach(([ind,p])=>{
+        const val = parseFloat(p);
+        if(v.indices[ind]!=null && !isNaN(val) && val>0 && val<5000){
+          v.indices[ind]=Math.round(val*100)/100; countPrix++;
+        }
+      });
+    }
+    // Appellation commerciale
+    if(item.appel && item.appel.trim()){
+      v.appel = item.appel.trim(); countAppel++;
+    }
+    // Traitements
+    if(Array.isArray(item.traitements) && item.traitements.length){
+      const validTags=['ar','lb','tr'];
+      const newTags = item.traitements.filter(t=>validTags.includes(t));
+      if(newTags.length){
+        v.tags=[...new Set([...(v.tags||[]),...newTags])]; countTags++;
+      }
+    }
+    // Stock
+    if(item.stock===true && !v.stock){ v.stock=true; countStock++; }
+    // Persister
+    savedPrix[v.id]={indices:{...v.indices},achats:{...v.achats}};
+    if(v.appel) savedAppel[v.id]=v.appel;
+    if(v.tags) savedTags[v.id]=[...v.tags];
+    if(v.stock) savedStock[v.id]=true;
+  });
+
+  localStorage.setItem('maneo_prix', JSON.stringify(savedPrix));
+  localStorage.setItem('maneo_appel', JSON.stringify(savedAppel));
+  localStorage.setItem('maneo_tags', JSON.stringify(savedTags));
+  localStorage.setItem('maneo_stock', JSON.stringify(savedStock));
+
+  const parts=[];
+  if(countPrix)  parts.push(`${countPrix} prix mis à jour`);
+  if(countAppel) parts.push(`${countAppel} appellations`);
+  if(countTags)  parts.push(`${countTags} traitements`);
+  if(countStock) parts.push(`${countStock} stock identifiés`);
+  showToast(parts.length ? parts.join(' · ')+' ✓' : 'Aucune donnée applicable trouvée');
+
+  // Mettre à jour le bouton
+  const zone = document.getElementById('slot-'+type+'-ia-zone');
+  if(zone){
+    const btn = zone.querySelector('.cat-ia-apply');
+    if(btn){ btn.innerHTML='<i class="ti ti-check"></i> Appliqué ✓'; btn.style.background='#6B7280'; btn.disabled=true; }
   }
 }
 
@@ -7709,6 +7974,8 @@ function pdfDel(key, bodyId, id, isConv){
     const bodyEl = document.getElementById(bodyId);
     if(bodyEl) bodyEl.innerHTML = _renderConvBody(id);
   } else {
+    // Supprimer aussi le cache IA du slot catalogue/tarif
+    localStorage.removeItem('cat_ia_result_' + id);
     _refreshCatSlot(id);
   }
   showToast('PDF supprimé.');
