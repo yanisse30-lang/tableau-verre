@@ -1155,7 +1155,7 @@ select option{background:#fff;color:var(--txt-primary)}
         <button class="vadmin-tab active" onclick="switchVTab('prix')"><i class="ti ti-coin"></i> Modifier les prix</button>
         <button class="vadmin-tab" onclick="switchVTab('pdf')"><i class="ti ti-file-text"></i> Importer PDF catalogue</button>
         <button class="vadmin-tab" onclick="switchVTab('ia')"><i class="ti ti-cpu"></i> Analyse IA</button>
-        <button class="vadmin-tab" onclick="switchVTab('accords')"><i class="ti ti-handshake"></i> Accords</button>
+        <button class="vadmin-tab" id="accord-tab-btn" onclick="switchVTab('accords')" style="display:none"><i class="ti ti-handshake"></i> Accords</button>
       </div>
       <!-- PANEL PRIX -->
       <div class="vadmin-panel active" id="vtab-prix">
@@ -3150,11 +3150,12 @@ function renderVerreLigne(v){
       </div>
     </div>` : '';
 
-  // Détail accords fournisseur (réductions achat)
+  // Détail accords fournisseur (visible uniquement admin + superhôte)
+  const _canSeeAccords = !!(currentUser?.admin || isSuperhote());
   const _accordsApplied = v._accordsApplied || [];
   const achatReducTotal = v.achatReducTotal || 0;
   const achatBase = v.achatBase || v.achat;
-  const accordDetailHtml = _accordsApplied.length > 0 ? `
+  const accordDetailHtml = (_canSeeAccords && _accordsApplied.length > 0) ? `
     <div style="margin-top:8px;background:#0a2e1a;border:1px solid #1a6040;border-radius:8px;padding:8px 12px;font-size:11px;color:#60d090">
       <span style="font-weight:700;color:#50e0a0"><i class="ti ti-handshake" style="font-size:10px"></i> Accord fournisseur actif</span>
       ${_accordsApplied.map(a=>{
@@ -3198,7 +3199,7 @@ function renderVerreLigne(v){
       <td class="vt-saisie">${v.vente} €</td>
       <td class="vt-saisie">${precalSaisie}</td>
       <td class="vt-saisie">${teinteSaisie}</td>
-      <td style="text-align:right"><div class="vt-marge ${margeClass}"><span class="vt-marge-pct">${taux}%</span><span class="vt-marge-detail">+${marge.toFixed(2)} € / verre · +${(marge*2).toFixed(2)} € / paire${achatReducTotal>0?`<br><span class="accord-marge-badge"><i class="ti ti-handshake" style="font-size:8px"></i> Accord −${achatReducTotal}€</span>`:''}</span></div></td>
+      <td style="text-align:right"><div class="vt-marge ${margeClass}"><span class="vt-marge-pct">${taux}%</span><span class="vt-marge-detail">+${marge.toFixed(2)} € / verre · +${(marge*2).toFixed(2)} € / paire${(_canSeeAccords && achatReducTotal>0)?`<br><span class="accord-marge-badge"><i class="ti ti-handshake" style="font-size:8px"></i> Accord −${achatReducTotal}€</span>`:''}</span></div></td>
     </tr>
     <tr class="vt-detail" id="vt-${v.id}">
       <td colspan="8">
@@ -4484,6 +4485,10 @@ let pdfPrixDetectes = [];
 
 function openVerresAdmin(){
   document.getElementById('verres-admin-screen').classList.add('open');
+  // Onglet Accords : visible uniquement pour admin et superhôte
+  const canSeeAccords = !!(currentUser?.admin || isSuperhote());
+  const accordBtn = document.getElementById('accord-tab-btn');
+  if(accordBtn) accordBtn.style.display = canSeeAccords ? '' : 'none';
   renderVerresEdit();
 }
 function closeVerresAdmin(){
