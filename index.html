@@ -3137,11 +3137,14 @@ function renderVerreLigne(v){
   // Précalibrage : depuis conv IA si dispo, sinon depuis mutuelle
   const _precalPrix    = _convData?.precalibrage_max ?? state.mutuelle?.prixPrecalibrage ?? 15;
   const _precalInclus  = state.mutuelle?.optislimInclus ?? false;
+  const _forcePrecal   = (selectedMonture === 'nylor' || selectedMonture === 'percee');
   const precalSaisie   = v.precalibrage
     ? (_precalInclus
         ? `<span style="display:inline-block;background:#0a2e1a;color:#50f0a0;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;border:1.5px solid #1a6040">Inclus</span>`
         : `<span style="display:inline-block;background:#1a1040;color:#c080ff;font-size:12px;font-weight:800;padding:3px 9px;border-radius:20px;border:1.5px solid #5030a0">+${_precalPrix} €${isConvIA?' <span style="font-size:9px;opacity:.7">max</span>':''}</span>`)
-    : `<span style="display:inline-block;background:#1a1200;color:#f0b030;font-size:10px;font-weight:700;padding:3px 7px;border-radius:20px;border:1.5px solid #5a4000;line-height:1.3;text-align:center">💡 Conseillé<br><strong style="font-size:11px">+${_precalPrix} €${isConvIA?' max':''}</strong></span>`;
+    : (_forcePrecal
+        ? `<span style="display:inline-block;background:#1a0e00;color:#f97316;font-size:10px;font-weight:700;padding:3px 7px;border-radius:20px;border:1.5px solid #7c3900;line-height:1.3;text-align:center">⚠ Requis<br><strong style="font-size:11px">+${_precalPrix} €${isConvIA?' max':''}</strong></span>`
+        : `<span style="display:inline-block;background:#1a1200;color:#f0b030;font-size:10px;font-weight:700;padding:3px 7px;border-radius:20px;border:1.5px solid #5a4000;line-height:1.3;text-align:center">💡 Conseillé<br><strong style="font-size:11px">+${_precalPrix} €${isConvIA?' max':''}</strong></span>`);
   // Teinte photochromique : depuis conv IA si dispo
   const _teintePrix = _convData?.photochromique_supp ?? null;
   const teinteSaisie = _teintePrix != null
@@ -3211,7 +3214,9 @@ function renderVerreLigne(v){
       <td><span class="vt-indice">${v.indiceChoisi}</span></td>
       <td>${v.precalibrage
         ? `<span class="vt-precal-incl"><i class="ti ti-check" style="font-size:10px;margin-right:3px"></i>Inclus</span>`
-        : `<span class="vt-precal-non">—</span>`}</td>
+        : (_forcePrecal
+            ? `<span class="vt-precal-non" style="color:#f97316;font-weight:700">Requis</span>`
+            : `<span class="vt-precal-non">—</span>`)}</td>
       <td style="text-align:right">
         <span class="vt-prix ${isReseau?'reseau':''} ${isConvIA?'conv-ia':''}">${v.vente} €</span>
         ${plafond!=null&&state.mutuelle?.section==='sous'?`<br><span style="font-size:10px;color:${resteC===0?'#50d090':'#ff8080'}">RAC: ${resteC===0?'0 €':resteC+' €'}</span>`:''}
@@ -3431,12 +3436,18 @@ function showVerres(){
     if(!v.compatible.includes(state.vision.id)) return false;
     if(sphMax>v.sphMax) return false;
     if(cylMax>v.cylMax) return false;
-    if(forcePrecalibrage && !v.precalibrage) return false;
-    // Filtre par traitement sélectionné (lb = lumière bleue, tr = photochromique)
+    // Note: precalibrage n'est PAS un filtre d'exclusion — tout verre peut être précalibré.
+    // forcePrecalibrage sert uniquement à l'affichage (colonne précal) et à l'indice minimum.
+    // Filtre par traitement sélectionné
     if(selectedTraits.size > 0){
-      // ar et lb = traitements de surface applicables à tous les verres → pas de filtre strict
-      // tr = Transitions = produit spécifique → filtre strict par tag
-      const specific=[...(selectedTraits)].filter(t=>t!=='ar' && t!=='lb');
+      // ar, lb = traitements de surface applicables à tous les verres → pas de filtre strict
+      // tr = photochromique → filtre strict uniquement pour les progressifs
+      //      (les unifocaux peuvent tous être commandés en photochromique comme service)
+      const specific=[...(selectedTraits)].filter(t=>{
+        if(t==='ar'||t==='lb') return false;
+        if(t==='tr' && state.vision?.id !== 'progressif') return false;
+        return true;
+      });
       if(specific.length>0){
         if(!v.tags) return false;
         if(!specific.every(t=>v.tags.includes(t))) return false;
