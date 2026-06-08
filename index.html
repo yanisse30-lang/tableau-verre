@@ -3208,6 +3208,7 @@ function renderVerreLigne(v){
           <span class="vr-gamme-dot" style="background:${gcColor}"></span>
           <span class="vr-marque">${v.marque}</span>
           ${v.stock ? `<span class="vr-reseau-badge" style="background:#15803D;border-color:#16A34A;color:#fff"><i class="ti ti-package" style="font-size:9px"></i> Stock J+1</span>` : ''}
+          ${(v.tags||[]).includes('tr') ? `<span class="vr-reseau-badge" style="background:#0f3d2a;border-color:#16A34A;color:#4ade80"><i class="ti ti-sun-moon" style="font-size:9px"></i> Transitions</span>` : (selectedTraits.has('tr') ? `<span class="vr-reseau-badge" style="background:#1a1a1a;border-color:#444;color:#888"><i class="ti ti-sun-moon" style="font-size:9px"></i> Photochromique sur cmd</span>` : '')}
           ${isConvIA ? `<span class="vr-reseau-badge" style="background:#5B21B6;border-color:#7C3AED"><i class="ti ti-cpu" style="font-size:9px"></i> IA ${state.mutuelle?.label||''}</span>` : (isReseau ? `<span class="vr-reseau-badge">${reseauLabel}</span>` : '')}
         </div>
       </td>
@@ -3439,20 +3440,10 @@ function showVerres(){
     // Note: precalibrage n'est PAS un filtre d'exclusion — tout verre peut être précalibré.
     // forcePrecalibrage sert uniquement à l'affichage (colonne précal) et à l'indice minimum.
     // Filtre par traitement sélectionné
-    if(selectedTraits.size > 0){
-      // ar, lb = traitements de surface applicables à tous les verres → pas de filtre strict
-      // tr = photochromique → filtre strict uniquement pour les progressifs
-      //      (les unifocaux peuvent tous être commandés en photochromique comme service)
-      const specific=[...(selectedTraits)].filter(t=>{
-        if(t==='ar'||t==='lb') return false;
-        if(t==='tr' && state.vision?.id !== 'progressif') return false;
-        return true;
-      });
-      if(specific.length>0){
-        if(!v.tags) return false;
-        if(!specific.every(t=>v.tags.includes(t))) return false;
-      }
-    }
+    // ar, lb, tr = traitements applicables à tous les verres (service labo ou surface)
+    // → aucun filtre strict : on affiche tous les verres compatibles,
+    //   les verres avec le tag correspondant sont mis en évidence dans la liste
+    // (aucun traitement ne peut bloquer l'affichage — évite 0 résultat)
     return true;
   }).map(v=>{
     const ind=getBestIndice(v,indiceRec);
