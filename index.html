@@ -453,8 +453,9 @@ select option{background:#fff;color:var(--txt-primary)}
 .pdf-slot-title{font-size:15px;font-weight:700}
 .pdf-slot-sub{font-size:11px;opacity:0.85;margin-top:1px}
 .pdf-slot-body{padding:14px 18px}
-.pdf-drop-zone{border:2px dashed var(--bdr-medium);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:0.15s;background:var(--surf-secondary)}
-.pdf-drop-zone:hover,.pdf-drop-zone.drag-over{border-color:var(--blue-600);background:#EFF6FF}
+.pdf-drop-zone{border:2px dashed #A78BFA;border-radius:14px;padding:26px 20px;text-align:center;cursor:pointer;transition:0.15s;background:#F5F3FF;color:#6D28D9}
+.pdf-drop-zone:hover,.pdf-drop-zone.drag-over{background:#EDE9FE;border-color:#7C3AED}
+.pdf-drop-zone i{font-size:34px;display:block;margin-bottom:10px;opacity:.85}
 .pdf-file-info{display:flex;align-items:center;justify-content:space-between;background:var(--surf-secondary);border:1.5px solid var(--bdr-light);border-radius:10px;padding:11px 14px;gap:10px}
 .pdf-file-name{font-size:13px;font-weight:600;color:var(--txt-primary);display:flex;align-items:center;gap:7px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pdf-file-actions{display:flex;gap:6px;flex-shrink:0}
@@ -1492,9 +1493,9 @@ select option{background:#fff;color:var(--txt-primary)}
           </div>
           <div class="pdf-slot-body" id="slot-catalogue-body">
             <div class="pdf-drop-zone" onclick="pdfPickFile('catalogue')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'catalogue')">
-              <i class="ti ti-cloud-upload" style="font-size:32px;color:var(--bdr-medium);display:block;margin-bottom:8px"></i>
-              <div style="font-size:13px;font-weight:600;color:var(--txt-muted)">Cliquez ou glissez un PDF ici</div>
-              <div style="font-size:11px;color:var(--txt-muted);margin-top:4px">Fichier PDF uniquement</div>
+              <i class="ti ti-cpu" style="color:#7C3AED"></i>
+              <div style="font-size:13px;font-weight:700">Déposer le catalogue verrier PDF</div>
+              <div style="font-size:11px;margin-top:5px;opacity:.75">L'IA extrait verres, indices, prix et traitements</div>
             </div>
           </div>
         </div>
@@ -1510,9 +1511,9 @@ select option{background:#fff;color:var(--txt-primary)}
           </div>
           <div class="pdf-slot-body" id="slot-tarif-body">
             <div class="pdf-drop-zone" onclick="pdfPickFile('tarif')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'tarif')">
-              <i class="ti ti-cloud-upload" style="font-size:32px;color:var(--bdr-medium);display:block;margin-bottom:8px"></i>
-              <div style="font-size:13px;font-weight:600;color:var(--txt-muted)">Cliquez ou glissez un PDF ici</div>
-              <div style="font-size:11px;color:var(--txt-muted);margin-top:4px">Fichier PDF uniquement</div>
+              <i class="ti ti-cpu" style="color:#7C3AED"></i>
+              <div style="font-size:13px;font-weight:700">Déposer le tarif fournisseur PDF</div>
+              <div style="font-size:11px;margin-top:5px;opacity:.75">L'IA analyse les prix d'achat HT</div>
             </div>
           </div>
         </div>
@@ -7605,8 +7606,9 @@ function _renderConvBody(id){
     <div id="conv-ai-res-${id}" style="margin-top:8px">${aiHtml}</div>`;
   }
   return `<div class="pdf-drop-zone" onclick="pdfPickFile('conv_${id}')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'conv_${id}')">
-    <i class="ti ti-cloud-upload" style="font-size:28px;color:var(--bdr-medium);display:block;margin-bottom:6px"></i>
-    <div style="font-size:12px;font-weight:600;color:var(--txt-muted)">Cliquez ou glissez un PDF</div>
+    <i class="ti ti-cpu" style="color:#7C3AED"></i>
+    <div style="font-size:13px;font-weight:700">Déposer la convention réseau PDF</div>
+    <div style="font-size:11px;margin-top:5px;opacity:.75">L'IA extrait la grille tarifaire par verrier</div>
   </div>`;
 }
 
@@ -7667,10 +7669,12 @@ function _refreshCatSlot(type){
       }catch(e){}
     }
   } else {
+    const _dropTitle = type === 'tarif' ? 'Déposer le tarif fournisseur PDF' : 'Déposer le catalogue verrier PDF';
+    const _dropSub   = type === 'tarif' ? "L'IA analyse les prix d'achat HT" : "L'IA extrait verres, indices, prix et traitements";
     bodyEl.innerHTML = `<div class="pdf-drop-zone" onclick="pdfPickFile('${type}')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'${type}')">
-      <i class="ti ti-cloud-upload" style="font-size:32px;color:var(--bdr-medium);display:block;margin-bottom:8px"></i>
-      <div style="font-size:13px;font-weight:600;color:var(--txt-muted)">Cliquez ou glissez un PDF ici</div>
-      <div style="font-size:11px;color:var(--txt-muted);margin-top:4px">Fichier PDF uniquement</div>
+      <i class="ti ti-cpu" style="color:#7C3AED"></i>
+      <div style="font-size:13px;font-weight:700">${_dropTitle}</div>
+      <div style="font-size:11px;margin-top:5px;opacity:.75">${_dropSub}</div>
     </div>`;
   }
 }
