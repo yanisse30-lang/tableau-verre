@@ -842,6 +842,37 @@ select option{background:#fff;color:var(--txt-primary)}
 .oc-back-btn{background:none;border:none;color:var(--txt-muted);font-size:14px;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:6px;padding:22px 0 8px}
 .oc-back-btn:hover{color:var(--txt-primary)}
 @media(max-width:720px){#soc{margin:-14px}.oc-wrap{padding:0 18px 120px}.oc-row2{grid-template-columns:1fr}.oc-geom-row{flex-wrap:wrap}.oc-mut-grid{grid-template-columns:repeat(3,1fr)}.oc-voir{padding:15px;font-size:15px}.oc-tab{font-size:20px}}
+
+/* ─── FORMATION ──────────────────────────────────────────────── */
+.form-mod{border:1.5px solid var(--bdr-light);border-radius:16px;margin-bottom:10px;overflow:hidden}
+.form-mod-hd{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;background:#fff;user-select:none;transition:background .15s}
+.form-mod-hd:hover{background:var(--surf-secondary)}
+.form-mod.open .form-mod-hd{background:#F5F3FF;border-bottom:1.5px solid #DDD6FE}
+.form-mod-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.form-mod-ico i{font-size:18px;color:#fff}
+.form-mod-title{font-size:14px;font-weight:700;color:var(--txt-primary);flex:1}
+.form-mod-chev{font-size:16px;color:var(--txt-muted);transition:transform .2s;flex-shrink:0}
+.form-mod.open .form-mod-chev{transform:rotate(180deg);color:#7C3AED}
+.form-mod-body{padding:18px 18px 20px;background:#FAFBFE;display:none;border-top:1px solid var(--bdr-light)}
+.form-mod.open .form-mod-body{display:block}
+.form-formula{background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;color:#5B21B6;margin:10px 0;font-family:monospace}
+.form-example{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:10px 14px;font-size:13px;color:#1E40AF;margin:10px 0}
+.form-warn{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400E;margin:10px 0}
+.form-step{display:flex;gap:10px;align-items:flex-start;margin:8px 0}
+.form-step-num{width:22px;height:22px;border-radius:50%;background:#7C3AED;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.form-step-txt{font-size:13px;color:var(--txt-secondary);line-height:1.55}
+.form-step-txt strong{color:var(--txt-primary)}
+.form-subtitle{font-size:12px;font-weight:700;color:var(--txt-muted);text-transform:uppercase;letter-spacing:.08em;margin:14px 0 8px}
+.form-kv{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr-light);font-size:13px;align-items:baseline}
+.form-kv:last-child{border-bottom:none}
+.form-key{font-weight:700;color:var(--txt-primary);min-width:64px;flex-shrink:0}
+.form-val{color:var(--txt-secondary);flex:1;line-height:1.4}
+.form-tag{display:inline-block;background:#EDE9FE;color:#5B21B6;border-radius:6px;padding:2px 7px;font-size:12px;font-weight:700;margin:1px 2px}
+.form-tag.blue{background:#DBEAFE;color:#1E40AF}
+.form-tag.green{background:#DCFCE7;color:#166534}
+.form-tag.orange{background:#FEF3C7;color:#92400E}
+.form-zone-bar{display:flex;flex-direction:column;gap:3px;margin:12px 0;border-radius:10px;overflow:hidden;border:1px solid var(--bdr-light)}
+.form-zone{padding:9px 14px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
 </style>
 </head>
 <body>
@@ -2021,62 +2052,154 @@ select option{background:#fff;color:var(--txt-primary)}
   <div id="sformation" class="screen">
     <div class="header-block purple">
       <div class="header-icon"><i class="ti ti-school"></i></div>
-      <div><h2>Formation</h2><p>Guides et ressources pour l'équipe</p></div>
-    </div>
-
-    <div class="card" style="margin-bottom:16px">
-      <div class="section-label" style="margin-top:0;margin-bottom:14px"><i class="ti ti-player-play"></i> Modules de formation</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-
-        <div class="tool-card" style="cursor:default;opacity:0.6">
-          <div class="tool-icon" style="background:linear-gradient(135deg,#1249A0,#185FA5)"><i class="ti ti-eye"></i></div>
-          <div class="tool-info">
-            <div class="tool-name">Prise en main de l'outil</div>
-            <div class="tool-desc">Découvrez les fonctionnalités principales</div>
-          </div>
-          <span style="font-size:10px;font-weight:700;color:#7C3AED;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:20px;padding:2px 8px;margin-left:auto">Bientôt</span>
-        </div>
-
-        <div class="tool-card" style="cursor:default;opacity:0.6">
-          <div class="tool-icon" style="background:linear-gradient(135deg,#5B21B6,#7C3AED)"><i class="ti ti-shield-check"></i></div>
-          <div class="tool-info">
-            <div class="tool-name">Mutuelles et réseaux</div>
-            <div class="tool-desc">Fonctionnement des prises en charge</div>
-          </div>
-          <span style="font-size:10px;font-weight:700;color:#7C3AED;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:20px;padding:2px 8px;margin-left:auto">Bientôt</span>
-        </div>
-
-        <div class="tool-card" style="cursor:default;opacity:0.6">
-          <div class="tool-icon" style="background:linear-gradient(135deg,#0d6630,#16A34A)"><i class="ti ti-chart-bar"></i></div>
-          <div class="tool-info">
-            <div class="tool-name">Marge et tarification</div>
-            <div class="tool-desc">Calculer et optimiser vos marges</div>
-          </div>
-          <span style="font-size:10px;font-weight:700;color:#7C3AED;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:20px;padding:2px 8px;margin-left:auto">Bientôt</span>
-        </div>
-
-        <div class="tool-card" style="cursor:default;opacity:0.6">
-          <div class="tool-icon" style="background:linear-gradient(135deg,#0e3a6a,#185FA5)"><i class="ti ti-lens"></i></div>
-          <div class="tool-info">
-            <div class="tool-name">Verres et traitements</div>
-            <div class="tool-desc">Guide des gammes et indices</div>
-          </div>
-          <span style="font-size:10px;font-weight:700;color:#7C3AED;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:20px;padding:2px 8px;margin-left:auto">Bientôt</span>
-        </div>
-
-      </div>
+      <div><h2>Formation</h2><p>Optique · 6 modules disponibles</p></div>
     </div>
 
     <div class="card">
-      <div class="section-label" style="margin-top:0;margin-bottom:14px"><i class="ti ti-info-circle"></i> Ressources</div>
-      <div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:14px;padding:20px 22px;text-align:center">
-        <i class="ti ti-tools" style="font-size:32px;color:#7C3AED;margin-bottom:10px;display:block"></i>
-        <div style="font-size:15px;font-weight:700;color:#5B21B6;margin-bottom:6px">Section en construction</div>
-        <div style="font-size:13px;color:#7C3AED;opacity:0.8">Les modules de formation seront disponibles prochainement.</div>
-      </div>
-    </div>
+      <div class="section-label" style="margin-top:0;margin-bottom:14px"><i class="ti ti-book"></i> Modules</div>
 
-    <div style="margin-top:16px">
+      <!-- 1 – Transposition optique -->
+      <div class="form-mod" id="fm1">
+        <div class="form-mod-hd" onclick="toggleFormMod('fm1')">
+          <div class="form-mod-ico" style="background:linear-gradient(135deg,#5B21B6,#7C3AED)"><i class="ti ti-refresh"></i></div>
+          <span class="form-mod-title">Transposition optique</span>
+          <i class="ti ti-chevron-down form-mod-chev"></i>
+        </div>
+        <div class="form-mod-body">
+          <div class="form-subtitle">Règle des 3 étapes</div>
+          <div class="form-step"><div class="form-step-num">1</div><div class="form-step-txt"><strong>Nouvelle sphère</strong> = Sphère + Cylindre (addition algébrique)</div></div>
+          <div class="form-step"><div class="form-step-num">2</div><div class="form-step-txt"><strong>Nouveau cylindre</strong> = changer le signe du cylindre (+ → − ou − → +)</div></div>
+          <div class="form-step"><div class="form-step-num">3</div><div class="form-step-txt"><strong>Nouvel axe</strong> = Axe ± 90° (rester entre 0° et 180°)</div></div>
+          <div class="form-subtitle">Exemple</div>
+          <div class="form-formula">Départ :  +2.00 (−1.50) à 30°</div>
+          <div class="form-step"><div class="form-step-num">1</div><div class="form-step-txt">+2.00 + (−1.50) = <strong>+0.50</strong></div></div>
+          <div class="form-step"><div class="form-step-num">2</div><div class="form-step-txt">−(−1.50) = <strong>+1.50</strong></div></div>
+          <div class="form-step"><div class="form-step-num">3</div><div class="form-step-txt">30° + 90° = <strong>120°</strong></div></div>
+          <div class="form-example">✅ Résultat : <strong>+0.50 (+1.50) à 120°</strong></div>
+          <div class="form-warn">⚠️ Si axe + 90° &gt; 180°, soustraire 90° à la place.</div>
+        </div>
+      </div>
+
+      <!-- 2 – Vision de loin -->
+      <div class="form-mod" id="fm2">
+        <div class="form-mod-hd" onclick="toggleFormMod('fm2')">
+          <div class="form-mod-ico" style="background:linear-gradient(135deg,#1249A0,#185FA5)"><i class="ti ti-eye"></i></div>
+          <span class="form-mod-title">Vision de loin</span>
+          <i class="ti ti-chevron-down form-mod-chev"></i>
+        </div>
+        <div class="form-mod-body">
+          <div class="form-subtitle">Définition</div>
+          <p style="font-size:13px;color:var(--txt-secondary);margin:0 0 10px;line-height:1.55">La vision de loin (VL) est la correction pour voir à distance (au-delà de 5 m). C'est la base de toute ordonnance optique.</p>
+          <div class="form-subtitle">Types de défauts</div>
+          <div class="form-kv"><span class="form-key">Myopie</span><span class="form-val">Sphère <strong>négative (−)</strong> · vision de loin floue, VP souvent nette sans correction</span></div>
+          <div class="form-kv"><span class="form-key">Hypermétropie</span><span class="form-val">Sphère <strong>positive (+)</strong> · accommodation permanente, fatigue visuelle</span></div>
+          <div class="form-kv"><span class="form-key">Astigmatisme</span><span class="form-val">Cylindre + Axe · vision floue à toutes distances si non corrigé</span></div>
+          <div class="form-kv"><span class="form-key">Emmétrope</span><span class="form-val">Sphère = 0, pas de correction nécessaire en VL</span></div>
+          <div class="form-example">📏 Un myope de −3.00 voit net jusqu'à environ <strong>33 cm</strong> (1 ÷ 3 = 0,33 m)</div>
+        </div>
+      </div>
+
+      <!-- 3 – Vision de près -->
+      <div class="form-mod" id="fm3">
+        <div class="form-mod-hd" onclick="toggleFormMod('fm3')">
+          <div class="form-mod-ico" style="background:linear-gradient(135deg,#0d6630,#16A34A)"><i class="ti ti-zoom-in"></i></div>
+          <span class="form-mod-title">Vision de près</span>
+          <i class="ti ti-chevron-down form-mod-chev"></i>
+        </div>
+        <div class="form-mod-body">
+          <div class="form-subtitle">Définition</div>
+          <p style="font-size:13px;color:var(--txt-secondary);margin:0 0 10px;line-height:1.55">La vision de près (VP) correspond à la lecture et au travail à environ 33–40 cm. Elle nécessite une <strong>addition</strong> dès l'apparition de la presbytie (vers 40–45 ans).</p>
+          <div class="form-subtitle">Formule</div>
+          <div class="form-formula">VP Sphère = VL Sphère + Addition</div>
+          <div class="form-subtitle">Exemple</div>
+          <div class="form-kv"><span class="form-key">OD VL</span><span class="form-val">−1.50 (−0.75) à 15°</span></div>
+          <div class="form-kv"><span class="form-key">Addition</span><span class="form-val">+2.00</span></div>
+          <div class="form-kv"><span class="form-key">OD VP</span><span class="form-val">−1.50 + 2.00 = <strong>+0.50</strong> (−0.75) à 15°</span></div>
+          <div class="form-warn">⚠️ L'addition est toujours <strong>identique pour les 2 yeux</strong> et toujours positive.</div>
+        </div>
+      </div>
+
+      <!-- 4 – Mi-distance -->
+      <div class="form-mod" id="fm4">
+        <div class="form-mod-hd" onclick="toggleFormMod('fm4')">
+          <div class="form-mod-ico" style="background:linear-gradient(135deg,#b45309,#D97706)"><i class="ti ti-adjustments"></i></div>
+          <span class="form-mod-title">Mi-distance</span>
+          <i class="ti ti-chevron-down form-mod-chev"></i>
+        </div>
+        <div class="form-mod-body">
+          <div class="form-subtitle">Définition</div>
+          <p style="font-size:13px;color:var(--txt-secondary);margin:0 0 10px;line-height:1.55">La mi-distance couvre environ 60–80 cm (ordinateur, bras tendu). Utilisée pour les <strong>verres de bureau</strong> et pour calculer la correction du corridor d'un progressif.</p>
+          <div class="form-subtitle">Formule</div>
+          <div class="form-formula">Mi-dist Sphère = VL Sphère + Addition ÷ 2</div>
+          <div class="form-subtitle">Exemple</div>
+          <div class="form-kv"><span class="form-key">OD VL</span><span class="form-val">−1.50</span></div>
+          <div class="form-kv"><span class="form-key">Addition</span><span class="form-val">+2.00</span></div>
+          <div class="form-kv"><span class="form-key">Mi-dist</span><span class="form-val">−1.50 + 1.00 = <strong>−0.50</strong></span></div>
+          <div class="form-example">💡 Un verre de bureau couvre VL courte (~1 m) + mi-dist + VP. Idéal pour le travail sur écran.</div>
+        </div>
+      </div>
+
+      <!-- 5 – Progressif -->
+      <div class="form-mod" id="fm5">
+        <div class="form-mod-hd" onclick="toggleFormMod('fm5')">
+          <div class="form-mod-ico" style="background:linear-gradient(135deg,#0e7490,#0891B2)"><i class="ti ti-layers"></i></div>
+          <span class="form-mod-title">Progressif</span>
+          <i class="ti ti-chevron-down form-mod-chev"></i>
+        </div>
+        <div class="form-mod-body">
+          <div class="form-subtitle">Zones du verre</div>
+          <div class="form-zone-bar">
+            <div class="form-zone" style="background:#1249A0">👁 Zone VL — Vision de loin (haut du verre)</div>
+            <div class="form-zone" style="background:#0891B2;font-weight:500">⟶ Corridor de progression (transition)</div>
+            <div class="form-zone" style="background:#0d6630">📖 Zone VP — Vision de près, décalée 2,5 mm en nasal (bas)</div>
+          </div>
+          <div class="form-subtitle">Types de corridor</div>
+          <div class="form-kv"><span class="form-key">Court (11 mm)</span><span class="form-val">Zone VP plus haute, adapté montures petites ou basse pupille</span></div>
+          <div class="form-kv"><span class="form-key">Moyen (13 mm)</span><span class="form-val">Compromis standard, bonne progression naturelle</span></div>
+          <div class="form-kv"><span class="form-key">Long (15 mm+)</span><span class="form-val">VL plus large, progression douce, zone VP plus basse</span></div>
+          <div class="form-subtitle">Rappels clés</div>
+          <div class="form-kv"><span class="form-key">Inset VP</span><span class="form-val">Décalage nasal ~2,5 mm → tenir compte à la centration</span></div>
+          <div class="form-kv"><span class="form-key">Aberrations</span><span class="form-val">Présentes sur les bords latéraux — normales en progressif</span></div>
+          <div class="form-kv"><span class="form-key">Hauteur mont.</span><span class="form-val">Minimum recommandé : 28–30 mm selon le corridor choisi</span></div>
+          <div class="form-warn">⚠️ Une forte addition (&gt; +2.50) augmente les aberrations latérales — prévenir le patient à l'adaptation.</div>
+        </div>
+      </div>
+
+      <!-- 6 – Lecture d'une ordonnance -->
+      <div class="form-mod" id="fm6">
+        <div class="form-mod-hd" onclick="toggleFormMod('fm6')">
+          <div class="form-mod-ico" style="background:linear-gradient(135deg,#0f766e,#0D9488)"><i class="ti ti-file-text"></i></div>
+          <span class="form-mod-title">Lecture d'une ordonnance optique</span>
+          <i class="ti ti-chevron-down form-mod-chev"></i>
+        </div>
+        <div class="form-mod-body">
+          <div class="form-subtitle">Abréviations essentielles</div>
+          <div class="form-kv"><span class="form-key">OD / RE</span><span class="form-val">Œil Droit — <em>Right Eye</em></span></div>
+          <div class="form-kv"><span class="form-key">OG / LE</span><span class="form-val">Œil Gauche — <em>Left Eye</em></span></div>
+          <div class="form-kv"><span class="form-key">Sph / S</span><span class="form-val">Sphère (dioptries) — corrige myopie / hypermétropie</span></div>
+          <div class="form-kv"><span class="form-key">Cyl / C</span><span class="form-val">Cylindre (dioptries) — corrige l'astigmatisme</span></div>
+          <div class="form-kv"><span class="form-key">Ax / A</span><span class="form-val">Axe (0° à 180°) — orientation du cylindre</span></div>
+          <div class="form-kv"><span class="form-key">Add / A+</span><span class="form-val">Addition — supplément pour la vision de près (presbytie)</span></div>
+          <div class="form-kv"><span class="form-key">EP / PD</span><span class="form-val">Écart Pupillaire (mm) — distance entre les deux pupilles</span></div>
+          <div class="form-subtitle">Exemple d'ordonnance</div>
+          <div class="form-formula" style="font-size:12px;line-height:1.8">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OG<br>
+            VL : −2.00 (−0.75) 45° &nbsp;|&nbsp; −1.75 (−0.50) 135°<br>
+            Add : +2.25 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp; +2.25<br>
+            EP : 64 mm (32 / 32)
+          </div>
+          <div class="form-subtitle">Lecture pas à pas</div>
+          <div class="form-step"><div class="form-step-num">1</div><div class="form-step-txt">OD VL <strong>−2.00</strong> → myope de 2 dioptries à l'œil droit</div></div>
+          <div class="form-step"><div class="form-step-num">2</div><div class="form-step-txt">Cylindre <strong>−0.75</strong> à <strong>45°</strong> → astigmatisme oblique</div></div>
+          <div class="form-step"><div class="form-step-num">3</div><div class="form-step-txt">Addition <strong>+2.25</strong> → VP OD = −2.00 + 2.25 = <strong>+0.25</strong></div></div>
+          <div class="form-step"><div class="form-step-num">4</div><div class="form-step-txt">EP 64 mm → 32 mm par œil (symétrique)</div></div>
+          <div class="form-example">💡 En l'absence de cylindre sur l'ordonnance : le patient n'est pas astigmate (ou le cylindre est non significatif).</div>
+        </div>
+      </div>
+
+    </div><!-- /card -->
+
+    <div style="margin-top:4px">
       <button class="btn-back" onclick="go('0')"><i class="ti ti-arrow-left"></i> Retour à l'accueil</button>
     </div>
     <div class="footer-note">Confidentiel · <a href="https://yanisse30-lang.github.io/tableau-verre/" style="color:#378ADD;text-decoration:none">yanisse30-lang.github.io/tableau-verre</a></div>
@@ -3144,6 +3267,13 @@ function choisirPaire2(vid){
 
   document.getElementById('verres-list-2').innerHTML=sorted.map((v,i)=>renderVerreCard(v,i,true,true)).join('');
   go(5);
+}
+
+// ─── FORMATION ───────────────────────────────────────────────
+function toggleFormMod(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('open');
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────
