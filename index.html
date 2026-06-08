@@ -911,6 +911,37 @@ select option{background:#fff;color:var(--txt-primary)}
 .form-tag.orange{background:#FEF3C7;color:#92400E}
 .form-zone-bar{display:flex;flex-direction:column;gap:3px;margin:12px 0;border-radius:10px;overflow:hidden;border:1px solid var(--bdr-light)}
 .form-zone{padding:9px 14px;font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+
+/* ── CONV AI ───────────────────────────────────────────────── */
+.conv-ai-btn{width:100%;margin-top:8px;background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
+.conv-ai-btn:hover{opacity:.87;transform:translateY(-1px)}
+.conv-ai-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.conv-ai-result{margin-top:10px;border:1.5px solid #DDD6FE;border-radius:10px;overflow:hidden}
+.conv-ai-res-hd{background:#7C3AED;color:#fff;font-size:11px;font-weight:700;padding:7px 12px;display:flex;align-items:center;gap:6px;letter-spacing:.04em}
+.conv-ai-res-body{background:#FAFBFE;padding:10px 12px}
+.conv-ai-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #EDE9FE;font-size:12px;align-items:flex-start}
+.conv-ai-row:last-child{border-bottom:none}
+.conv-ai-lbl{font-weight:700;color:#5B21B6;min-width:110px;flex-shrink:0}
+.conv-ai-val{color:#3730A3;flex:1;line-height:1.45}
+
+/* ── VERRES APPELLATION ────────────────────────────────────── */
+.verre-appel-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--bdr-light)}
+.verre-appel-lbl{font-size:11px;font-weight:700;color:var(--txt-muted);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;flex-shrink:0}
+.verre-appel-input{flex:1;border:1px solid var(--bdr-medium);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--txt-primary);background:#fff;transition:.15s}
+.verre-appel-input:focus{outline:none;border-color:#7C3AED;box-shadow:0 0 0 2px #EDE9FE}
+
+/* ── VERRES ADMIN IA TAB ───────────────────────────────────── */
+.btn-ai-analyse{background:linear-gradient(135deg,#7C3AED,#5B21B6);border:none;border-radius:9px;padding:10px 16px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;transition:.15s;margin-bottom:16px}
+.btn-ai-analyse:hover{opacity:.87}
+.btn-ai-analyse:disabled{opacity:.5;cursor:not-allowed}
+.ia-verre-card{background:#fff;border:1px solid #DDD6FE;border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.ia-verre-nom{font-size:13px;font-weight:700;color:var(--txt-primary);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.ia-verre-detail{font-size:12px;color:var(--txt-secondary);line-height:1.5}
+.ia-verre-appel{background:#F5F3FF;border:1px solid #DDD6FE;border-radius:6px;padding:4px 9px;font-size:12px;font-weight:600;color:#5B21B6;display:inline-block;margin:4px 0}
+.ia-apply-btn{background:#16A34A;border:none;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;float:right;display:flex;align-items:center;gap:4px}
+.ia-apply-btn:hover{background:#15803D}
+.ia-apply-all{background:linear-gradient(135deg,#16A34A,#15803D);border:none;border-radius:9px;padding:10px 16px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;transition:.15s;margin-top:12px;width:100%;justify-content:center}
+.ia-apply-all:hover{opacity:.87}
 </style>
 </head>
 <body>
@@ -1091,13 +1122,14 @@ select option{background:#fff;color:var(--txt-primary)}
         <button onclick="closeVerresAdmin()" style="background:#F7F9FC;border:1px solid #E4E9F0;color:#4A5568;border-radius:8px;padding:7px 12px;cursor:pointer;font-family:inherit;font-size:13px"><i class="ti ti-x"></i></button>
       </div>
       <div style="font-size:13px;color:#777;margin-bottom:20px">Modifiez les prix ou importez votre catalogue PDF</div>
-      <div class="vadmin-tabs">
+      <div class="vadmin-tabs" style="flex-wrap:wrap">
         <button class="vadmin-tab active" onclick="switchVTab('prix')"><i class="ti ti-coin"></i> Modifier les prix</button>
         <button class="vadmin-tab" onclick="switchVTab('pdf')"><i class="ti ti-file-text"></i> Importer PDF catalogue</button>
+        <button class="vadmin-tab" onclick="switchVTab('ia')"><i class="ti ti-cpu"></i> Analyse IA</button>
       </div>
       <!-- PANEL PRIX -->
       <div class="vadmin-panel active" id="vtab-prix">
-        <div style="font-size:12px;color:#94A3B8;margin-bottom:14px">Cliquez sur <strong style="color:#1A202C">Enregistrer</strong> après chaque modification — les nouveaux prix s'appliquent immédiatement.</div>
+        <div style="font-size:12px;color:#94A3B8;margin-bottom:14px">Cliquez sur <strong style="color:#1A202C">Enregistrer</strong> après chaque modification — les nouveaux prix et appellations s'appliquent immédiatement.</div>
         <div id="verres-edit-list"></div>
       </div>
       <!-- PANEL PDF -->
@@ -1120,6 +1152,22 @@ select option{background:#fff;color:var(--txt-primary)}
           <div id="pdf-verres-found"></div>
           <button class="btn-apply-pdf" onclick="applyPdfPrix()"><i class="ti ti-check"></i> Appliquer ces prix au catalogue</button>
         </div>
+      </div>
+      <!-- PANEL IA -->
+      <div class="vadmin-panel" id="vtab-ia">
+        <div style="font-size:13px;color:#64748B;margin-bottom:14px;line-height:1.6">
+          Importez un PDF de tarif mutuelle ou fournisseur — Claude IA détecte les <strong style="color:#1A202C">prix d'achat, prix de vente</strong> et propose des <strong style="color:#7C3AED">appellations commerciales</strong> pour chaque verre.
+        </div>
+        <div class="pdf-drop" id="ia-pdf-drop" onclick="document.getElementById('ia-pdf-input').click()"
+             ondragover="event.preventDefault();this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="handleIaPdfDrop(event)">
+          <i class="ti ti-cpu" style="color:#7C3AED"></i>
+          <p><strong>Cliquez ou glissez un PDF tarif / réseau</strong></p>
+          <p style="font-size:12px;margin-top:6px">L'IA analyse les prix et propose des noms commerciaux</p>
+        </div>
+        <input type="file" id="ia-pdf-input" accept=".pdf" style="display:none" onchange="handleIaPdfFile(this.files[0])"/>
+        <div id="ia-results" style="display:none"></div>
       </div>
     </div>
   </div>
@@ -4248,10 +4296,11 @@ function closeVerresAdmin(){
 }
 function switchVTab(tab){
   document.querySelectorAll('.vadmin-tab').forEach((t,i)=>{
-    t.classList.toggle('active', (i===0&&tab==='prix')||(i===1&&tab==='pdf'));
+    t.classList.toggle('active', (i===0&&tab==='prix')||(i===1&&tab==='pdf')||(i===2&&tab==='ia'));
   });
   document.getElementById('vtab-prix').classList.toggle('active', tab==='prix');
   document.getElementById('vtab-pdf').classList.toggle('active', tab==='pdf');
+  document.getElementById('vtab-ia').classList.toggle('active', tab==='ia');
 }
 
 function renderVerresEdit(){
@@ -4271,16 +4320,21 @@ function renderVerresEdit(){
         </div>
       </div>`;
     }).join('');
+    const appelVal = (v.appel||'').replace(/"/g,'&quot;');
     return `<div class="verre-edit-row">
       <div class="verre-edit-name">
         <div class="gamme-dot ${dotClass}"></div>
         ${v.nom} <span style="color:#777;font-weight:400;font-size:12px">${v.marque}</span>
       </div>
       <div class="indice-grid">${indicesHTML}</div>
+      <div class="verre-appel-row">
+        <span class="verre-appel-lbl"><i class="ti ti-tag" style="font-size:12px"></i> Appellation</span>
+        <input class="verre-appel-input" type="text" id="appel-${v.id}" value="${appelVal}" placeholder="Appellation commerciale (ex: Progressif Premium, Unifocal HD…)"/>
+      </div>
       <button class="btn-save-prix" onclick="savePrixVerre('${v.id}')">
         <i class="ti ti-device-floppy"></i> Enregistrer
       </button>
-      <div class="saved-badge" id="saved-${v.id}"><i class="ti ti-check"></i> Prix enregistrés !</div>
+      <div class="saved-badge" id="saved-${v.id}"><i class="ti ti-check"></i> Enregistré !</div>
     </div>`;
   }).join('');
 }
@@ -4299,11 +4353,19 @@ function savePrixVerre(vid){
       v.indices[ind] = parseFloat(venteEl.value)||0;
     }
   });
+  // Sauvegarder l'appellation
+  const appelEl = document.getElementById('appel-'+vid);
+  if(appelEl) v.appel = appelEl.value.trim();
   // Save to localStorage for persistence
   try{
     const saved = JSON.parse(localStorage.getItem('maneo_prix')||'{}');
     saved[vid] = {indices:{...v.indices}, achats:{...v.achats}};
     localStorage.setItem('maneo_prix', JSON.stringify(saved));
+    // Sauvegarder les appellations séparément
+    const savedAppel = JSON.parse(localStorage.getItem('maneo_appel')||'{}');
+    if(v.appel) savedAppel[vid] = v.appel;
+    else delete savedAppel[vid];
+    localStorage.setItem('maneo_appel', JSON.stringify(savedAppel));
   }catch(e){}
   const badge = document.getElementById('saved-'+vid);
   badge.style.display='flex';
@@ -4313,12 +4375,14 @@ function savePrixVerre(vid){
 function loadSavedPrix(){
   try{
     const saved = JSON.parse(localStorage.getItem('maneo_prix')||'{}');
+    const savedAppel = JSON.parse(localStorage.getItem('maneo_appel')||'{}');
     const all = [...catalogue, ...catalogue2e];
     all.forEach(v => {
       if(saved[v.id]){
         v.indices = {...v.indices, ...saved[v.id].indices};
         v.achats  = {...v.achats,  ...saved[v.id].achats};
       }
+      if(savedAppel[v.id]) v.appel = savedAppel[v.id];
     });
   }catch(e){}
 }
@@ -4705,6 +4769,378 @@ function _applyClaudeResults(parsed, textLen){
 
 function resetPdfDrop(){
   document.getElementById('pdf-drop').innerHTML = `<i class="ti ti-file-upload"></i><p><strong>Cliquez ou glissez votre PDF ici</strong></p><p style="font-size:12px;margin-top:6px">Tarifs fournisseur, catalogue verres, grille de prix</p>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// IA CONVENTIONNEMENT — analyse un PDF de réseau mutuelle
+// ══════════════════════════════════════════════════════════════════
+async function analyzeConvPdfWithAI(id){
+  const key = 'pdf_conv_' + id;
+  const stored = localStorage.getItem(key);
+  if(!stored){ showToast('Aucun PDF pour ce réseau.'); return; }
+
+  const claudeKey = localStorage.getItem('maneo_claude_key');
+  if(!claudeKey){ showToast('Clé API Claude non configurée — activez-la dans les paramètres admin.'); return; }
+
+  const btn = document.getElementById('conv-ai-btn-'+id);
+  const resEl = document.getElementById('conv-ai-res-'+id);
+  if(btn){ btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Analyse en cours…'; }
+  if(resEl) resEl.innerHTML = '';
+
+  try {
+    // Lire le PDF depuis le base64 stocké
+    const info = JSON.parse(stored);
+    const base64 = info.data.split(',')[1];
+    const binaryStr = atob(base64);
+    const bytes = new Uint8Array(binaryStr.length);
+    for(let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+
+    // Charger PDF.js si nécessaire
+    if(typeof pdfjsLib === 'undefined'){
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = _PDFJS + '/pdf.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    // Extraire le texte
+    pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS + '/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({data: bytes.buffer}).promise;
+    let fullText = '';
+    for(let i = 1; i <= Math.min(pdf.numPages, 25); i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(s => s.str).join(' ') + '\n';
+    }
+
+    // Trouver le label du réseau
+    const reseauInfo = _CONV_RESEAUX.find(r => r.id === id);
+    const reseauLabel = reseauInfo ? reseauInfo.label : id;
+
+    const prompt = `Tu es un expert en conventionnement optique en France. Analyse ce texte extrait d'un document de convention réseau optique (${reseauLabel}).
+
+TEXTE DU DOCUMENT (${fullText.length} caractères):
+${fullText.substring(0, 20000)}
+
+MISSION: Extrais les informations clés de ce conventionnement pour un opticien.
+Recherche spécifiquement:
+- Plafonds de remboursement Sécurité Sociale (base SS, tarif de responsabilité)
+- Plafonds de remboursement mutuelle par classe de verre (A, B, C ou équivalent)
+- Conditions d'accès au réseau (agrément, délai minimum entre deux équipements)
+- Tiers payant (prise en charge directe ou avance de frais)
+- Tarifs plafonds des verres si mentionnés
+- Délais de règlement / paiement
+- Conditions particulières (ordonnance, renouvellement, etc.)
+
+Réponds UNIQUEMENT avec ce JSON valide:
+{
+  "reseau": "${reseauLabel}",
+  "rows": [
+    {"l": "Base SS", "v": "valeur ou info"},
+    {"l": "Plafond verre A", "v": "valeur"},
+    {"l": "Plafond verre B", "v": "valeur"},
+    {"l": "Tiers payant", "v": "oui/non + conditions"},
+    {"l": "Délai renouvellement", "v": "durée"},
+    {"l": "Conditions réseau", "v": "description courte"}
+  ]
+}
+
+RÈGLES:
+- N'inclure que les informations réellement trouvées dans le document
+- Si une info est absente: ne pas inclure la ligne correspondante
+- Valeurs courtes et précises (max 80 caractères par valeur)
+- Si aucune info pertinente trouvée: {"reseau":"${reseauLabel}","rows":[{"l":"Document","v":"Aucune information de conventionnement détectée"}]}`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': claudeKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 1024,
+        messages: [{role: 'user', content: prompt}]
+      })
+    });
+
+    if(!resp.ok){
+      const errData = await resp.json().catch(()=>({}));
+      throw new Error(errData.error?.message || `HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    let rawJson = data.content[0].text.trim();
+    const jsonMatch = rawJson.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('Réponse IA invalide');
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    // Sauvegarder et afficher
+    localStorage.setItem('conv_ai_' + id, JSON.stringify(parsed));
+    if(resEl) resEl.innerHTML = _renderConvAiCard(parsed);
+    if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Réanalyser avec IA'; }
+    showToast(`Analyse ${reseauLabel} terminée — ${parsed.rows?.length||0} informations extraites.`);
+
+  } catch(e) {
+    console.error('Conv AI error:', e);
+    if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Analyser avec IA'; }
+    if(e.message?.includes('401') || e.message?.includes('authentication')){
+      showToast('Clé API invalide — vérifiez dans les paramètres admin.');
+    } else {
+      showToast('Erreur IA : ' + e.message);
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// IA VERRES — analyse un PDF et suggère prix + appellations
+// ══════════════════════════════════════════════════════════════════
+function handleIaPdfDrop(e){
+  e.preventDefault();
+  document.getElementById('ia-pdf-drop').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file && file.type === 'application/pdf') handleIaPdfFile(file);
+  else showToast('Veuillez déposer un fichier PDF.');
+}
+
+function handleIaPdfFile(file){
+  if(!file) return;
+  const drop = document.getElementById('ia-pdf-drop');
+  drop.innerHTML = `<i class="ti ti-loader-2" style="font-size:36px;color:#7C3AED;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#7C3AED;font-weight:600">Lecture du PDF en cours...</p>`;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const buf = e.target.result;
+    if(typeof pdfjsLib === 'undefined'){
+      const s = document.createElement('script');
+      s.src = _PDFJS + '/pdf.min.js';
+      s.onload = () => _iaExtractAndAnalyze(buf);
+      s.onerror = () => { resetIaPdfDrop(); showToast('Erreur chargement PDF.js'); };
+      document.head.appendChild(s);
+    } else {
+      _iaExtractAndAnalyze(buf);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function _iaExtractAndAnalyze(arrayBuffer){
+  const drop = document.getElementById('ia-pdf-drop');
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS + '/pdf.worker.min.js';
+    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+    let fullText = '';
+    for(let i = 1; i <= Math.min(pdf.numPages, 30); i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(s => s.str).join(' ') + '\n';
+      if(drop) drop.innerHTML = `<i class="ti ti-loader-2" style="font-size:36px;color:#7C3AED;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#7C3AED;font-weight:600">Extraction — page ${i}/${pdf.numPages}...</p>`;
+    }
+    analyzeIaVerresWithClaude(fullText);
+  } catch(err) {
+    resetIaPdfDrop();
+    showToast('Erreur lecture PDF : ' + err.message);
+  }
+}
+
+function resetIaPdfDrop(){
+  const drop = document.getElementById('ia-pdf-drop');
+  if(drop) drop.innerHTML = `<i class="ti ti-cpu" style="color:#7C3AED"></i><p><strong>Cliquez ou glissez un PDF tarif / réseau</strong></p><p style="font-size:12px;margin-top:6px">L'IA analyse les prix et propose des noms commerciaux</p>`;
+}
+
+async function analyzeIaVerresWithClaude(pdfText){
+  const key = localStorage.getItem('maneo_claude_key');
+  if(!key){
+    resetIaPdfDrop();
+    showToast('Clé API Claude non configurée.');
+    return;
+  }
+
+  const drop = document.getElementById('ia-pdf-drop');
+  if(drop) drop.innerHTML = `<i class="ti ti-cpu" style="font-size:36px;color:#7C3AED;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#7C3AED;font-weight:600">Claude IA analyse les verres...</p><p style="font-size:12px;color:#aaa;margin-top:6px">Détection des prix et noms commerciaux</p>`;
+
+  const all = [...catalogue, ...catalogue2e];
+  const catCtx = all.map(v => `${v.id}|${v.nom}|${v.marque}|${v.gamme}|[${Object.keys(v.indices||{}).join(',')}]`).join('\n');
+
+  const prompt = `Tu es un expert en optique ophtalmique et commerce de détail optique en France.
+Analyse ce texte extrait d'un PDF de tarif ou de conventionnement réseau optique.
+
+CATALOGUE EXISTANT (id|nom|marque|gamme|indices):
+${catCtx}
+
+TEXTE DU PDF (${pdfText.length} caractères):
+${pdfText.substring(0, 18000)}
+
+MISSION:
+1. Extrais les prix d'achat et/ou de vente pour les verres du catalogue
+2. Pour chaque verre identifié, propose une APPELLATION COMMERCIALE courte et vendeuse (max 40 car.) adaptée au grand public (ex: "Progressif Premium Nikon", "Anti-fatigue HD", "Unifocal Haute Précision")
+
+Réponds UNIQUEMENT avec ce JSON valide:
+{
+  "verres": [
+    {
+      "id": "id_du_catalogue",
+      "nom": "nom technique catalogue",
+      "appel": "Appellation commerciale proposée",
+      "achats": {"1.50": 145.00, "1.60": 170.00},
+      "ventes": {"1.50": 285.00, "1.60": 310.00}
+    }
+  ]
+}
+
+RÈGLES:
+- id: doit correspondre exactement à un id du catalogue existant
+- appel: proposition de nom commercial clair et attractif pour le client final
+- achats/ventes: uniquement si des prix sont clairement indiqués dans le PDF
+- Ne pas inventer de prix — si absent du PDF, omettre le champ
+- Si aucun verre identifiable: {"verres":[]}`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 4096,
+        messages: [{role: 'user', content: prompt}]
+      })
+    });
+
+    if(!resp.ok){
+      const errData = await resp.json().catch(()=>({}));
+      throw new Error(errData.error?.message || `HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    let rawJson = data.content[0].text.trim();
+    const jsonMatch = rawJson.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('Réponse IA invalide');
+    const parsed = JSON.parse(jsonMatch[0]);
+    _renderIaVerresResults(parsed);
+
+  } catch(e) {
+    console.error('IA verres error:', e);
+    resetIaPdfDrop();
+    if(e.message?.includes('401') || e.message?.includes('authentication')){
+      showToast('Clé API invalide — vérifiez dans les paramètres admin.');
+    } else {
+      showToast('Erreur IA : ' + e.message);
+    }
+  }
+}
+
+function _renderIaVerresResults(parsed){
+  resetIaPdfDrop();
+  const resEl = document.getElementById('ia-results');
+  const all = [...catalogue, ...catalogue2e];
+
+  if(!parsed.verres || !parsed.verres.length){
+    resEl.innerHTML = `<div style="text-align:center;padding:20px;color:var(--txt-muted)">
+      <i class="ti ti-search-off" style="font-size:28px;display:block;margin-bottom:10px"></i>
+      <strong>Aucun verre détecté dans ce PDF</strong><br>
+      <span style="font-size:12px">Le document ne contient pas de tarif de verre identifiable.</span>
+    </div>`;
+    resEl.style.display = 'block';
+    return;
+  }
+
+  // Filtrer les verres qui existent dans le catalogue
+  const valid = parsed.verres.filter(item => all.find(v => v.id === item.id));
+  if(!valid.length){
+    resEl.innerHTML = `<div style="text-align:center;padding:16px;color:var(--txt-muted)">
+      <i class="ti ti-alert-circle" style="font-size:22px;display:block;margin-bottom:8px"></i>
+      <strong>Verres trouvés mais sans correspondance au catalogue.</strong>
+    </div>`;
+    resEl.style.display = 'block';
+    return;
+  }
+
+  const cardsHtml = valid.map((item, idx) => {
+    const v = all.find(x => x.id === item.id);
+    const prixHtml = (() => {
+      const parts = [];
+      if(item.achats && Object.keys(item.achats).length) parts.push('<span style="color:#D97706;font-weight:600">Achats :</span> ' + Object.entries(item.achats).map(([i,p])=>`Ind.${i}: <strong>${p}€</strong>`).join(' · '));
+      if(item.ventes && Object.keys(item.ventes).length) parts.push('<span style="color:#185FA5;font-weight:600">Ventes :</span> ' + Object.entries(item.ventes).map(([i,p])=>`Ind.${i}: <strong>${p}€</strong>`).join(' · '));
+      return parts.length ? parts.join('<br>') : '<em style="color:#aaa">Prix non détectés dans ce PDF</em>';
+    })();
+    const appelHtml = item.appel ? `<div class="ia-verre-appel"><i class="ti ti-tag" style="font-size:11px"></i> ${item.appel}</div>` : '';
+    return `<div class="ia-verre-card" id="ia-card-${idx}">
+      <div class="ia-verre-nom">
+        <div class="gamme-dot ${v.gamme==='haut'?'dot-haut':v.gamme==='milieu'?'dot-milieu':'dot-entree'}" style="width:8px;height:8px;border-radius:50%;flex-shrink:0"></div>
+        ${v.nom} <span style="color:#aaa;font-weight:400;font-size:11px">${v.marque}</span>
+        <button class="ia-apply-btn" onclick="applyIaVerre(${idx}, ${JSON.stringify(item).replace(/"/g,'&quot;')})">
+          <i class="ti ti-check"></i> Appliquer
+        </button>
+      </div>
+      ${appelHtml}
+      <div class="ia-verre-detail">${prixHtml}</div>
+    </div>`;
+  }).join('');
+
+  resEl.innerHTML = `<div style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#7C3AED;display:flex;align-items:center;gap:8px">
+    <i class="ti ti-cpu"></i> <strong>Analyse IA terminée</strong> — ${valid.length} verre(s) identifié(s)
+  </div>
+  ${cardsHtml}
+  <button class="ia-apply-all" onclick="applyAllIaVerres(${JSON.stringify(valid).replace(/"/g,'&quot;')})">
+    <i class="ti ti-check-circle"></i> Appliquer toutes les suggestions
+  </button>`;
+  resEl.style.display = 'block';
+}
+
+function applyIaVerre(idx, item){
+  const all = [...catalogue, ...catalogue2e];
+  const v = all.find(x => x.id === item.id);
+  if(!v) return;
+
+  // Appliquer appellation
+  if(item.appel){
+    v.appel = item.appel;
+    const appelInput = document.getElementById('appel-' + v.id);
+    if(appelInput) appelInput.value = item.appel;
+  }
+  // Appliquer prix d'achat
+  if(item.achats) Object.entries(item.achats).forEach(([ind, prix]) => {
+    const p = parseFloat(prix);
+    if(!isNaN(p) && p > 0 && v.indices[ind] != null){
+      v.achats[ind] = p;
+      const el = document.getElementById('achat-' + v.id + '-' + ind.replace('.','_'));
+      if(el) el.value = p;
+    }
+  });
+  // Appliquer prix de vente
+  if(item.ventes) Object.entries(item.ventes).forEach(([ind, prix]) => {
+    const p = parseFloat(prix);
+    if(!isNaN(p) && p > 0 && v.indices[ind] != null){
+      v.indices[ind] = p;
+      const el = document.getElementById('vente-' + v.id + '-' + ind.replace('.','_'));
+      if(el) el.value = p;
+    }
+  });
+
+  // Sauvegarder
+  savePrixVerre(v.id);
+
+  // Marquer la carte comme appliquée
+  const card = document.getElementById('ia-card-' + idx);
+  if(card){
+    const btn = card.querySelector('.ia-apply-btn');
+    if(btn){ btn.innerHTML = '<i class="ti ti-check"></i> Appliqué'; btn.style.background='#6B7280'; btn.disabled=true; }
+  }
+  showToast(`${v.nom} — mis à jour avec les suggestions IA.`);
+}
+
+function applyAllIaVerres(items){
+  items.forEach((item, idx) => applyIaVerre(idx, item));
+  showToast('Toutes les suggestions IA ont été appliquées et sauvegardées.');
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -6551,17 +6987,32 @@ function _renderConvBody(id){
   const stored = localStorage.getItem(key);
   if(stored){
     const info = JSON.parse(stored);
+    const aiStored = localStorage.getItem('conv_ai_' + id);
+    const aiHtml = aiStored ? _renderConvAiCard(JSON.parse(aiStored)) : '';
     return `<div class="pdf-file-info">
       <span class="pdf-file-name"><i class="ti ti-file-type-pdf" style="color:#E11D48;font-size:16px"></i>${info.name}</span>
       <div class="pdf-file-actions">
         <button class="pdf-btn-view" onclick="pdfView('${key}')"><i class="ti ti-eye"></i> Voir</button>
         <button class="pdf-btn-del" onclick="pdfDel('${key}','conv-body-${id}','${id}',true)"><i class="ti ti-trash"></i></button>
       </div>
-    </div>`;
+    </div>
+    <button class="conv-ai-btn" id="conv-ai-btn-${id}" onclick="analyzeConvPdfWithAI('${id}')">
+      <i class="ti ti-cpu"></i> ${aiStored ? 'Réanalyser avec IA' : 'Analyser avec IA'}
+    </button>
+    <div id="conv-ai-res-${id}">${aiHtml}</div>`;
   }
   return `<div class="pdf-drop-zone" onclick="pdfPickFile('conv_${id}')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'conv_${id}')">
     <i class="ti ti-cloud-upload" style="font-size:28px;color:var(--bdr-medium);display:block;margin-bottom:6px"></i>
     <div style="font-size:12px;font-weight:600;color:var(--txt-muted)">Cliquez ou glissez un PDF</div>
+  </div>`;
+}
+
+function _renderConvAiCard(data){
+  if(!data || !data.rows || !data.rows.length) return '';
+  const rows = data.rows.map(r => `<div class="conv-ai-row"><span class="conv-ai-lbl">${r.l}</span><span class="conv-ai-val">${r.v}</span></div>`).join('');
+  return `<div class="conv-ai-result">
+    <div class="conv-ai-res-hd"><i class="ti ti-cpu"></i> Analyse IA — ${data.reseau||'Convention'}</div>
+    <div class="conv-ai-res-body">${rows}</div>
   </div>`;
 }
 
@@ -6647,6 +7098,8 @@ function pdfDel(key, bodyId, id, isConv){
   if(!confirm('Supprimer ce PDF ?')) return;
   localStorage.removeItem(key);
   if(isConv){
+    // Supprimer aussi le cache IA du réseau
+    localStorage.removeItem('conv_ai_' + id);
     const bodyEl = document.getElementById(bodyId);
     if(bodyEl) bodyEl.innerHTML = _renderConvBody(id);
   } else {
