@@ -3588,7 +3588,13 @@ function _loginWowAnimation(callback){
     burst.remove();
     // Animation d'entrée de l'app
     const app = document.querySelector('.app-wrapper');
-    if(app){ app.style.animation = 'app-entry 0.5s cubic-bezier(0.2,0,0,1) forwards'; }
+    if(app){
+      app.style.animation = 'app-entry 0.5s cubic-bezier(0.2,0,0,1) forwards';
+      // Supprimer l'animation après qu'elle finit pour éviter le stacking context
+      // que transform/opacity en fill-mode crée sur .app-wrapper,
+      // ce qui casserait position:fixed des enfants (logout-bar, toasts…)
+      setTimeout(() => { app.style.animation = ''; app.style.opacity = '1'; }, 560);
+    }
     callback();
   }, 660);
 }
