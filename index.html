@@ -4749,12 +4749,43 @@ Réponds UNIQUEMENT avec ce JSON valide, rien d'autre:
   ]
 }
 
-CODES TRAITEMENTS (à détecter dans le PDF pour chaque verre):
-- "ar" = anti-reflet (antireflet, AR, ECC, SCC, HCC, SeeCoat, etc.)
-- "lb" = filtre lumière bleue (Blue, Bleu, BlueControl, SeeCoat Blue, Pure Blue, etc.)
-- "tr" = photochromique / Transitions (Transitions, Reactiv, PhotoFusion, Sensity, etc.)
-Si le traitement n'est pas mentionné pour ce verre, ne pas l'inclure.
-Si aucune info traitement dans le PDF: mettre ["ar"] par défaut pour tous les verres.
+CODES TRAITEMENTS — APPELLATIONS PAR VERRIER (très important, chaque marque a ses propres noms):
+
+"ar" = Anti-reflet (traitement de surface, applicable à tous):
+  • Nikon      : ECC+UV, SCC+UV NG, SCC+UV, SCC, HCC, SeeCoat Next UV, SeeCoat Next, SeeCoat Plus
+  • Essilor    : Crizal, Crizal Sapphire, Crizal Rock, Crizal Drive, Crizal Easy, Crizal Forte UV
+  • Zeiss      : DuraVision Platinum, DuraVision Silver, DuraVision, DuraVision AntiSmog
+  • Hoya       : Hi-Vision Aqua, Hi-Vision LongLife, Hi-Vision Meiryo, Hi-Vision UV, Nulux
+  • BBGR       : Novatek, Novaprotek, Novaclear
+  • Novacel    : Novalux, Novaprotect, NovaLight
+  • Seiko      : SCC, HCC, SuperResistant
+  • Rodenstock : Solitaire, Clearstar, SurfaceCoating
+  • Shamir     : Glacier, Glacier UV
+  • Indo       : iCoat, Precitech
+
+"lb" = Filtre lumière bleue / Blue light:
+  • Nikon      : SeeCoat Blue UV, Pure Blue UV, SeeCoat Blue
+  • Essilor    : Crizal Prevencia, Eyezen+, Blue UV Capture, Anti-Lumière Bleue
+  • Zeiss      : DuraVision BlueGuard, BlueGuard, BlueProtect
+  • Hoya       : Recharge, BlueControl, Recharge UV
+  • BBGR       : BlueUV Protect, Blue+, BlueUV
+  • Novacel    : BlueProtect, Blue Light Protect
+  • Seiko      : BlueShield, BlueClear
+  • Rodenstock : BlueProtect, Solitaire Blue
+
+"tr" = Photochromique / Teinte variable soleil:
+  • Transitions : Transitions Signature, Transitions Gen S, GEN 8, XTRActive, Drivewear
+  • Essilor    : Transitions (licencié), LifeRx, Photochromique
+  • Zeiss      : PhotoFusion, PhotoFusion X, PhotoFusion Original
+  • Hoya       : Sensity, Sensity Dark, Sensity Shine, Sensity Sun
+  • BBGR       : Reactiv, Reactiv Haze, Reactiv Sun, Reactiv Performance
+  • Novacel    : Novacolor, Transitions (licencié), ColorSun
+  • Rodenstock : ColorMatic, ColorMatic IQ, ColorMatic IQ Sun
+  • Seiko      : Sunsensors, Sensity (licencié)
+  • Indo       : Fotogray, Airvantage
+
+Règle: si le nom du verre ou sa description contient l'un de ces termes, attribuer le code correspondant.
+Si aucune info traitement dans le PDF: mettre ["ar"] par défaut.
 
 RÈGLES STRICTES:
 - Inclure UNIQUEMENT les verres dont tu trouves des prix concrets dans le PDF
