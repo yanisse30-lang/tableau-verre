@@ -3208,7 +3208,7 @@ function renderVerreLigne(v){
           <span class="vr-gamme-dot" style="background:${gcColor}"></span>
           <span class="vr-marque">${v.marque}</span>
           ${v.stock ? `<span class="vr-reseau-badge" style="background:#15803D;border-color:#16A34A;color:#fff"><i class="ti ti-package" style="font-size:9px"></i> Stock J+1</span>` : ''}
-          ${(v.tags||[]).includes('tr') ? `<span class="vr-reseau-badge" style="background:#0f3d2a;border-color:#16A34A;color:#4ade80"><i class="ti ti-sun-moon" style="font-size:9px"></i> Transitions</span>` : (selectedTraits.has('tr') ? `<span class="vr-reseau-badge" style="background:#1a1a1a;border-color:#444;color:#888"><i class="ti ti-sun-moon" style="font-size:9px"></i> Photochromique sur cmd</span>` : '')}
+          ${(v.tags||[]).includes('tr') ? `<span class="vr-reseau-badge" style="background:#0f3d2a;border-color:#16A34A;color:#4ade80"><i class="ti ti-sun-moon" style="font-size:9px"></i> Transitions</span>` : ''}
           ${isConvIA ? `<span class="vr-reseau-badge" style="background:#5B21B6;border-color:#7C3AED"><i class="ti ti-cpu" style="font-size:9px"></i> IA ${state.mutuelle?.label||''}</span>` : (isReseau ? `<span class="vr-reseau-badge">${reseauLabel}</span>` : '')}
         </div>
       </td>
