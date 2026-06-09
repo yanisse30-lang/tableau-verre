@@ -2463,6 +2463,83 @@ const catalogue = [
     {nom:'Idéal patients écrans',icon:'ti-device-laptop',desc:'Recommandé pour les patients exposés aux écrans plus de 4h/jour. Réduit la fatigue visuelle en fin de journée.'}
    ]},
 
+  // ── HAUT DE GAMME UNIFOCAUX — SeeMax, SuperSee, RelaxSee Neo ──
+  // SeeMax SCC+UV NG | achat:72.10/78.10/94.10/110.10
+  {id:'nk_h6',nom:'Nikon SeeMax SCC+UV NG',marque:'Nikon',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:8,aspherique:true,precalibrage:false,
+   indices:{'1.50':215,'1.60':232,'1.67':282,'1.74':335},
+   achats:{'1.50':72.10,'1.60':78.10,'1.67':94.10,'1.74':110.10},
+   tags:['ar'],
+   traitements:[
+    {nom:'SCC+UV NG',icon:'ti-shield',desc:`SeeCoat Clear+ UV Next Generation — antireflet haut de gamme Nikon. Antistatique intégré, super-hydrophobe, oléophobe, protection UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'Multi-Asphérique SeeMax',icon:'ti-maximize',desc:`Design multi-asphérique SeeMax : correction des aberrations d'ordre élevé (coma, aberration sphérique). Vision nette et précise du centre à la périphérie, même en forte correction. Disponible en 1.50, 1.60, 1.67 et 1.74.`},
+    {nom:'EyecuraSee disponible',icon:'ti-eye',desc:`Option EyecuraSee disponible : prescription au 1/100 de dioptrie pour une correction ultra-précise. Recommandé pour les patients exigeants.`},
+    {nom:'Optislim disponible',icon:'ti-settings',desc:`Compatible Optislim (précalibrage) pour nylor et percé. Version SeeMax AP disponible avec Optislim inclus et correction personnalisée.`}
+   ]},
+
+  // SeeMax Pure Blue UV | achat:74.10/80.10 (1.50 et 1.60 uniquement)
+  {id:'nk_h7',nom:'Nikon SeeMax Pure Blue UV',marque:'Nikon',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:8,aspherique:true,precalibrage:false,
+   indices:{'1.50':220,'1.60':238},
+   achats:{'1.50':74.10,'1.60':80.10},
+   tags:['ar','lb'],
+   traitements:[
+    {nom:'Pure Blue UV (SCB UV)',icon:'ti-device-desktop',desc:`SeeCoat Blue UV — filtre lumière bleue nocive 380-460nm intégré au traitement antireflet. Réduit la fatigue oculaire des patients exposés aux écrans intensifs. UV 400nm.`},
+    {nom:'Multi-Asphérique SeeMax',icon:'ti-maximize',desc:`Design multi-asphérique SeeMax : correction des aberrations d'ordre élevé. Vision nette et précise du centre à la périphérie. Disponible en 1.50 et 1.60 avec Pure Blue UV.`},
+    {nom:'EyecuraSee disponible',icon:'ti-eye',desc:`Option EyecuraSee disponible : prescription au 1/100 de dioptrie.`},
+    {nom:'Fortes corrections',icon:'ti-stack-2',desc:`Pour les fortes corrections (1.67 et 1.74), préférer Nikon SeeMax SCC+UV NG disponible jusqu'au 1.74.`}
+   ]},
+
+  // SuperSee SCC+UV NG | achat:56.70/62.70/78.70/94.70
+  {id:'nk_h8',nom:'Nikon SuperSee SCC+UV NG',marque:'Nikon',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:7,cylMax:8,aspherique:true,precalibrage:false,
+   indices:{'1.50':182,'1.60':200,'1.67':240,'1.74':292},
+   achats:{'1.50':56.70,'1.60':62.70,'1.67':78.70,'1.74':94.70},
+   tags:['ar'],
+   traitements:[
+    {nom:'SCC+UV NG',icon:'ti-shield',desc:`SeeCoat Clear+ UV Next Generation antireflet. Antistatique, super-hydrophobe, oléophobe, UV 400nm. Carte d'authenticité Nikon incluse.`},
+    {nom:'Design SuperSee — Tri-vision',icon:'ti-layout-columns',desc:`Verre unifocal à champ élargi couvrant les trois zones (loin, intermédiaire, près). Idéal pour les patients actifs nécessitant une vision confortable sur toutes les distances sans progressif.`},
+    {nom:'Vision intermédiaire intégrée',icon:'ti-device-desktop',desc:`Corridor de vision intermédiaire intégré dans le design. Confort visuel en usage numérique prolongé sans contrainte de posture.`},
+    {nom:'SuperSee AP et Transitions disponibles',icon:'ti-sun',desc:`Version personnalisée SuperSee AP disponible sur demande (Optislim inclus). Transitions Gen S disponible.`}
+   ]},
+
+  // SuperSee Pure Blue UV | achat:58.70/64.70 (1.50 et 1.60 uniquement)
+  {id:'nk_h9',nom:'Nikon SuperSee Pure Blue UV',marque:'Nikon',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:7,cylMax:8,aspherique:true,precalibrage:false,
+   indices:{'1.50':188,'1.60':208},
+   achats:{'1.50':58.70,'1.60':64.70},
+   tags:['ar','lb'],
+   traitements:[
+    {nom:'Pure Blue UV (SCB UV)',icon:'ti-device-desktop',desc:`SeeCoat Blue UV — filtre lumière bleue nocive 380-460nm. Réduit la fatigue oculaire sur écrans. UV 400nm intégré.`},
+    {nom:'Design SuperSee — Tri-vision',icon:'ti-layout-columns',desc:`Verre unifocal à champ élargi (loin, intermédiaire, près). Solution confort maximale pour les patients actifs sans progressif.`},
+    {nom:'Disponible 1.50 et 1.60',icon:'ti-stack-2',desc:`Version Pure Blue UV disponible en 1.50 et 1.60. Version SCC+UV NG disponible jusqu'au 1.74.`}
+   ]},
+
+  // RelaxSee Neo SCC+UV NG | achat:68.20/83.20/88.20/104.20
+  {id:'nk_h10',nom:'Nikon RelaxSee Neo SCC+UV NG',marque:'Nikon',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:8,cylMax:7,aspherique:true,precalibrage:false,
+   indices:{'1.50':205,'1.60':250,'1.67':265,'1.74':315},
+   achats:{'1.50':68.20,'1.60':83.20,'1.67':88.20,'1.74':104.20},
+   tags:['ar'],
+   traitements:[
+    {nom:'SCC+UV NG',icon:'ti-shield',desc:`SeeCoat Clear+ UV Next Generation — antireflet de dernière génération. Antistatique, super-hydrophobe, oléophobe, UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'RelaxSee Neo — Addition légère',icon:'ti-activity',desc:`Verre unifocal avec addition légère intégrée (Neo Air +0.50D / Neo Lite +0.75D / Neo +1.00D / Neo Super +1.25D). Réduit l'effort d'accommodation en vision de près. Idéal pour les presbytes débutants et les grands utilisateurs d'écrans.`},
+    {nom:'Disponible 1.50 à 1.74',icon:'ti-stack-2',desc:`Disponible en 1.50, 1.60, 1.67 et 1.74. Version RelaxSee Neo AP et Transitions Gen S disponibles sur demande.`},
+    {nom:"Verre D'Intérieur / Home & Office",icon:'ti-home',desc:`Classé dans les verres d'intérieur Nikon. Parfait pour un usage mixte bureau/écran avec confort de vision de loin conservé.`}
+   ]},
+
+  // RelaxSee Neo Pure Blue UV | achat:75.20/90.20/95.20/111.20
+  {id:'nk_h11',nom:'Nikon RelaxSee Neo Pure Blue UV',marque:'Nikon',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:8,cylMax:7,aspherique:true,precalibrage:false,
+   indices:{'1.50':226,'1.60':271,'1.67':286,'1.74':334},
+   achats:{'1.50':75.20,'1.60':90.20,'1.67':95.20,'1.74':111.20},
+   tags:['ar','lb'],
+   traitements:[
+    {nom:'Pure Blue UV (SCB UV)',icon:'ti-device-desktop',desc:`SeeCoat Blue UV — filtre lumière bleue nocive 380-460nm. Idéal pour les patients presbytes débutants exposés intensivement aux écrans.`},
+    {nom:'RelaxSee Neo — Addition légère',icon:'ti-activity',desc:`Addition légère intégrée (0.50 à 1.25D). Réduit l'effort d'accommodation en vision de près. Confort maximal en usage numérique prolongé.`},
+    {nom:'Disponible 1.50 à 1.74',icon:'ti-stack-2',desc:`Disponible en 1.50, 1.60, 1.67 et 1.74. Version SCC+UV NG aussi disponible.`}
+   ]},
+
   // ── MILIEU DE GAMME ────────────────────────────────────────
   // Presio Power Z 12 ECC+UV | achat:138/160 | CB:256/285 | marge:46.1%/43.9%
   {id:'nk_m1',nom:'Nikon Presio Power Z 12',marque:'Nikon',gamme:'milieu',
