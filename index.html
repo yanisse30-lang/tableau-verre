@@ -3344,7 +3344,7 @@ function renderVerreLigne(v){
           <span class="vr-gamme-dot" style="background:${gcColor}"></span>
           <span class="vr-marque">${v.marque}</span>
           ${v.stock ? `<span class="vr-reseau-badge" style="background:#15803D;border-color:#16A34A;color:#fff"><i class="ti ti-package" style="font-size:9px"></i> Stock J+1</span>` : ''}
-          ${(v.tags||[]).includes('tr') ? `<span class="vr-reseau-badge" style="background:#0f3d2a;border-color:#16A34A;color:#4ade80"><i class="ti ti-sun-moon" style="font-size:9px"></i> Transitions</span>` : ''}
+          ${_verrePrimaryTrait(v)==='tr' ? `<span class="vr-reseau-badge" style="background:#0f3d2a;border-color:#16A34A;color:#4ade80"><i class="ti ti-sun-moon" style="font-size:9px"></i> Transitions</span>` : (_verrePrimaryTrait(v)==='lb' ? `<span class="vr-reseau-badge" style="background:#2a1a4a;border-color:#7C3AED;color:#c4a0ff"><i class="ti ti-device-desktop" style="font-size:9px"></i> Lumière bleue</span>` : `<span class="vr-reseau-badge" style="background:#0a2038;border-color:#1e4e80;color:#7fb3ff"><i class="ti ti-eye" style="font-size:9px"></i> Anti-reflet</span>`)}
           ${isConvIA ? `<span class="vr-reseau-badge" style="background:#5B21B6;border-color:#7C3AED"><i class="ti ti-cpu" style="font-size:9px"></i> IA ${state.mutuelle?.label||''}</span>` : (isReseau ? `<span class="vr-reseau-badge">${reseauLabel}</span>` : (isHorsReseau ? `<span class="vr-reseau-badge" style="background:#7c2d12;border-color:#b45309;color:#fbbf24" title="Verre d'intérieur non référencé dans la convention réseau — tarif libre appliqué"><i class="ti ti-info-circle" style="font-size:9px"></i> Hors réseau · tarif libre</span>` : ''))}
         </div>
       </td>
@@ -3503,6 +3503,18 @@ function getTraitKeywords(){
   return keywords;
 }
 
+// Catégorie de traitement PRINCIPALE d'un verre (1 verre = 1 catégorie).
+// Priorité : Transitions (tr) > Lumière bleue (lb) > Anti-reflet (ar).
+// Tout verre possède l'anti-reflet de base, mais on le classe dans sa
+// caractéristique distinctive pour éviter qu'un Transitions ou un Bleu
+// apparaisse dans la catégorie "Anti-reflet".
+function _verrePrimaryTrait(v){
+  const tags = v.tags || [];
+  if(tags.includes('tr')) return 'tr';
+  if(tags.includes('lb')) return 'lb';
+  return 'ar';
+}
+
 function showVerres(){
   // Safety checks
   if(!state.mutuelle){ showToast('Erreur: mutuelle non sélectionnée'); go(1); return; }
@@ -3575,11 +3587,13 @@ function showVerres(){
     if(cylMax>v.cylMax) return false;
     // Note: precalibrage n'est PAS un filtre d'exclusion — tout verre peut être précalibré.
     // forcePrecalibrage sert uniquement à l'affichage (colonne précal) et à l'indice minimum.
-    // Filtre par traitement sélectionné
-    // ar, lb, tr = traitements applicables à tous les verres (service labo ou surface)
-    // → aucun filtre strict : on affiche tous les verres compatibles,
-    //   les verres avec le tag correspondant sont mis en évidence dans la liste
-    // (aucun traitement ne peut bloquer l'affichage — évite 0 résultat)
+    // ── Filtre par traitement : chaque verre est classé dans SA catégorie ──
+    // (Transitions > Lumière bleue > Anti-reflet). On n'affiche que les verres dont
+    // la catégorie principale correspond au(x) traitement(s) sélectionné(s) → un
+    // Transitions n'apparaît jamais dans "Anti-reflet", un Bleu non plus, etc.
+    // (Hors mode 100% Santé où l'anti-reflet est imposé et tous les verres classe A s'affichent.)
+    if(window._priseType !== 'sante' && selectedTraits && selectedTraits.size > 0
+       && !selectedTraits.has(_verrePrimaryTrait(v))) return false;
     return true;
   }).map(v=>{
     const ind=getBestIndice(v,indiceRec);
@@ -3653,6 +3667,9 @@ function showVerres(){
                 + buildVerreSection(mil,'GAMME DYNAMIQUE','gd')
                 + buildVerreSection(ent,'GAMME ESSENTIELLE','ge');
 
+  const _TRAIT_LBL={ar:'anti-reflet',lb:'filtre lumière bleue',tr:'Transitions'};
+  const _traitsActifs=[...selectedTraits].map(t=>_TRAIT_LBL[t]||t);
+  const _traitTxt=(window._priseType!=='sante'&&_traitsActifs.length)?` <strong style="color:#80c0ff">${_traitsActifs.join(' / ')}</strong>`:'';
   const tableHTML = compat.length
     ? `<div style="margin-top:8px"><table class="verre-table">
         <colgroup>
@@ -3672,7 +3689,7 @@ function showVerres(){
         </tr></thead>
         <tbody>${tableBody}</tbody>
       </table></div>`
-    : `<div style="text-align:center;padding:30px;color:#aaa"><i class="ti ti-alert-circle" style="font-size:32px;display:block;margin-bottom:10px"></i>Aucun verre compatible avec cette correction.</div>`;
+    : `<div style="text-align:center;padding:30px;color:#aaa"><i class="ti ti-alert-circle" style="font-size:32px;display:block;margin-bottom:10px"></i>Aucun verre${_traitTxt} compatible avec cette correction.<div style="font-size:12px;margin-top:8px;color:#888">Essayez un autre traitement ou ajustez la correction.</div></div>`;
 
   const html = conseilHTML + tableHTML;
 
