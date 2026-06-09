@@ -5130,8 +5130,7 @@ function resetPdfDrop(){
 // ══════════════════════════════════════════════════════════════════
 async function analyzeConvPdfWithAI(id){
   const key = 'pdf_conv_' + id;
-  const stored = localStorage.getItem(key);
-  if(!stored){ showToast('Aucun PDF pour ce réseau.'); return; }
+  if(!localStorage.getItem(key)){ showToast('Aucun PDF pour ce réseau.'); return; }
 
   const claudeKey = localStorage.getItem('maneo_claude_key');
   if(!claudeKey){ showToast('Clé API Claude non configurée — activez-la dans les paramètres admin.'); return; }
@@ -5142,11 +5141,8 @@ async function analyzeConvPdfWithAI(id){
   if(resEl) resEl.innerHTML = '';
 
   try {
-    const info = JSON.parse(stored);
-    const base64 = info.data.split(',')[1];
-    const binaryStr = atob(base64);
-    const bytes = new Uint8Array(binaryStr.length);
-    for(let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+    const bytes = await _pdfGetBytes(key);
+    if(!bytes) throw new Error('PDF introuvable dans le stockage.');
 
     if(typeof pdfjsLib === 'undefined'){
       await new Promise((resolve, reject) => {
@@ -7752,21 +7748,18 @@ function _refreshCatSlot(type){
 async function _catLaunchIA(type){
   const key = localStorage.getItem('maneo_claude_key');
   if(!key){ showToast('⚠️ Clé Claude manquante — configurez-la dans Paramètres'); return; }
-  const stored = localStorage.getItem('pdf_cat_' + type);
-  if(!stored){ showToast('Aucun PDF chargé pour ce slot'); return; }
+  const pdfKey = 'pdf_cat_' + type;
+  if(!localStorage.getItem(pdfKey)){ showToast('Aucun PDF chargé pour ce slot'); return; }
 
   const zone = document.getElementById('slot-' + type + '-ia-zone');
   if(!zone) return;
   zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Extraction du PDF…</div>`;
 
   try{
-    // Base64 → ArrayBuffer
-    const info = JSON.parse(stored);
-    const base64 = info.data.includes(',') ? info.data.split(',')[1] : info.data;
-    const binary = atob(base64);
-    const buf = new ArrayBuffer(binary.length);
-    const view = new Uint8Array(buf);
-    for(let i=0;i<binary.length;i++) view[i] = binary.charCodeAt(i);
+    // Récupérer les octets du PDF (IndexedDB ou legacy base64)
+    const bytes = await _pdfGetBytes(pdfKey);
+    if(!bytes) throw new Error('PDF introuvable dans le stockage.');
+    const buf = bytes.buffer;
 
     // Charger PDF.js si besoin
     if(typeof pdfjsLib === 'undefined'){
@@ -8010,43 +8003,100 @@ function pdfDrop(e, slotId){
   else showToast('Veuillez déposer un fichier PDF (.pdf).');
 }
 
-function _pdfStore(slotId, file){
-  const reader = new FileReader();
-  reader.onerror = () => showToast('Erreur lecture du fichier PDF.');
-  reader.onload = function(e){
-    const data = e.target.result;
-    const isConv = slotId.startsWith('conv_');
-    const isCat = slotId === 'catalogue' || slotId === 'tarif';
-    const key = isConv ? 'pdf_conv_' + slotId.replace('conv_','') : 'pdf_cat_' + slotId;
-    try {
-      localStorage.setItem(key, JSON.stringify({name: file.name, data}));
-    } catch(err){
-      showToast('Fichier trop volumineux pour le stockage local.');
-      return;
-    }
-    if(isConv){
-      const rid = slotId.replace('conv_','');
-      const bodyEl = document.getElementById('conv-body-' + rid);
-      if(bodyEl) bodyEl.innerHTML = _renderConvBody(rid);
-    } else if(isCat){
-      _refreshCatSlot(slotId);
-    }
-    showToast('PDF "' + file.name + '" déposé avec succès !');
-  };
-  reader.readAsDataURL(file);
+// ── Stockage des PDF volumineux via IndexedDB ───────────────
+// localStorage est plafonné à ~5 Mo : insuffisant pour un catalogue
+// de 15 Mo. IndexedDB stocke le Blob directement (quota = plusieurs
+// centaines de Mo) sans surcoût base64. Les métadonnées légères
+// (nom, taille) restent dans localStorage pour le rendu synchrone.
+const _PDF_DB = 'maneo_pdfs', _PDF_STORE = 'files';
+function _pdfDB(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open(_PDF_DB, 1);
+    req.onupgradeneeded = ()=>{ const db=req.result; if(!db.objectStoreNames.contains(_PDF_STORE)) db.createObjectStore(_PDF_STORE); };
+    req.onsuccess = ()=> resolve(req.result);
+    req.onerror = ()=> reject(req.error);
+  });
 }
-
-function pdfView(key){
+function _pdfIdbPut(key, value){
+  return _pdfDB().then(db=> new Promise((resolve, reject)=>{
+    const tx = db.transaction(_PDF_STORE,'readwrite');
+    tx.objectStore(_PDF_STORE).put(value, key);
+    tx.oncomplete = ()=> resolve();
+    tx.onerror = ()=> reject(tx.error);
+    tx.onabort = ()=> reject(tx.error || new Error('Quota dépassé'));
+  }));
+}
+function _pdfIdbGet(key){
+  return _pdfDB().then(db=> new Promise((resolve, reject)=>{
+    const tx = db.transaction(_PDF_STORE,'readonly');
+    const r = tx.objectStore(_PDF_STORE).get(key);
+    r.onsuccess = ()=> resolve(r.result);
+    r.onerror = ()=> reject(r.error);
+  }));
+}
+function _pdfIdbDel(key){
+  return _pdfDB().then(db=> new Promise((resolve)=>{
+    const tx = db.transaction(_PDF_STORE,'readwrite');
+    tx.objectStore(_PDF_STORE).delete(key);
+    tx.oncomplete = ()=> resolve();
+    tx.onerror = ()=> resolve();
+  }));
+}
+// Récupère le Blob d'un slot — IndexedDB d'abord, fallback legacy (base64 localStorage)
+async function _pdfGetBlob(key){
+  try{ const rec = await _pdfIdbGet(key); if(rec && rec.blob) return rec.blob; }catch(e){}
   const stored = localStorage.getItem(key);
-  if(!stored) return;
-  const info = JSON.parse(stored);
-  const win = window.open();
-  win.document.write('<iframe src="' + info.data + '" style="width:100%;height:100vh;border:none"></iframe>');
+  if(stored){
+    try{ const info = JSON.parse(stored); if(info.data){ return await (await fetch(info.data)).blob(); } }catch(e){}
+  }
+  return null;
+}
+// Récupère les octets (Uint8Array) d'un slot pour pdf.js
+async function _pdfGetBytes(key){
+  const blob = await _pdfGetBlob(key);
+  if(!blob) return null;
+  return new Uint8Array(await blob.arrayBuffer());
 }
 
-function pdfDel(key, bodyId, id, isConv){
+async function _pdfStore(slotId, file){
+  const isConv = slotId.startsWith('conv_');
+  const isCat = slotId === 'catalogue' || slotId === 'tarif';
+  const key = isConv ? 'pdf_conv_' + slotId.replace('conv_','') : 'pdf_cat_' + slotId;
+  try {
+    // Blob volumineux → IndexedDB (File hérite de Blob, stockage direct sans base64)
+    await _pdfIdbPut(key, {name:file.name, size:file.size, type:file.type, blob:file});
+    // Métadonnées légères → localStorage (rendu synchrone des slots)
+    localStorage.setItem(key, JSON.stringify({name:file.name, size:file.size, idb:true}));
+  } catch(err){
+    showToast('Impossible d\'enregistrer le PDF : ' + ((err && err.message) || 'stockage saturé'));
+    return;
+  }
+  if(isConv){
+    const rid = slotId.replace('conv_','');
+    const bodyEl = document.getElementById('conv-body-' + rid);
+    if(bodyEl) bodyEl.innerHTML = _renderConvBody(rid);
+  } else if(isCat){
+    _refreshCatSlot(slotId);
+  }
+  const mo = (file.size/1048576).toFixed(1);
+  showToast('PDF "' + file.name + '" (' + mo + ' Mo) déposé avec succès !');
+}
+
+async function pdfView(key){
+  // Ouvrir la fenêtre de façon synchrone (geste utilisateur) pour éviter le blocage popup
+  const win = window.open('', '_blank');
+  if(win) win.document.write('<p style="font-family:sans-serif;padding:24px;color:#555">Chargement du PDF…</p>');
+  const blob = await _pdfGetBlob(key);
+  if(!blob){ if(win) win.close(); showToast('PDF introuvable.'); return; }
+  const url = URL.createObjectURL(blob);
+  if(win){ win.location.href = url; } else { window.open(url, '_blank'); }
+  setTimeout(()=> URL.revokeObjectURL(url), 60000);
+}
+
+async function pdfDel(key, bodyId, id, isConv){
   if(!confirm('Supprimer ce PDF ?')) return;
   localStorage.removeItem(key);
+  try{ await _pdfIdbDel(key); }catch(e){}
   if(isConv){
     // Supprimer aussi le cache IA du réseau
     localStorage.removeItem('conv_parsed_' + id);
