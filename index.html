@@ -1582,8 +1582,8 @@ select option{background:#fff;color:var(--txt-primary)}
     </div>
   </div>
 
-  <!-- input file caché pour PDF -->
-  <input type="file" id="pdf-file-input" accept=".pdf" style="display:none" onchange="pdfFileSelected(this)"/>
+  <!-- input file caché pour les slots PDF (convention / catalogue) -->
+  <input type="file" id="pdf-slot-input" accept=".pdf" style="display:none" onchange="pdfFileSelected(this)"/>
 
   <!-- S0-MUT CHOIX MUTUELLE -->
   <div id="s0mut" class="screen">
@@ -7674,7 +7674,7 @@ function _renderConvBody(id){
     </div>
     <div id="conv-ai-res-${id}" style="margin-top:8px">${aiHtml}</div>`;
   }
-  return `<div class="pdf-drop-zone" onclick="pdfPickFile('conv_${id}')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'conv_${id}')">
+  return `<div class="pdf-drop-zone" onclick="pdfPickFile('conv_${id}')" ondragover="pdfDragOver(event)" ondragleave="this.classList.remove('drag-over')" ondrop="pdfDrop(event,'conv_${id}')">
     <i class="ti ti-cpu" style="color:#7C3AED"></i>
     <div style="font-size:13px;font-weight:700">Déposer la convention réseau PDF</div>
     <div style="font-size:11px;margin-top:5px;opacity:.75">L'IA extrait la grille tarifaire par verrier</div>
@@ -7740,7 +7740,7 @@ function _refreshCatSlot(type){
   } else {
     const _dropTitle = type === 'tarif' ? 'Déposer le tarif fournisseur PDF' : 'Déposer le catalogue verrier PDF';
     const _dropSub   = type === 'tarif' ? "L'IA analyse les prix d'achat HT" : "L'IA extrait verres, indices, prix et traitements";
-    bodyEl.innerHTML = `<div class="pdf-drop-zone" onclick="pdfPickFile('${type}')" ondragover="pdfDragOver(event)" ondrop="pdfDrop(event,'${type}')">
+    bodyEl.innerHTML = `<div class="pdf-drop-zone" onclick="pdfPickFile('${type}')" ondragover="pdfDragOver(event)" ondragleave="this.classList.remove('drag-over')" ondrop="pdfDrop(event,'${type}')">
       <i class="ti ti-cpu" style="color:#7C3AED"></i>
       <div style="font-size:13px;font-weight:700">${_dropTitle}</div>
       <div style="font-size:11px;margin-top:5px;opacity:.75">${_dropSub}</div>
@@ -7990,8 +7990,8 @@ function _catApplyIA(type){
 // ── Sélection de fichier ────────────────────────────────────
 function pdfPickFile(slotId){
   _pdfCurrentSlot = slotId;
-  document.getElementById('pdf-file-input').value = '';
-  document.getElementById('pdf-file-input').click();
+  document.getElementById('pdf-slot-input').value = '';
+  document.getElementById('pdf-slot-input').click();
 }
 
 function pdfFileSelected(input){
@@ -8005,12 +8005,14 @@ function pdfDrop(e, slotId){
   e.preventDefault();
   e.currentTarget.classList.remove('drag-over');
   const file = e.dataTransfer.files[0];
-  if(file && file.type === 'application/pdf') _pdfStore(slotId, file);
-  else showToast('Veuillez déposer un fichier PDF.');
+  const isPdf = file && (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'));
+  if(isPdf) _pdfStore(slotId, file);
+  else showToast('Veuillez déposer un fichier PDF (.pdf).');
 }
 
 function _pdfStore(slotId, file){
   const reader = new FileReader();
+  reader.onerror = () => showToast('Erreur lecture du fichier PDF.');
   reader.onload = function(e){
     const data = e.target.result;
     const isConv = slotId.startsWith('conv_');
