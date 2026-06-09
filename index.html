@@ -2464,11 +2464,12 @@ const catalogue = [
    ]},
 
   // ── HAUT DE GAMME UNIFOCAUX — SeeMax, SuperSee, RelaxSee Neo ──
-  // SeeMax SCC+UV NG | achat:72.10/78.10/94.10/110.10
+  // Prix d'achat HT vérifiés sur tarif Nikon mai 2026 (pages internes 7,8,10).
+  // SeeMax SCC+UV NG | achat HT:73.10/79.10/93.10/109.10 | sphMax-16 cyl10
   {id:'nk_h6',nom:'Nikon SeeMax SCC+UV NG',marque:'Nikon',gamme:'haut',
-   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:8,aspherique:true,precalibrage:false,
-   indices:{'1.50':215,'1.60':232,'1.67':282,'1.74':335},
-   achats:{'1.50':72.10,'1.60':78.10,'1.67':94.10,'1.74':110.10},
+   compatible:['loin','pres','intermediaire'],sphMax:16,cylMax:10,aspherique:true,precalibrage:false,
+   indices:{'1.50':210,'1.60':230,'1.67':270,'1.74':315},
+   achats:{'1.50':73.10,'1.60':79.10,'1.67':93.10,'1.74':109.10},
    tags:['ar'],
    traitements:[
     {nom:'SCC+UV NG',icon:'ti-shield',desc:`SeeCoat Clear+ UV Next Generation — antireflet haut de gamme Nikon. Antistatique intégré, super-hydrophobe, oléophobe, protection UV 400nm. Carte d'authenticité incluse.`},
@@ -2477,67 +2478,118 @@ const catalogue = [
     {nom:'Optislim disponible',icon:'ti-settings',desc:`Compatible Optislim (précalibrage) pour nylor et percé. Version SeeMax AP disponible avec Optislim inclus et correction personnalisée.`}
    ]},
 
-  // SeeMax Pure Blue UV | achat:74.10/80.10 (1.50 et 1.60 uniquement)
+  // SeeMax Pure Blue UV (SCB) | achat HT:75.10/81.10/95.10/111.10 | sphMax-16 cyl10
   {id:'nk_h7',nom:'Nikon SeeMax Pure Blue UV',marque:'Nikon',gamme:'haut',
-   compatible:['loin','pres','intermediaire'],sphMax:10,cylMax:8,aspherique:true,precalibrage:false,
-   indices:{'1.50':220,'1.60':238},
-   achats:{'1.50':74.10,'1.60':80.10},
+   compatible:['loin','pres','intermediaire'],sphMax:16,cylMax:10,aspherique:true,precalibrage:false,
+   indices:{'1.50':220,'1.60':235,'1.67':275,'1.74':320},
+   achats:{'1.50':75.10,'1.60':81.10,'1.67':95.10,'1.74':111.10},
    tags:['ar','lb'],
    traitements:[
     {nom:'Pure Blue UV (SCB UV)',icon:'ti-device-desktop',desc:`SeeCoat Blue UV — filtre lumière bleue nocive 380-460nm intégré au traitement antireflet. Réduit la fatigue oculaire des patients exposés aux écrans intensifs. UV 400nm.`},
-    {nom:'Multi-Asphérique SeeMax',icon:'ti-maximize',desc:`Design multi-asphérique SeeMax : correction des aberrations d'ordre élevé. Vision nette et précise du centre à la périphérie. Disponible en 1.50 et 1.60 avec Pure Blue UV.`},
+    {nom:'Multi-Asphérique SeeMax',icon:'ti-maximize',desc:`Design multi-asphérique SeeMax : correction des aberrations d'ordre élevé. Vision nette et précise du centre à la périphérie. Disponible en 1.50, 1.60, 1.67 et 1.74.`},
     {nom:'EyecuraSee disponible',icon:'ti-eye',desc:`Option EyecuraSee disponible : prescription au 1/100 de dioptrie.`},
-    {nom:'Fortes corrections',icon:'ti-stack-2',desc:`Pour les fortes corrections (1.67 et 1.74), préférer Nikon SeeMax SCC+UV NG disponible jusqu'au 1.74.`}
+    {nom:'Idéal écrans',icon:'ti-device-laptop',desc:`Recommandé pour les patients exposés aux écrans avec exigence de qualité optique maximale.`}
    ]},
 
-  // SuperSee SCC+UV NG | achat:56.70/62.70/78.70/94.70
+  // SuperSee SCC+UV NG | achat HT:56.70/62.70/76.70/92.70 | sphMax-16 cyl10
   {id:'nk_h8',nom:'Nikon SuperSee SCC+UV NG',marque:'Nikon',gamme:'haut',
-   compatible:['loin','pres','intermediaire'],sphMax:7,cylMax:8,aspherique:true,precalibrage:false,
-   indices:{'1.50':182,'1.60':200,'1.67':240,'1.74':292},
-   achats:{'1.50':56.70,'1.60':62.70,'1.67':78.70,'1.74':94.70},
+   compatible:['loin','pres','intermediaire'],sphMax:16,cylMax:10,aspherique:true,precalibrage:false,
+   indices:{'1.50':165,'1.60':180,'1.67':220,'1.74':270},
+   achats:{'1.50':56.70,'1.60':62.70,'1.67':76.70,'1.74':92.70},
    tags:['ar'],
    traitements:[
     {nom:'SCC+UV NG',icon:'ti-shield',desc:`SeeCoat Clear+ UV Next Generation antireflet. Antistatique, super-hydrophobe, oléophobe, UV 400nm. Carte d'authenticité Nikon incluse.`},
-    {nom:'Design SuperSee — Tri-vision',icon:'ti-layout-columns',desc:`Verre unifocal à champ élargi couvrant les trois zones (loin, intermédiaire, près). Idéal pour les patients actifs nécessitant une vision confortable sur toutes les distances sans progressif.`},
-    {nom:'Vision intermédiaire intégrée',icon:'ti-device-desktop',desc:`Corridor de vision intermédiaire intégré dans le design. Confort visuel en usage numérique prolongé sans contrainte de posture.`},
+    {nom:'Design SuperSee — Champ élargi',icon:'ti-layout-columns',desc:`Verre unifocal à champ de vision élargi. Idéal pour les patients actifs nécessitant une vision périphérique confortable et nette.`},
+    {nom:'Bon rapport qualité-prix',icon:'ti-device-desktop',desc:`Verre asphérique premium d'entrée de gamme Nikon. Excellent compromis qualité optique / budget.`},
     {nom:'SuperSee AP et Transitions disponibles',icon:'ti-sun',desc:`Version personnalisée SuperSee AP disponible sur demande (Optislim inclus). Transitions Gen S disponible.`}
    ]},
 
-  // SuperSee Pure Blue UV | achat:58.70/64.70 (1.50 et 1.60 uniquement)
+  // SuperSee Pure Blue UV (SCB) | achat HT:58.70/64.70/78.70/94.70 | sphMax-16 cyl10
   {id:'nk_h9',nom:'Nikon SuperSee Pure Blue UV',marque:'Nikon',gamme:'haut',
-   compatible:['loin','pres','intermediaire'],sphMax:7,cylMax:8,aspherique:true,precalibrage:false,
-   indices:{'1.50':188,'1.60':208},
-   achats:{'1.50':58.70,'1.60':64.70},
+   compatible:['loin','pres','intermediaire'],sphMax:16,cylMax:10,aspherique:true,precalibrage:false,
+   indices:{'1.50':170,'1.60':190,'1.67':230,'1.74':275},
+   achats:{'1.50':58.70,'1.60':64.70,'1.67':78.70,'1.74':94.70},
    tags:['ar','lb'],
    traitements:[
     {nom:'Pure Blue UV (SCB UV)',icon:'ti-device-desktop',desc:`SeeCoat Blue UV — filtre lumière bleue nocive 380-460nm. Réduit la fatigue oculaire sur écrans. UV 400nm intégré.`},
-    {nom:'Design SuperSee — Tri-vision',icon:'ti-layout-columns',desc:`Verre unifocal à champ élargi (loin, intermédiaire, près). Solution confort maximale pour les patients actifs sans progressif.`},
-    {nom:'Disponible 1.50 et 1.60',icon:'ti-stack-2',desc:`Version Pure Blue UV disponible en 1.50 et 1.60. Version SCC+UV NG disponible jusqu'au 1.74.`}
+    {nom:'Design SuperSee — Champ élargi',icon:'ti-layout-columns',desc:`Verre unifocal à champ de vision élargi. Solution confort pour les patients actifs exposés aux écrans.`},
+    {nom:'Disponible 1.50 à 1.74',icon:'ti-stack-2',desc:`Version Pure Blue UV disponible en 1.50, 1.60, 1.67 et 1.74.`}
    ]},
 
-  // RelaxSee Neo SCC+UV NG | achat:68.20/83.20/88.20/104.20
+  // RelaxSee Neo SCC+UV NG (unifocal antifatigue) | achat HT:72.10/78.10/92.10/108.10 | sphMax-16 cyl10
   {id:'nk_h10',nom:'Nikon RelaxSee Neo SCC+UV NG',marque:'Nikon',gamme:'haut',
-   compatible:['loin','pres','intermediaire'],sphMax:8,cylMax:7,aspherique:true,precalibrage:false,
-   indices:{'1.50':205,'1.60':250,'1.67':265,'1.74':315},
-   achats:{'1.50':68.20,'1.60':83.20,'1.67':88.20,'1.74':104.20},
+   compatible:['loin','pres','intermediaire'],sphMax:16,cylMax:10,aspherique:true,precalibrage:false,
+   indices:{'1.50':210,'1.60':225,'1.67':265,'1.74':315},
+   achats:{'1.50':72.10,'1.60':78.10,'1.67':92.10,'1.74':108.10},
    tags:['ar'],
    traitements:[
     {nom:'SCC+UV NG',icon:'ti-shield',desc:`SeeCoat Clear+ UV Next Generation — antireflet de dernière génération. Antistatique, super-hydrophobe, oléophobe, UV 400nm. Carte d'authenticité incluse.`},
-    {nom:'RelaxSee Neo — Addition légère',icon:'ti-activity',desc:`Verre unifocal avec addition légère intégrée (Neo Air +0.50D / Neo Lite +0.75D / Neo +1.00D / Neo Super +1.25D). Réduit l'effort d'accommodation en vision de près. Idéal pour les presbytes débutants et les grands utilisateurs d'écrans.`},
+    {nom:'Unifocal antifatigue',icon:'ti-activity',desc:`Verre UNIFOCAL avec addition légère intégrée (Neo Air +0.50D / Neo Lite +0.75D / Neo +1.00D / Neo Super +1.25D). Réduit l'effort d'accommodation en vision de près. Idéal pour les presbytes débutants et les grands utilisateurs d'écrans.`},
     {nom:'Disponible 1.50 à 1.74',icon:'ti-stack-2',desc:`Disponible en 1.50, 1.60, 1.67 et 1.74. Version RelaxSee Neo AP et Transitions Gen S disponibles sur demande.`},
-    {nom:"Verre D'Intérieur / Home & Office",icon:'ti-home',desc:`Classé dans les verres d'intérieur Nikon. Parfait pour un usage mixte bureau/écran avec confort de vision de loin conservé.`}
+    {nom:'Soulage la fatigue visuelle',icon:'ti-eye-check',desc:`Recommandé pour les patients souffrant de fatigue oculaire numérique. Détend l'accommodation lors du travail de près prolongé.`}
    ]},
 
-  // RelaxSee Neo Pure Blue UV | achat:75.20/90.20/95.20/111.20
+  // RelaxSee Neo Pure Blue UV (SCB) | achat HT:74.10/80.10/94.10/110.10 | sphMax-16 cyl10
   {id:'nk_h11',nom:'Nikon RelaxSee Neo Pure Blue UV',marque:'Nikon',gamme:'haut',
-   compatible:['loin','pres','intermediaire'],sphMax:8,cylMax:7,aspherique:true,precalibrage:false,
-   indices:{'1.50':226,'1.60':271,'1.67':286,'1.74':334},
-   achats:{'1.50':75.20,'1.60':90.20,'1.67':95.20,'1.74':111.20},
+   compatible:['loin','pres','intermediaire'],sphMax:16,cylMax:10,aspherique:true,precalibrage:false,
+   indices:{'1.50':215,'1.60':230,'1.67':275,'1.74':320},
+   achats:{'1.50':74.10,'1.60':80.10,'1.67':94.10,'1.74':110.10},
    tags:['ar','lb'],
    traitements:[
     {nom:'Pure Blue UV (SCB UV)',icon:'ti-device-desktop',desc:`SeeCoat Blue UV — filtre lumière bleue nocive 380-460nm. Idéal pour les patients presbytes débutants exposés intensivement aux écrans.`},
-    {nom:'RelaxSee Neo — Addition légère',icon:'ti-activity',desc:`Addition légère intégrée (0.50 à 1.25D). Réduit l'effort d'accommodation en vision de près. Confort maximal en usage numérique prolongé.`},
+    {nom:'Unifocal antifatigue',icon:'ti-activity',desc:`Verre UNIFOCAL avec addition légère intégrée (0.50 à 1.25D). Réduit l'effort d'accommodation en vision de près. Confort maximal en usage numérique prolongé.`},
     {nom:'Disponible 1.50 à 1.74',icon:'ti-stack-2',desc:`Disponible en 1.50, 1.60, 1.67 et 1.74. Version SCC+UV NG aussi disponible.`}
+   ]},
+
+  // ── VERRES D'INTÉRIEUR — Soltes Wide & Home & Office Neo ──────
+  // Catégorie "Intérieur" Nikon. Verres dégressifs/mi-distance pour bureau & écrans.
+  // Compatibles uniquement vision intermédiaire (sélection "Home & Office").
+  // Soltes Wide SCC+UV NG (mi-distance) | achat HT:68.20/83.20/88.20/104.20 | sphMax-8 cyl7
+  {id:'nk_int1',nom:'Nikon Soltes Wide SCC+UV NG',marque:'Nikon',gamme:'haut',
+   compatible:['intermediaire'],sphMax:8,cylMax:7,aspherique:true,precalibrage:false,
+   indices:{'1.50':200,'1.60':240,'1.67':255,'1.74':300},
+   achats:{'1.50':68.20,'1.60':83.20,'1.67':88.20,'1.74':104.20},
+   tags:['ar'],
+   traitements:[
+    {nom:'SCC+UV NG',icon:'ti-shield',desc:`SeeCoat Clear+ UV Next Generation antireflet. Antistatique, super-hydrophobe, oléophobe, UV 400nm.`},
+    {nom:'Verre d\'intérieur mi-distance',icon:'ti-home',desc:`Soltes Wide — verre dégressif mi-distance "Pour le bureau". Dégression disponible 1.00 / 1.50 / 2.00 / 2.50 D. Vision nette du plan de travail à l'écran. Hauteur min. de montage 13 mm.`},
+    {nom:'Idéal poste de travail',icon:'ti-device-desktop',desc:`Conçu pour le confort visuel prolongé au bureau : lecture, écran et environnement proche sans effort d'accommodation.`}
+   ]},
+
+  // Soltes Wide Pure Blue UV (SCB) | achat HT:75.20/90.20/95.20/111.20 | sphMax-8 cyl7
+  {id:'nk_int2',nom:'Nikon Soltes Wide Pure Blue UV',marque:'Nikon',gamme:'haut',
+   compatible:['intermediaire'],sphMax:8,cylMax:7,aspherique:true,precalibrage:false,
+   indices:{'1.50':220,'1.60':260,'1.67':275,'1.74':320},
+   achats:{'1.50':75.20,'1.60':90.20,'1.67':95.20,'1.74':111.20},
+   tags:['ar','lb'],
+   traitements:[
+    {nom:'Pure Blue UV (SCB UV)',icon:'ti-device-desktop',desc:`SeeCoat Blue UV — filtre lumière bleue nocive 380-460nm. Protection écran renforcée pour le travail numérique.`},
+    {nom:'Verre d\'intérieur mi-distance',icon:'ti-home',desc:`Soltes Wide — verre dégressif mi-distance "Pour le bureau". Dégression 1.00 à 2.50 D. Hauteur min. de montage 13 mm.`},
+    {nom:'Idéal poste de travail écrans',icon:'ti-eye-check',desc:`Recommandé pour les patients exposés aux écrans au bureau plus de 4h/jour.`}
+   ]},
+
+  // Home & Office Neo SCC+UV NG (progressif d'intérieur) | achat HT:69.40/79.80/89.30/104.90 | sphMax-12 cyl8
+  {id:'nk_int3',nom:'Nikon Home & Office Neo SCC+UV NG',marque:'Nikon',gamme:'haut',
+   compatible:['intermediaire'],sphMax:12,cylMax:8,aspherique:true,precalibrage:false,
+   indices:{'1.50':200,'1.60':230,'1.67':260,'1.74':305},
+   achats:{'1.50':69.40,'1.60':79.80,'1.67':89.30,'1.74':104.90},
+   tags:['ar'],
+   traitements:[
+    {nom:'SCC+UV NG',icon:'ti-shield',desc:`SeeCoat Clear+ UV Next Generation antireflet. Antistatique, super-hydrophobe, oléophobe, UV 400nm.`},
+    {nom:'Progressif d\'intérieur',icon:'ti-home',desc:`Home & Office Neo — verre progressif d'intérieur "Pour l'intérieur et les activités de bureau". Champ de vision élargi du proche au mi-distance. 3 versions (Long / Standard / Wide). Hauteur min. de montage 16 mm.`},
+    {nom:'Confort intérieur global',icon:'ti-device-desktop',desc:`Couvre toutes les distances d'intérieur (lecture, écran, interlocuteur). Posture naturelle, sans contrainte cervicale.`}
+   ]},
+
+  // Home & Office Neo Pure Blue UV (SCB) | achat HT:73.00/84.00/93.80/110.40 | sphMax-12 cyl8
+  {id:'nk_int4',nom:'Nikon Home & Office Neo Pure Blue UV',marque:'Nikon',gamme:'haut',
+   compatible:['intermediaire'],sphMax:12,cylMax:8,aspherique:true,precalibrage:false,
+   indices:{'1.50':210,'1.60':245,'1.67':270,'1.74':320},
+   achats:{'1.50':73.00,'1.60':84.00,'1.67':93.80,'1.74':110.40},
+   tags:['ar','lb'],
+   traitements:[
+    {nom:'Pure Blue UV (SCB UV)',icon:'ti-device-desktop',desc:`SeeCoat Blue UV — filtre lumière bleue nocive 380-460nm. Protection écran renforcée pour l'intérieur.`},
+    {nom:'Progressif d\'intérieur',icon:'ti-home',desc:`Home & Office Neo — verre progressif d'intérieur. Champ élargi du proche au mi-distance. 3 versions (Long / Standard / Wide). Hauteur min. de montage 16 mm.`},
+    {nom:'Confort numérique intérieur',icon:'ti-eye-check',desc:`Idéal pour le travail prolongé sur écrans en environnement intérieur.`}
    ]},
 
   // ── MILIEU DE GAMME ────────────────────────────────────────
