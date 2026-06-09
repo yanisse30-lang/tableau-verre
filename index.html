@@ -1966,21 +1966,12 @@ select option{background:#fff;color:var(--txt-primary)}
             </svg>
             <span class="oc-geom-lbl">Progressif</span>
           </button>
-          <button class="oc-geom-card" id="ocg-prog_inter" onclick="ocSelGeom('prog_inter',this)">
-            <svg viewBox="0 0 88 56" width="66" height="42">
-              <path class="oc-lens-path" d="M12,37 C10,20 20,6 46,6 C74,6 82,22 82,34 C82,48 70,54 46,52 C22,50 12,50 12,37Z"/>
-              <line class="oc-lens-zone" x1="16" y1="23" x2="80" y2="23"/>
-              <line class="oc-lens-zone" x1="18" y1="33" x2="78" y2="33"/>
-              <line class="oc-lens-zone" x1="22" y1="43" x2="74" y2="43"/>
-            </svg>
-            <span class="oc-geom-lbl">Progressifs<br>d'intérieur</span>
-          </button>
           <button class="oc-geom-card" id="ocg-degressif" onclick="ocSelGeom('degressif',this)">
             <svg viewBox="0 0 88 56" width="66" height="42">
               <path class="oc-lens-path" d="M12,37 C10,20 20,6 46,6 C74,6 82,22 82,34 C82,48 70,54 46,52 C22,50 12,50 12,37Z"/>
               <path class="oc-lens-zone" d="M14,30 Q46,23 80,30" stroke-dasharray="none"/>
             </svg>
-            <span class="oc-geom-lbl">Dégressif</span>
+            <span class="oc-geom-lbl">Home &amp; Office</span>
           </button>
         </div>
       </div>
@@ -2827,10 +2818,9 @@ function ocVoirVerres(){
     return;
   }
   const geomMap = {
-    unifocal:   {id:'loin',         label:'Vision de loin'},
+    unifocal:   {id:'loin',          label:'Vision de loin'},
     progressif: {id:'progressif',   label:'Progressif'},
-    prog_inter: {id:'intermediaire',label:'Intermédiaire'},
-    degressif:  {id:'loin',         label:'Vision de loin'},
+    degressif:  {id:'intermediaire',label:'Intermédiaire'},
   };
   const vis = geomMap[_ocGeom] || geomMap.progressif;
   state.mutuelle = mutuelles.find(m=>m.id===_ocMutId);
