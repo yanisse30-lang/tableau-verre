@@ -3034,7 +3034,7 @@ function renderVerreCard(v,i,showTop,paire2=false){
       <div class="trait-desc">${t.desc}</div>
     </div>`;
   }).join('');
-  const btnP2=paire2?'':`<button class="btn-choisir" onclick="event.stopPropagation();choisirPaire2('${v.id}')"><i class="ti ti-copy"></i> Choisir & voir la 2ème paire</button>`;
+  const btnP2=(paire2||window._priseType==='sante')?'':`<button class="btn-choisir" onclick="event.stopPropagation();choisirPaire2('${v.id}')"><i class="ti ti-copy"></i> Choisir & voir la 2ème paire</button>`;
   const btnCompare=`<button class="btn-comparer" id="cmp-${v.id}" onclick="event.stopPropagation();toggleCompareBtn(this,'${v.id}')"><i class="ti ti-layout-columns"></i> Comparer</button>`;
   const indiceChip=v.indiceChoisi?`<span class="chip indice"><strong>${getIndiceLabel(v.indiceChoisi)}</strong></span>`:'';
   const aspChip=v.aspherique?`<span class="chip" style="background:#F0FDF4;border-color:#BBF7D0;color:#16A34A"><strong>Asphérique</strong></span>`:'';
@@ -3236,7 +3236,7 @@ function renderVerreLigne(v){
           ${plafondHTML}
           <div style="display:flex;gap:8px;align-items:center;margin-left:auto;margin-top:8px">
             <button class="btn-comparer" id="cmp-${v.id}" onclick="event.stopPropagation();toggleCompareBtn(this,'${v.id}')"><i class="ti ti-layout-columns"></i> Comparer</button>
-            <button class="btn-choisir" style="width:auto;margin-top:0;padding:10px 16px" onclick="event.stopPropagation();choisirPaire2('${v.id}')"><i class="ti ti-copy"></i> 2ème paire</button>
+            ${window._priseType!=='sante'?`<button class="btn-choisir" style="width:auto;margin-top:0;padding:10px 16px" onclick="event.stopPropagation();choisirPaire2('${v.id}')"><i class="ti ti-copy"></i> 2ème paire</button>`:''}
           </div>
         </div>
       </td>
@@ -3266,7 +3266,7 @@ function goMonture(){
   }
   // Check vision is selected
   if(!state.vision){
-    showToast('Veuillez d abord choisir le type de vision');
+    showToast("Veuillez d'abord choisir le type de vision");
     go(2);
     return;
   }
@@ -5484,7 +5484,7 @@ Règles:
 - Si pas d'accord détecté pour un verrier/catégorie: ne pas l'inclure
 - "marque" doit correspondre EXACTEMENT au nom du verrier tel qu'il apparaît dans le PDF`;
 
-  const resp = await sbFetch('https://api.anthropic.com/v1/messages',{
+  const resp = await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
     body: JSON.stringify({model:'claude-haiku-4-5',max_tokens:2000,messages:[{role:'user',content:prompt}]})
@@ -7773,7 +7773,7 @@ Réponds UNIQUEMENT JSON valide:
 RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de stock · Si rien trouvé: {"verres":[]}`;
     }
 
-    const resp = await sbFetch('https://api.anthropic.com/v1/messages',{
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:4096,messages:[{role:'user',content:prompt}]})
