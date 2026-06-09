@@ -3261,6 +3261,10 @@ function renderVerreLigne(v){
   // isReseau : tarif réseau hard-codé (si pas de conv IA)
   const isReseau = !isConvIA && mutId && v.tarifsReseau && v.tarifsReseau[mutId]?.[v.indiceChoisi] != null;
   const reseauLabel = isReseau ? (state.mutuelle?.label || mutId.toUpperCase()) : null;
+  // Verre d'intérieur (dégressif / progressif d'intérieur) non référencé dans les conventions réseau
+  // → affiché au tarif libre, signalé par un badge quand une convention est active pour la mutuelle.
+  const _isInterieur = (state.vision?.id==='interieur' || state.vision?.id==='degressif');
+  const isHorsReseau = _isInterieur && !isConvIA && !isReseau && !!_getConvParsed(mutId);
   const gcColor = v.gamme==='haut'?'#9060e0':v.gamme==='milieu'?'#378ADD':'#3B6D11';
   // Précalibrage : depuis conv IA si dispo, sinon depuis mutuelle
   const _precalPrix    = _convData?.precalibrage_max ?? state.mutuelle?.prixPrecalibrage ?? 15;
@@ -3337,7 +3341,7 @@ function renderVerreLigne(v){
           <span class="vr-marque">${v.marque}</span>
           ${v.stock ? `<span class="vr-reseau-badge" style="background:#15803D;border-color:#16A34A;color:#fff"><i class="ti ti-package" style="font-size:9px"></i> Stock J+1</span>` : ''}
           ${(v.tags||[]).includes('tr') ? `<span class="vr-reseau-badge" style="background:#0f3d2a;border-color:#16A34A;color:#4ade80"><i class="ti ti-sun-moon" style="font-size:9px"></i> Transitions</span>` : ''}
-          ${isConvIA ? `<span class="vr-reseau-badge" style="background:#5B21B6;border-color:#7C3AED"><i class="ti ti-cpu" style="font-size:9px"></i> IA ${state.mutuelle?.label||''}</span>` : (isReseau ? `<span class="vr-reseau-badge">${reseauLabel}</span>` : '')}
+          ${isConvIA ? `<span class="vr-reseau-badge" style="background:#5B21B6;border-color:#7C3AED"><i class="ti ti-cpu" style="font-size:9px"></i> IA ${state.mutuelle?.label||''}</span>` : (isReseau ? `<span class="vr-reseau-badge">${reseauLabel}</span>` : (isHorsReseau ? `<span class="vr-reseau-badge" style="background:#7c2d12;border-color:#b45309;color:#fbbf24" title="Verre d'intérieur non référencé dans la convention réseau — tarif libre appliqué"><i class="ti ti-info-circle" style="font-size:9px"></i> Hors réseau · tarif libre</span>` : ''))}
         </div>
       </td>
       <td><span class="vt-indice">${v.indiceChoisi}</span></td>
@@ -5326,6 +5330,10 @@ function _getConvParsed(mutId){
 
 function _calcConvVerre(v, ind, visionId, eqSph, convParsed){
   if(!convParsed||!convParsed.verriers) return null;
+  // Verres d'intérieur (Soltes Wide dégressif, Home & Office Neo) : non référencés dans
+  // les conventions réseau (Carte Blanche, Itelis, Kalixia, Séveane… → grilles par produit :
+  // Presio / SeeMax / SuperSee / RelaxSee / SPH uniquement). On les laisse au tarif libre.
+  if(visionId==='interieur' || visionId==='degressif') return null;
   const marque=(v.marque||'').toLowerCase();
   const verrieurKey=Object.keys(convParsed.verriers).find(k=>{
     const kl=k.toLowerCase();
@@ -5335,15 +5343,12 @@ function _calcConvVerre(v, ind, visionId, eqSph, convParsed){
   const verrier=convParsed.verriers[verrieurKey];
   const seuil=parseFloat(convParsed.seuil_complexe)||6.0;
   let verreType;
-  // Progressif + verres d'intérieur (Soltes Wide dégressif, Home & Office Neo) = multifocaux → tarif progressif réseau
-  if(visionId==='progressif' || visionId==='interieur' || visionId==='degressif') verreType='progressif';
+  if(visionId==='progressif') verreType='progressif';
   else if(v.stock && verrier.unifocal_stock) verreType='unifocal_stock';  // verre de stock → tarif dédié
   else verreType=(eqSph>seuil)?'unifocal_complexe':'unifocal_simple';
   let tarifs=verrier[verreType];
   // Fallback : si unifocal_stock non trouvé dans le PDF, utiliser unifocal_simple
   if((!tarifs||tarifs[ind]==null) && verreType==='unifocal_stock') tarifs=verrier['unifocal_simple'];
-  // Fallback : verres d'intérieur sans tarif progressif réseau listé → repli sur unifocal complexe puis simple
-  if((!tarifs||tarifs[ind]==null) && verreType==='progressif' && (visionId==='interieur'||visionId==='degressif')) tarifs=verrier['unifocal_complexe']||verrier['unifocal_simple'];
   if(!tarifs||tarifs[ind]==null) return null;
   const base=parseFloat(tarifs[ind]);
   if(isNaN(base)||base<=0) return null;
