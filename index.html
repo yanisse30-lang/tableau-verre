@@ -1971,7 +1971,15 @@ select option{background:#fff;color:var(--txt-primary)}
               <path class="oc-lens-path" d="M12,37 C10,20 20,6 46,6 C74,6 82,22 82,34 C82,48 70,54 46,52 C22,50 12,50 12,37Z"/>
               <path class="oc-lens-zone" d="M14,30 Q46,23 80,30" stroke-dasharray="none"/>
             </svg>
-            <span class="oc-geom-lbl">Home &amp; Office</span>
+            <span class="oc-geom-lbl">Dégressif<br><span style="font-size:9px;opacity:.7">Soltes Wide</span></span>
+          </button>
+          <button class="oc-geom-card" id="ocg-proginterieur" onclick="ocSelGeom('prog_interieur',this)">
+            <svg viewBox="0 0 88 56" width="66" height="42">
+              <path class="oc-lens-path" d="M12,37 C10,20 20,6 46,6 C74,6 82,22 82,34 C82,48 70,54 46,52 C22,50 12,50 12,37Z"/>
+              <line class="oc-lens-zone" x1="20" y1="25" x2="76" y2="25"/>
+              <path class="oc-lens-zone" d="M16,38 Q46,31 78,38" stroke-dasharray="none"/>
+            </svg>
+            <span class="oc-geom-lbl">Progressif d'intérieur<br><span style="font-size:9px;opacity:.7">Home &amp; Office</span></span>
           </button>
         </div>
       </div>
@@ -2546,7 +2554,7 @@ const catalogue = [
   // Compatibles uniquement vision intermédiaire (sélection "Home & Office").
   // Soltes Wide SCC+UV NG (mi-distance) | achat HT:68.20/83.20/88.20/104.20 | sphMax-8 cyl7
   {id:'nk_int1',nom:'Nikon Soltes Wide SCC+UV NG',marque:'Nikon',gamme:'haut',
-   compatible:['intermediaire'],sphMax:8,cylMax:7,aspherique:true,precalibrage:false,
+   compatible:['degressif'],sphMax:8,cylMax:7,aspherique:true,precalibrage:false,
    indices:{'1.50':200,'1.60':240,'1.67':255,'1.74':300},
    achats:{'1.50':68.20,'1.60':83.20,'1.67':88.20,'1.74':104.20},
    tags:['ar'],
@@ -2558,7 +2566,7 @@ const catalogue = [
 
   // Soltes Wide Pure Blue UV (SCB) | achat HT:75.20/90.20/95.20/111.20 | sphMax-8 cyl7
   {id:'nk_int2',nom:'Nikon Soltes Wide Pure Blue UV',marque:'Nikon',gamme:'haut',
-   compatible:['intermediaire'],sphMax:8,cylMax:7,aspherique:true,precalibrage:false,
+   compatible:['degressif'],sphMax:8,cylMax:7,aspherique:true,precalibrage:false,
    indices:{'1.50':220,'1.60':260,'1.67':275,'1.74':320},
    achats:{'1.50':75.20,'1.60':90.20,'1.67':95.20,'1.74':111.20},
    tags:['ar','lb'],
@@ -2570,7 +2578,7 @@ const catalogue = [
 
   // Home & Office Neo SCC+UV NG (progressif d'intérieur) | achat HT:69.40/79.80/89.30/104.90 | sphMax-12 cyl8
   {id:'nk_int3',nom:'Nikon Home & Office Neo SCC+UV NG',marque:'Nikon',gamme:'haut',
-   compatible:['intermediaire'],sphMax:12,cylMax:8,aspherique:true,precalibrage:false,
+   compatible:['interieur'],sphMax:12,cylMax:8,aspherique:true,precalibrage:false,
    indices:{'1.50':200,'1.60':230,'1.67':260,'1.74':305},
    achats:{'1.50':69.40,'1.60':79.80,'1.67':89.30,'1.74':104.90},
    tags:['ar'],
@@ -2582,7 +2590,7 @@ const catalogue = [
 
   // Home & Office Neo Pure Blue UV (SCB) | achat HT:73.00/84.00/93.80/110.40 | sphMax-12 cyl8
   {id:'nk_int4',nom:'Nikon Home & Office Neo Pure Blue UV',marque:'Nikon',gamme:'haut',
-   compatible:['intermediaire'],sphMax:12,cylMax:8,aspherique:true,precalibrage:false,
+   compatible:['interieur'],sphMax:12,cylMax:8,aspherique:true,precalibrage:false,
    indices:{'1.50':210,'1.60':245,'1.67':270,'1.74':320},
    achats:{'1.50':73.00,'1.60':84.00,'1.67':93.80,'1.74':110.40},
    tags:['ar','lb'],
@@ -2947,9 +2955,10 @@ function ocVoirVerres(){
     return;
   }
   const geomMap = {
-    unifocal:   {id:'loin',          label:'Vision de loin'},
-    progressif: {id:'progressif',   label:'Progressif'},
-    degressif:  {id:'intermediaire',label:'Intermédiaire'},
+    unifocal:       {id:'loin',       label:'Vision de loin'},
+    progressif:     {id:'progressif', label:'Progressif'},
+    degressif:      {id:'degressif',  label:'Dégressif (Soltes Wide)'},
+    prog_interieur: {id:'interieur',  label:"Progressif d'intérieur (Home & Office)"},
   };
   const vis = geomMap[_ocGeom] || geomMap.progressif;
   state.mutuelle = mutuelles.find(m=>m.id===_ocMutId);
@@ -3130,7 +3139,7 @@ function selectMut(id){
 function selectVision(id,label){
   state.vision={id,label};
   document.getElementById('vision-label-h').textContent='Vision : '+label;
-  const needAdd=id==='progressif'||id==='pres';
+  const needAdd=id==='progressif'||id==='pres'||id==='interieur'||id==='degressif';
   document.getElementById('od-add-row').style.display=needAdd?'block':'none';
   document.getElementById('og-add-row').style.display=needAdd?'block':'none';
   go(3);
@@ -5326,12 +5335,15 @@ function _calcConvVerre(v, ind, visionId, eqSph, convParsed){
   const verrier=convParsed.verriers[verrieurKey];
   const seuil=parseFloat(convParsed.seuil_complexe)||6.0;
   let verreType;
-  if(visionId==='progressif') verreType='progressif';
+  // Progressif + verres d'intérieur (Soltes Wide dégressif, Home & Office Neo) = multifocaux → tarif progressif réseau
+  if(visionId==='progressif' || visionId==='interieur' || visionId==='degressif') verreType='progressif';
   else if(v.stock && verrier.unifocal_stock) verreType='unifocal_stock';  // verre de stock → tarif dédié
   else verreType=(eqSph>seuil)?'unifocal_complexe':'unifocal_simple';
   let tarifs=verrier[verreType];
   // Fallback : si unifocal_stock non trouvé dans le PDF, utiliser unifocal_simple
   if((!tarifs||tarifs[ind]==null) && verreType==='unifocal_stock') tarifs=verrier['unifocal_simple'];
+  // Fallback : verres d'intérieur sans tarif progressif réseau listé → repli sur unifocal complexe puis simple
+  if((!tarifs||tarifs[ind]==null) && verreType==='progressif' && (visionId==='interieur'||visionId==='degressif')) tarifs=verrier['unifocal_complexe']||verrier['unifocal_simple'];
   if(!tarifs||tarifs[ind]==null) return null;
   const base=parseFloat(tarifs[ind]);
   if(isNaN(base)||base<=0) return null;
