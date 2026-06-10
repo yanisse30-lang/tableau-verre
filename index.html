@@ -2613,6 +2613,62 @@ const catalogue = [
     {nom:'Confort numérique intérieur',icon:'ti-eye-check',desc:`Idéal pour le travail prolongé sur écrans en environnement intérieur.`}
    ]},
 
+  // ── VERRES TRANSITIONS GEN S (photochromiques, toutes gammes) ──
+  // Regroupés ici par lisibilité ; l'affichage les répartit par gamme automatiquement.
+  // SeeMax Transitions Gen S (unifocal premium) | achat HT base SeeMax +18 Transitions
+  {id:'nk_h13',nom:'Nikon SeeMax Transitions Gen S',marque:'Nikon',gamme:'haut',
+   compatible:['loin','pres','intermediaire'],sphMax:16,cylMax:10,aspherique:true,precalibrage:false,
+   indices:{'1.50':245,'1.60':265,'1.67':305,'1.74':350},
+   achats:{'1.50':91.10,'1.60':97.10,'1.67':111.10,'1.74':127.10},
+   tags:['ar','tr'],
+   traitements:[
+    {nom:'Transitions Gen S',icon:'ti-sun-moon',desc:'Transitions Gen S — photochromie nouvelle génération. Transparent en intérieur, teinte foncée en 30 secondes en extérieur. Protection UV 400nm complète. Brun, gris ou graphite.'},
+    {nom:'Multi-Asphérique SeeMax',icon:'ti-maximize',desc:`Design multi-asphérique SeeMax : correction des aberrations d'ordre élevé. Vision nette et précise du centre à la périphérie. SCC+UV NG intégré.`},
+    {nom:'EyecuraSee disponible',icon:'ti-eye',desc:'Option EyecuraSee disponible : prescription au 1/100 de dioptrie pour une correction ultra-précise.'},
+    {nom:'Remplace les lunettes de soleil',icon:'ti-sun',desc:'Solution 2-en-1 : verre clair en intérieur, solaire en extérieur. Idéal pour les patients actifs qui ne veulent pas changer de lunettes.'}
+   ]},
+
+  // Asphérique Transitions Gen S (unifocal milieu) | base ECC+UV Asph +18
+  {id:'nk_m7',nom:'Nikon Asphérique Transitions Gen S',marque:'Nikon',gamme:'milieu',
+   compatible:['loin','pres','intermediaire'],sphMax:19,cylMax:9,aspherique:true,precalibrage:false,
+   indices:{'1.50':203,'1.60':223,'1.67':263},
+   achats:{'1.50':63.10,'1.60':69.10,'1.67':88.10},
+   tarifsReseau:{cb:{'1.50':121,'1.60':132,'1.67':150},actil:{'1.50':115,'1.60':135,'1.67':149}},
+   tags:['ar','tr'],
+   traitements:[
+    {nom:'Transitions Gen S',icon:'ti-sun-moon',desc:'Transitions Gen S — photochromie nouvelle génération. Transparent en intérieur, teinte en 30 secondes en extérieur. UV 400nm. Brun ou gris.'},
+    {nom:'ECC+UV Asphérique',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon sur design asphérique — verre plat et léger, résistant aux rayures, UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'Bon rapport qualité-prix',icon:'ti-coins',desc:'Verre Transitions asphérique au tarif accessible. Excellent compromis confort solaire / budget.'},
+    {nom:'Remplace les lunettes de soleil',icon:'ti-sun',desc:'Clair en intérieur, solaire dehors. Pratique pour la conduite de jour et les activités extérieures.'}
+   ]},
+
+  // Sphérique Transitions Gen S (unifocal entrée) | tarif accessible
+  {id:'nk_e7',nom:'Nikon Sphérique Transitions Gen S',marque:'Nikon',gamme:'entree',
+   compatible:['loin','pres','intermediaire'],sphMax:16,cylMax:4,aspherique:false,precalibrage:false,
+   indices:{'1.50':155,'1.60':172,'1.67':212},
+   achats:{'1.50':58,'1.60':64,'1.67':78},
+   tarifsReseau:{cb:{'1.50':100,'1.60':112,'1.67':128},actil:{'1.50':95,'1.60':108,'1.67':122}},
+   tags:['ar','tr'],
+   traitements:[
+    {nom:'Transitions Gen S',icon:'ti-sun-moon',desc:'Transitions Gen S — photochromie nouvelle génération. Transparent en intérieur, teinte foncée en extérieur. UV 400nm. Brun ou gris.'},
+    {nom:'ECC+UV Sphérique',icon:'ti-shield',desc:'Antireflet ECC+UV Nikon sur design sphérique surfacé. Résistance aux rayures, UV 400nm. Solution Transitions économique.'},
+    {nom:'Prix accessible',icon:'ti-coins',desc:'Verre Transitions au tarif le plus abordable. Idéal budgets maîtrisés ou remboursements limités.'},
+    {nom:'Remplace les lunettes de soleil',icon:'ti-sun',desc:'Clair en intérieur, solaire dehors — confort 2-en-1 sans surcoût de monture solaire.'}
+   ]},
+
+  // Presio Clear 13 Transitions Gen S (progressif milieu) | base Presio Clear 13 +18
+  {id:'nk_m8',nom:'Nikon Presio Clear 13 Transitions Gen S',marque:'Nikon',gamme:'milieu',
+   compatible:['progressif'],sphMax:12,cylMax:6,aspherique:true,precalibrage:true,
+   indices:{'1.50':275,'1.60':307},achats:{'1.50':116,'1.60':136},
+   tarifsReseau:{cb:{'1.50':224,'1.60':251},actil:{'1.50':213,'1.60':237}},
+   tags:['ar','tr'],
+   traitements:[
+    {nom:'Transitions Gen S',icon:'ti-sun-moon',desc:'Transitions Gen S — photochromie nouvelle génération. Transparent en intérieur, teinte foncée en 30 secondes en extérieur. UV 400nm. Brun ou gris.'},
+    {nom:'ECC+UV',icon:'ti-shield',desc:`Antireflet ECC+UV Nikon — résistance maximale aux rayures, super-hydrophobe, UV 400nm. Carte d'authenticité incluse.`},
+    {nom:'Design Corridor 13',icon:'ti-cpu',desc:'Corridor progressif 13 mm — large zone de vision intermédiaire. Adapté à tous types de presbytes.'},
+    {nom:'Progressif solaire 2-en-1',icon:'ti-sun',desc:'Progressif clair en intérieur, solaire en extérieur. Confort sans changer de lunettes pour les presbytes actifs.'}
+   ]},
+
   // ── MILIEU DE GAMME ────────────────────────────────────────
   // Presio Power Z 12 ECC+UV | achat:138/160 | CB:256/285 | marge:46.1%/43.9%
   {id:'nk_m1',nom:'Nikon Presio Power Z 12',marque:'Nikon',gamme:'milieu',
