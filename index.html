@@ -2415,12 +2415,15 @@ const mutuelles = [
   // ── Sous Contrat ─────────────────────────────────────────────
   // prixPrecalibrage = prix Optislim Nikon par réseau (mémos Dec 2024 / Mars 2025)
   // optislimInclus = true → Optislim déjà inclus dans le Px Vente TTC (Avec), pas de surcoût patient
-  {id:'kalixia', label:'Kalixia',       section:'sous', lastMaj:'27/04/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20, prixPrecalibrage:12, optislimInclus:false},
+  {id:'kalixia', label:'Kalixia',       section:'sous', hasContrats:true, lastMaj:'27/04/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20, prixPrecalibrage:12, optislimInclus:false},
+  // Kalixia gestionnaires : Oxantis / Viamedis. Précalibrage + prix verre à confirmer (placeholder = valeur Kalixia actuelle).
+  {id:'kalixia_oxantis',  label:'Kalixia Oxantis',  section:'sous', hidden:true, lastMaj:'27/04/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20, prixPrecalibrage:12, optislimInclus:false},
+  {id:'kalixia_viamedis', label:'Kalixia Viamedis', section:'sous', hidden:true, lastMaj:'27/04/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20, prixPrecalibrage:12, optislimInclus:false},
   {id:'cb',      label:'Carte Blanche', section:'sous', lastMaj:'09/01/2026', plafond_monture:150, plafond_verre:250, remiseMonture:0,  prixPrecalibrage:20, optislimInclus:false},
   {id:'sc',      label:'Santéclair',    section:'sous', lastMaj:'07/01/2026', plafond_monture:120, plafond_verre:220, remiseMonture:15, prixPrecalibrage:4.92, optislimInclus:false},
   {id:'itelis',  label:'Itelis',        section:'sous', hasContrats:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:10, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
   // Sans Opti = Itelis classique : précalibrage à l'ancien prix (10€), AUCUN tarif réseau Opti (prix verre standard)
-  {id:'itelis_sansopti', label:'Itelis Sans Opti', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:10, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
+  {id:'itelis_sansopti', label:'Itelis Sans Opti', section:'sous', hidden:true, isDefault:true, sub:'Itelis classique — prix verre standard', lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:10, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
   // Opti 2/3/4 = précalibrage 1€ (PDF Itelis : « Précalibrage 1€ à ajouter », identique aux 3 niveaux)
   {id:'itelis_opti2', label:'Itelis Opti 2', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:1, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
   {id:'itelis_opti3', label:'Itelis Opti 3', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:1, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
@@ -3072,32 +3075,29 @@ function ocSelMut(id){
   _ocUpdateContratBadge(null);
 }
 
-// Sélection d'un contrat (Opti 2/3/4) depuis le picker, dans le flow OptiConseil
+// Sélection d'un sous-contrat depuis le picker (Opti 2/3/4, Oxantis/Viamedis…), flow OptiConseil
 function ocSelContrat(contratId){
   _ocMutId = contratId;
-  const parentId = contratId.split('_')[0]; // itelis_opti2 → itelis
+  const parentId = contratId.split('_')[0]; // itelis_opti2 → itelis ; kalixia_oxantis → kalixia
   document.querySelectorAll('.oc-mut-card').forEach(c=>c.classList.remove('selected'));
   const el = document.getElementById('ocm-'+parentId);
   if(el) el.classList.add('selected');
   const c = mutuelles.find(x=>x.id===contratId);
-  _ocUpdateContratBadge(c ? c.label.replace(/^Itelis\s*/i,'') : null);
+  const parent = mutuelles.find(x=>x.id===parentId);
+  const short = c ? _contratShortLabel(parent ? parent.label : parentId, c.label) : null;
+  _ocUpdateContratBadge(parentId, short);
 }
 
-// Affiche/masque le badge "Opti X" sur la carte Itelis sélectionnée
-function _ocUpdateContratBadge(levelLabel){
-  const card = document.getElementById('ocm-itelis');
+// Affiche/masque le badge du sous-contrat sélectionné (un seul à la fois, toutes cartes confondues)
+function _ocUpdateContratBadge(parentId, levelLabel){
+  document.querySelectorAll('.oc-mut-card .oc-contrat-badge').forEach(b=>b.remove());
+  if(!parentId || !levelLabel) return;
+  const card = document.getElementById('ocm-'+parentId);
   if(!card) return;
-  let badge = card.querySelector('.oc-contrat-badge');
-  if(levelLabel){
-    if(!badge){
-      badge = document.createElement('div');
-      badge.className = 'oc-contrat-badge';
-      card.appendChild(badge);
-    }
-    badge.textContent = levelLabel;
-  } else if(badge){
-    badge.remove();
-  }
+  const badge = document.createElement('div');
+  badge.className = 'oc-contrat-badge';
+  badge.textContent = levelLabel;
+  card.appendChild(badge);
 }
 
 function ocRenderMuts(){
@@ -3110,7 +3110,7 @@ function ocRenderMuts(){
     const logo = mutLogos[id]
       ? `<div style="width:110px;height:58px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:6px">${mutLogos[id]}</div>`
       : `<span style="font-size:12px;font-weight:700;color:#ccc;text-align:center;line-height:1.3">${m.label}</span>`;
-    const hint = m.hasContrats ? `<div class="oc-contrat-hint">Opti 2·3·4</div>` : '';
+    const hint = m.hasContrats ? `<div class="oc-contrat-hint">${_contratHint(m.id, m.label)}</div>` : '';
     return `<button class="oc-mut-card${m.hasContrats?' has-contrats':''}" id="ocm-${id}" onclick="ocSelMut('${id}')">${logo}${hint}</button>`;
   }).join('');
 }
@@ -3297,6 +3297,21 @@ const mutSections = [
   {key:'hors', label:'Hors OCAM'},
 ];
 
+// ── Helpers contrats/sous-réseaux (Itelis Opti 2/3/4, Kalixia Oxantis/Viamedis…) ──
+function _contratChildren(parentId){
+  return mutuelles.filter(x => x.hidden && x.id.startsWith(parentId + '_'));
+}
+function _contratShortLabel(parentLabel, childLabel){
+  const re = new RegExp('^' + parentLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*', 'i');
+  return childLabel.replace(re, '').trim() || childLabel;
+}
+function _contratHint(parentId, parentLabel){
+  return _contratChildren(parentId)
+    .filter(c => !(c.isDefault || /sansopti/i.test(c.id)))   // le "classique/sans" n'apparaît pas dans l'aperçu
+    .map(c => _contratShortLabel(parentLabel, c.label))
+    .join(' · ');
+}
+
 function _renderMutGrid(containerId, onClickFn, f=''){
   const container = document.getElementById(containerId);
   if(!container) return;
@@ -3310,7 +3325,7 @@ function _renderMutGrid(containerId, onClickFn, f=''){
       const badge = m.remiseMontureTiers
         ? '<div class="mut-remise-badge">Palier monture</div>'
         : m.remiseMonture > 0 ? '<div class="mut-remise-badge">-' + m.remiseMonture + '% monture</div>' : '';
-      const hint  = m.hasContrats ? '<div class="mut-contrat-hint"><i class="ti ti-layers-subtract"></i> Opti 2 · 3 · 4</div>' : '';
+      const hint  = m.hasContrats ? '<div class="mut-contrat-hint"><i class="ti ti-layers-subtract"></i> ' + _contratHint(m.id, m.label) + '</div>' : '';
       const cls   = 'mut-logo-card'
         + (s.key === 'sans' ? ' sans-contrat' : s.key === 'hors' ? ' hors-ocam' : '')
         + (m.hasContrats ? ' has-contrats' : '');
@@ -3345,12 +3360,13 @@ function _showContratPicker(mutId, onClickFn){
   const contrats = mutuelles.filter(x => x.hidden && x.id.startsWith(mutId + '_'));
   if(btnsEl){
     let bhtml = '';
+    const parentLabel = m ? m.label : mutId;
     contrats.forEach(c => {
-      const lvl = c.label.replace(/^Itelis\s*/i, '');
-      const isSans = /sansopti/i.test(c.id);
-      const icon = isSans ? 'ti-circle-off' : 'ti-rosette';
-      const sub  = isSans ? '<span class="contrat-pick-sub">Itelis classique — prix verre standard</span>' : '';
-      bhtml += '<button class="contrat-pick-btn' + (isSans ? ' sans-opti' : '') + '" data-cid="' + c.id + '" data-cfn="' + onClickFn + '">'
+      const lvl = _contratShortLabel(parentLabel, c.label);
+      const isDefault = c.isDefault || /sansopti/i.test(c.id);
+      const icon = isDefault ? 'ti-circle-off' : 'ti-rosette';
+      const sub  = c.sub ? '<span class="contrat-pick-sub">' + c.sub + '</span>' : '';
+      bhtml += '<button class="contrat-pick-btn' + (isDefault ? ' sans-opti' : '') + '" data-cid="' + c.id + '" data-cfn="' + onClickFn + '">'
         + '<i class="ti ' + icon + '"></i><span class="contrat-pick-lbl">' + lvl + sub + '</span></button>';
     });
     btnsEl.innerHTML = bhtml;
