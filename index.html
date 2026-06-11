@@ -5631,7 +5631,10 @@ RÈGLES STRICTES:
 
 // ─── Helpers conv parsed ──────────────────────────────────────
 function _getConvParsed(mutId){
-  try{ const s=localStorage.getItem('conv_parsed_'+mutId); return s?JSON.parse(s):null; }catch(e){ return null; }
+  if(!mutId) return null;
+  const read = k => { try{ const s=localStorage.getItem('conv_parsed_'+k); return s?JSON.parse(s):null; }catch(e){ return null; } };
+  // Sous-contrat (itelis_opti2, kalixia_oxantis…) → repli sur la convention du réseau parent (itelis, kalixia).
+  return read(mutId) || (mutId.includes('_') ? read(mutId.split('_')[0]) : null);
 }
 
 // Déduit la famille produit réseau d'un verre, depuis son nom (pour le tarif convention par produit).
