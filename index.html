@@ -5289,7 +5289,7 @@ CATALOGUE EXISTANT (id|nom|marque|indices|STOCK si verre de stock):
 ${catCtx}
 
 TEXTE DU PDF (${pdfText.length} caractères):
-${pdfText.substring(0, 50000)}
+${pdfText.substring(0, 28000)}
 
 MISSION: Extrais TOUS les verres avec leurs prix depuis le PDF.
 Pour chaque verre trouvé, cherche la correspondance dans le catalogue existant (par nom ou marque).
@@ -5536,7 +5536,7 @@ CATALOGUE OPTICIEN — une ligne par verre, format « id | nom | marque | [indic
 ${catCtx}
 
 TEXTE DE LA CONVENTION ${reseauLabel} (${fullText.length} caractères) :
-${fullText.substring(0, 50000)}
+${fullText.substring(0, 28000)}
 
 Les conventions se présentent sous DEUX formes — extrais les DEUX quand elles sont présentes :
 (A) PAR PRODUIT NOMMÉ (ex: grille Nikon "P.Clear P 13", "P.Touch", "Sph ECC+UV"…) → mappe sur les id du catalogue.
@@ -5616,12 +5616,26 @@ RÈGLES STRICTES :
   } catch(e) {
     console.error('Conv AI error:', e);
     if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Analyser avec IA'; }
-    if(e.message?.includes('401') || e.message?.includes('authentication')){
-      showToast('Clé API invalide — vérifiez dans les paramètres admin.');
-    } else {
-      showToast('Erreur IA : ' + e.message);
-    }
+    showToast('Erreur IA : ' + _aiFriendlyError(e.message));
   }
+}
+
+// Message d'erreur IA lisible (rate limit, clé, surcharge, crédit…)
+function _aiFriendlyError(msg){
+  const m = (msg||'').toLowerCase();
+  if(m.includes('rate_limit') || m.includes('429') || m.includes('tokens per minute')){
+    return "Limite IA atteinte (trop de texte en 1 min sur ton offre Anthropic). Attends ~60 s puis relance, et analyse un seul PDF à la fois. Ajouter du crédit sur console.anthropic.com augmente cette limite.";
+  }
+  if(m.includes('401') || m.includes('authentication') || m.includes('invalid x-api-key')){
+    return "Clé API invalide ou révoquée — vérifie-la dans les Paramètres admin.";
+  }
+  if(m.includes('overloaded') || m.includes('529')){
+    return "Service IA momentanément surchargé — réessaie dans quelques instants.";
+  }
+  if(m.includes('credit') || m.includes('billing') || m.includes('insufficient')){
+    return "Crédit Anthropic insuffisant — vérifie ton solde sur console.anthropic.com.";
+  }
+  return msg;
 }
 
 // ─── Helpers conv parsed ──────────────────────────────────────
@@ -6023,7 +6037,7 @@ CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
 ${catCtx}
 
 TEXTE DU PDF (${pdfText.length} caractères):
-${pdfText.substring(0, 50000)}
+${pdfText.substring(0, 28000)}
 
 VERRE DE STOCK = verre sphérique pré-fabriqué, non surfacé, livraison J+1, prix catalogue fixe (beaucoup moins cher).
 Mots-clés stock dans le PDF: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made", "de série".
@@ -8244,7 +8258,7 @@ CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
 ${catCtx}
 
 TEXTE DU PDF (${fullText.length} car.):
-${fullText.substring(0,50000)}
+${fullText.substring(0,28000)}
 
 VERRE DE STOCK = verre sphérique pré-fabriqué, livraison J+1, prix catalogue fixe.
 Mots-clés stock: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made", "de série".
@@ -8272,7 +8286,7 @@ CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
 ${catCtx}
 
 TEXTE DU PDF (${fullText.length} car.):
-${fullText.substring(0,50000)}
+${fullText.substring(0,28000)}
 
 MISSION: Extrait TOUS les prix d'achat HT opticien pour les verres du catalogue. Les verres de stock ont des prix beaucoup plus bas que les verres surfacés.
 
@@ -8300,7 +8314,7 @@ RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de
     _catRenderIAResults(type, parsed, true);
 
   } catch(err){
-    if(zone) zone.innerHTML = `<div style="margin-top:10px;background:#FFF1F2;border:1px solid #FECDD3;border-radius:10px;padding:10px 14px;font-size:13px;color:#DC2626;font-weight:600"><i class="ti ti-alert-circle"></i> Erreur : ${err.message}</div>`;
+    if(zone) zone.innerHTML = `<div style="margin-top:10px;background:#FFF1F2;border:1px solid #FECDD3;border-radius:10px;padding:10px 14px;font-size:13px;color:#DC2626;font-weight:600"><i class="ti ti-alert-circle"></i> Erreur : ${_aiFriendlyError(err.message)}</div>`;
   }
 }
 
