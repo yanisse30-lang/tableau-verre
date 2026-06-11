@@ -846,9 +846,13 @@ select option{background:#fff;color:var(--txt-primary)}
 .oc-geom-card.selected .oc-lens-zone{stroke:#93C5FD}
 .oc-type-row{display:flex;gap:14px}
 .oc-mut-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.oc-mut-card{border:1.5px solid var(--bdr-light);border-radius:14px;padding:10px 8px;cursor:pointer;background:#fff;display:flex;align-items:center;justify-content:center;min-height:76px;transition:border .15s,background .15s,box-shadow .15s;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.oc-mut-card{position:relative;border:1.5px solid var(--bdr-light);border-radius:14px;padding:10px 8px;cursor:pointer;background:#fff;display:flex;align-items:center;justify-content:center;min-height:76px;transition:border .15s,background .15s,box-shadow .15s;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
 .oc-mut-card:hover:not(.selected){border-color:var(--blue-600);background:#EFF6FF;box-shadow:0 3px 12px rgba(0,100,200,0.1)}
 .oc-mut-card.selected{border:2.5px solid var(--blue-600);background:#EFF6FF;box-shadow:0 3px 12px rgba(0,100,200,0.15)}
+.oc-mut-card.has-contrats{border-color:#FDE68A}
+.oc-mut-card.has-contrats:hover:not(.selected){border-color:#D97706;background:#FFFBEB}
+.oc-contrat-hint{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;letter-spacing:.02em;color:#D97706;background:#FFFBEB;padding:1px 6px;border-radius:10px;border:1px solid #FDE68A;pointer-events:none;white-space:nowrap}
+.oc-contrat-badge{position:absolute;top:-7px;right:-7px;background:linear-gradient(135deg,#b45309,#D97706);color:#fff;font-size:10px;font-weight:800;letter-spacing:.02em;padding:2px 8px;border-radius:20px;box-shadow:0 2px 6px rgba(180,83,9,0.35);pointer-events:none;white-space:nowrap}
 .oc-mont-row{display:flex;gap:12px;flex-wrap:wrap}
 .oc-mont-btn{flex:1;min-width:80px;display:flex;flex-direction:column;align-items:center;gap:7px;padding:18px 8px;border-radius:16px;border:2px solid var(--bdr-light);background:#fff;color:var(--txt-muted);font-family:var(--font);cursor:pointer;transition:.15s;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
 .oc-mont-btn i{font-size:24px;color:var(--txt-muted)}
@@ -3046,10 +3050,45 @@ function ocSelType(type, btn){
 }
 
 function ocSelMut(id){
+  const m = mutuelles.find(x=>x.id===id);
+  if(m && m.hasContrats){
+    // Mutuelle à plusieurs contrats (Itelis Opti 2/3/4) → ouvrir le picker
+    _showContratPicker(id, 'ocSelContrat');
+    return;
+  }
   _ocMutId = id;
   document.querySelectorAll('.oc-mut-card').forEach(c=>c.classList.remove('selected'));
   const el = document.getElementById('ocm-'+id);
   if(el) el.classList.add('selected');
+  _ocUpdateContratBadge(null);
+}
+
+// Sélection d'un contrat (Opti 2/3/4) depuis le picker, dans le flow OptiConseil
+function ocSelContrat(contratId){
+  _ocMutId = contratId;
+  const parentId = contratId.split('_')[0]; // itelis_opti2 → itelis
+  document.querySelectorAll('.oc-mut-card').forEach(c=>c.classList.remove('selected'));
+  const el = document.getElementById('ocm-'+parentId);
+  if(el) el.classList.add('selected');
+  const c = mutuelles.find(x=>x.id===contratId);
+  _ocUpdateContratBadge(c ? c.label.replace(/^Itelis\s*/i,'') : null);
+}
+
+// Affiche/masque le badge "Opti X" sur la carte Itelis sélectionnée
+function _ocUpdateContratBadge(levelLabel){
+  const card = document.getElementById('ocm-itelis');
+  if(!card) return;
+  let badge = card.querySelector('.oc-contrat-badge');
+  if(levelLabel){
+    if(!badge){
+      badge = document.createElement('div');
+      badge.className = 'oc-contrat-badge';
+      card.appendChild(badge);
+    }
+    badge.textContent = levelLabel;
+  } else if(badge){
+    badge.remove();
+  }
 }
 
 function ocRenderMuts(){
@@ -3062,7 +3101,8 @@ function ocRenderMuts(){
     const logo = mutLogos[id]
       ? `<div style="width:110px;height:58px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:6px">${mutLogos[id]}</div>`
       : `<span style="font-size:12px;font-weight:700;color:#ccc;text-align:center;line-height:1.3">${m.label}</span>`;
-    return `<button class="oc-mut-card" id="ocm-${id}" onclick="ocSelMut('${id}')">${logo}</button>`;
+    const hint = m.hasContrats ? `<div class="oc-contrat-hint">Opti 2·3·4</div>` : '';
+    return `<button class="oc-mut-card${m.hasContrats?' has-contrats':''}" id="ocm-${id}" onclick="ocSelMut('${id}')">${logo}${hint}</button>`;
   }).join('');
 }
 
