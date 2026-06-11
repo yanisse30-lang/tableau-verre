@@ -5530,15 +5530,16 @@ async function analyzeConvPdfWithAI(id){
       .map(v => `${v.id}|${v.nom}|${v.marque||''}|[${Object.keys(v.indices||{}).join(',')}]`)
       .join('\n');
 
-    const prompt = `Tu es un expert en conventionnement optique en France. On te donne (1) le CATALOGUE de verres de l'opticien et (2) le texte d'un document de conventionnement réseau (${reseauLabel}) qui liste les PRIX DE VENTE MAXIMA négociés (reste à charge zéro / "prix maxima" / "prix de vente max" / plafond verre).
+    // Construit le prompt pour un morceau du texte de convention
+    const mkPrompt = (txt, partInfo) => `Tu es un expert en conventionnement optique en France. On te donne (1) le CATALOGUE de verres de l'opticien et (2) un EXTRAIT${partInfo} du texte d'un document de conventionnement réseau (${reseauLabel}) qui liste les PRIX DE VENTE MAXIMA négociés (reste à charge zéro / "prix maxima" / "prix de vente max" / plafond verre).
 
 CATALOGUE OPTICIEN — une ligne par verre, format « id | nom | marque | [indices disponibles] » :
 ${catCtx}
 
-TEXTE DE LA CONVENTION ${reseauLabel} (${fullText.length} caractères) :
-${fullText.substring(0, 28000)}
+TEXTE DE LA CONVENTION ${reseauLabel}${partInfo} :
+${txt}
 
-Les conventions se présentent sous DEUX formes — extrais les DEUX quand elles sont présentes :
+Les conventions se présentent sous DEUX formes — extrais les DEUX quand elles sont présentes dans CE morceau :
 (A) PAR PRODUIT NOMMÉ (ex: grille Nikon "P.Clear P 13", "P.Touch", "Sph ECC+UV"…) → mappe sur les id du catalogue.
 (B) PAR CATÉGORIE (ex: "verre unifocal simple/complexe", "progressif", "verre de stock") sans nommer de produit → remplis la grille générique par verrier.
 
@@ -5567,37 +5568,23 @@ Réponds UNIQUEMENT avec ce JSON valide, sans texte autour :
 }
 
 RÈGLES STRICTES :
-- "verres" : CLÉS = id EXACTS du catalogue ci-dessus (ex: "nk_h3"). Jamais d'id absent. Un prix par couple verre/indice réellement présent. Correspondance PRODUIT + TRAITEMENT obligatoire ; en cas de doute, OMETTRE (mieux vaut rien que se tromper). Mets "verres":{} si la convention ne nomme aucun produit.
+- "verres" : CLÉS = id EXACTS du catalogue ci-dessus (ex: "nk_h3"). Jamais d'id absent. Un prix par couple verre/indice réellement présent. Correspondance PRODUIT + TRAITEMENT obligatoire ; en cas de doute, OMETTRE (mieux vaut rien que se tromper). Mets "verres":{} si ce morceau ne nomme aucun produit.
 - "verriers" : grille par catégorie. unifocal_stock si le PDF mentionne "stock"/"de série"/"ready-made". seuil_complexe = seuil dioptries simple/complexe (défaut 6.0). amincissement = supplément par indice aminci (omettre si absent).
 - Si la convention a plusieurs niveaux/contrats (ex: Opti 2/3/4), choisis la grille du niveau le plus complet présent dans le texte.
 - "precalibrage_max" : supplément précalibrage si indiqué (sinon omettre).
-- N'INVENTE AUCUN prix. Inclure uniquement indices/catégories réellement trouvés.`;
+- N'INVENTE AUCUN prix. Inclure uniquement indices/catégories réellement trouvés dans CE morceau.`;
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': claudeKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 4096,
-        messages: [{role: 'user', content: prompt}]
-      })
-    });
-
-    if(!resp.ok){
-      const errData = await resp.json().catch(()=>({}));
-      throw new Error(errData.error?.message || `HTTP ${resp.status}`);
+    // Découpage en plusieurs passes : lit toute la convention sans dépasser la limite IA/minute
+    const chunks = _chunkText(fullText, 24000, 6);
+    const parsed = { reseau: reseauLabel };
+    for(let ci=0; ci<chunks.length; ci++){
+      const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
+      if(btn) btn.innerHTML = `<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Analyse${partInfo}…`;
+      const raw = await _aiCall(claudeKey, mkPrompt(chunks[ci], partInfo), { maxTokens:4096, onWait:(s)=>{
+        if(btn) btn.innerHTML = `<i class="ti ti-clock"></i> Pause ${s}s (limite IA)…`;
+      }});
+      _mergeConvParsed(parsed, _extractJson(raw));
     }
-
-    const data = await resp.json();
-    let rawJson = (data.content?.[0]?.text || '').trim();
-    const jsonMatch = rawJson.match(/\{[\s\S]*\}/);
-    if(!jsonMatch) throw new Error('Réponse IA invalide (aucun JSON)');
-    const parsed = JSON.parse(jsonMatch[0]);
 
     // Stocker les données structurées (utilisées pour le calcul de prix dans showVerres)
     localStorage.setItem('conv_parsed_' + id, JSON.stringify(parsed));
@@ -5618,6 +5605,85 @@ RÈGLES STRICTES :
     if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Analyser avec IA'; }
     showToast('Erreur IA : ' + _aiFriendlyError(e.message));
   }
+}
+
+// Appel API Claude avec retry automatique sur 429 (rate limit). onWait(sec) notifie l'attente.
+async function _aiCall(key, prompt, opts){
+  opts = opts || {};
+  const model = opts.model || 'claude-haiku-4-5';
+  const maxTokens = opts.maxTokens || 4096;
+  for(let attempt=0; attempt<5; attempt++){
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model, max_tokens:maxTokens, messages:[{role:'user', content:prompt}]})
+    });
+    if(resp.status===429 && attempt<4){
+      let ra = parseInt(resp.headers.get('retry-after')||'', 10);
+      if(!ra || ra<1) ra = 30;
+      if(opts.onWait) opts.onWait(ra);
+      await new Promise(r=>setTimeout(r, (ra+1)*1000));
+      continue;
+    }
+    if(!resp.ok){ const e = await resp.text(); throw new Error('API '+resp.status+': '+e.substring(0,200)); }
+    const data = await resp.json();
+    return data.content?.[0]?.text || '';
+  }
+  throw new Error('rate_limit_error — limite atteinte après plusieurs essais');
+}
+
+// Découpe un texte en morceaux d'environ "size" caractères (max "maxChunks" morceaux)
+function _chunkText(text, size, maxChunks){
+  const out = [];
+  for(let i=0; i<text.length && out.length<(maxChunks||99); i+=size) out.push(text.slice(i, i+size));
+  return out.length ? out : [''];
+}
+
+// Extrait le 1er objet JSON d'une réponse IA
+function _extractJson(raw){
+  const m = (raw||'').match(/\{[\s\S]*\}/);
+  if(!m) throw new Error('Réponse IA invalide (aucun JSON)');
+  return JSON.parse(m[0]);
+}
+
+// Fusionne un résultat conv partiel (verres + verriers) dans l'accumulateur
+function _mergeConvParsed(into, part){
+  if(!into.reseau && part.reseau) into.reseau = part.reseau;
+  if(into.seuil_complexe==null && part.seuil_complexe!=null) into.seuil_complexe = part.seuil_complexe;
+  if(into.precalibrage_max==null && part.precalibrage_max!=null) into.precalibrage_max = part.precalibrage_max;
+  if(part.verres && typeof part.verres==='object'){
+    into.verres = into.verres || {};
+    for(const id in part.verres) into.verres[id] = Object.assign(into.verres[id]||{}, part.verres[id]);
+  }
+  if(part.verriers && typeof part.verriers==='object'){
+    into.verriers = into.verriers || {};
+    for(const vk in part.verriers){
+      const src = part.verriers[vk]; const dst = into.verriers[vk] = into.verriers[vk] || {};
+      for(const cat in src){
+        if(cat==='produits') dst.produits = Object.assign(dst.produits||{}, src.produits||{});
+        else if(src[cat] && typeof src[cat]==='object') dst[cat] = Object.assign(dst[cat]||{}, src[cat]);
+        else if(dst[cat]==null) dst[cat] = src[cat];
+      }
+    }
+  }
+  return into;
+}
+
+// Fusionne une liste de verres catalogue partielle (par id ou nom) dans l'accumulateur
+function _mergeCatVerres(into, partVerres){
+  for(const item of (partVerres||[])){
+    const ex = into.find(x => (x.id && x.id===item.id) || (!x.id && (x.nom||'').toLowerCase()===(item.nom||'').toLowerCase()));
+    if(ex){
+      ex.achats = Object.assign(ex.achats||{}, item.achats||{});
+      ex.ventes = Object.assign(ex.ventes||{}, item.ventes||{});
+      if(!ex.appel && item.appel) ex.appel = item.appel;
+      if((!ex.traitements || !ex.traitements.length) && item.traitements) ex.traitements = item.traitements;
+      if(item.stock) ex.stock = true;
+    } else {
+      into.push(item);
+    }
+  }
+  return into;
 }
 
 // Message d'erreur IA lisible (rate limit, clé, surcharge, crédit…)
@@ -8249,22 +8315,22 @@ async function _catLaunchIA(type){
     const all = [...catalogue, ...catalogue2e];
     const catCtx = all.map(v=>`${v.id}|${v.nom}|${v.marque}|${v.gamme}|[${Object.keys(v.indices||{}).join(',')}]${v.stock?'|STOCK':''}`).join('\n');
 
-    // Prompt adapté selon le type de slot
-    let prompt;
-    if(type === 'catalogue'){
-      prompt = `Tu es un expert en optique ophtalmique. Analyse ce PDF catalogue verre fournisseur.
+    // Construit le prompt pour un morceau de texte du PDF
+    const mkPrompt = (txt, partInfo) => {
+      if(type === 'catalogue'){
+        return `Tu es un expert en optique ophtalmique. Analyse ce PDF catalogue verre fournisseur${partInfo}.
 
 CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
 ${catCtx}
 
-TEXTE DU PDF (${fullText.length} car.):
-${fullText.substring(0,28000)}
+TEXTE DU PDF :
+${txt}
 
 VERRE DE STOCK = verre sphérique pré-fabriqué, livraison J+1, prix catalogue fixe.
 Mots-clés stock: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made", "de série".
 
 MISSION:
-1. Identifie les verres du catalogue ci-dessus présents dans le PDF
+1. Identifie les verres du catalogue ci-dessus présents dans CE morceau de texte
 2. Extrais leurs prix d'achat (achat HT opticien) et/ou prix de vente conseillés
 3. Détecte le traitement de chaque verre selon les appellations par verrier
 4. Détecte si le verre est de stock (stock:true)
@@ -8277,41 +8343,41 @@ CODES TRAITEMENTS PAR VERRIER:
 
 Réponds UNIQUEMENT JSON valide:
 {"verres":[{"id":"id_catalogue","nom":"nom PDF","appel":"Appellation commerciale","stock":false,"achats":{"1.50":21.30},"ventes":{"1.50":99.00},"traitements":["ar"]}]}
-RÈGLES: Ne pas inventer de prix · stock:true si verre de stock · id = id catalogue existant · Si rien trouvé: {"verres":[]}`;
-    } else {
+RÈGLES: Ne pas inventer de prix · stock:true si verre de stock · id = id catalogue existant · Si rien dans ce morceau: {"verres":[]}`;
+      }
       // tarif → focus sur les prix d'achat
-      prompt = `Tu es un expert en optique ophtalmique. Analyse ce PDF de grille tarifaire fournisseur.
+      return `Tu es un expert en optique ophtalmique. Analyse ce PDF de grille tarifaire fournisseur${partInfo}.
 
 CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
 ${catCtx}
 
-TEXTE DU PDF (${fullText.length} car.):
-${fullText.substring(0,28000)}
+TEXTE DU PDF :
+${txt}
 
-MISSION: Extrait TOUS les prix d'achat HT opticien pour les verres du catalogue. Les verres de stock ont des prix beaucoup plus bas que les verres surfacés.
+MISSION: Extrait TOUS les prix d'achat HT opticien pour les verres du catalogue présents dans CE morceau. Les verres de stock ont des prix beaucoup plus bas que les verres surfacés.
 
 VERRE DE STOCK = termes: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made" → stock:true
 
 Réponds UNIQUEMENT JSON valide:
 {"verres":[{"id":"id_catalogue","nom":"nom PDF","stock":false,"achats":{"1.50":21.30,"1.60":31.00},"traitements":["ar"]}]}
-RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de stock · Si rien trouvé: {"verres":[]}`;
+RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de stock · Si rien dans ce morceau: {"verres":[]}`;
+    };
+
+    // Découpage en plusieurs passes : lit tout le PDF sans dépasser la limite IA/minute
+    const chunks = _chunkText(fullText, 24000, 6);
+    const merged = {verres:[]};
+    for(let ci=0; ci<chunks.length; ci++){
+      const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
+      zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Claude IA analyse le PDF${partInfo}…</div>`;
+      const raw = await _aiCall(key, mkPrompt(chunks[ci], partInfo), { maxTokens:4096, onWait:(s)=>{
+        zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#92400E;font-weight:600"><i class="ti ti-clock"></i> Limite IA atteinte — pause ${s}s puis reprise${partInfo}…</div>`;
+      }});
+      _mergeCatVerres(merged.verres, _extractJson(raw).verres);
     }
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:4096,messages:[{role:'user',content:prompt}]})
-    });
-    if(!resp.ok){ const e=await resp.text(); throw new Error('API '+resp.status+': '+e.substring(0,200)); }
-    const data = await resp.json();
-    const raw = data.content?.[0]?.text||'';
-    const match = raw.match(/\{[\s\S]*\}/);
-    if(!match) throw new Error('Réponse IA invalide');
-    const parsed = JSON.parse(match[0]);
-
-    // Sauvegarder le résultat en cache
-    localStorage.setItem('cat_ia_result_'+type, JSON.stringify(parsed));
-    _catRenderIAResults(type, parsed, true);
+    // Sauvegarder le résultat fusionné en cache
+    localStorage.setItem('cat_ia_result_'+type, JSON.stringify(merged));
+    _catRenderIAResults(type, merged, true);
 
   } catch(err){
     if(zone) zone.innerHTML = `<div style="margin-top:10px;background:#FFF1F2;border:1px solid #FECDD3;border-radius:10px;padding:10px 14px;font-size:13px;color:#DC2626;font-weight:600"><i class="ti ti-alert-circle"></i> Erreur : ${_aiFriendlyError(err.message)}</div>`;
