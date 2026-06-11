@@ -5105,7 +5105,7 @@ async function extractPdfText(arrayBuffer){
     drop.innerHTML = `<i class="ti ti-loader-2" style="font-size:36px;color:#378ADD;animation:spin 1s linear infinite;display:block;margin-bottom:12px"></i><p style="color:#aaa">Analyse des prix — page 0/${pdf.numPages}...</p>`;
 
     let fullText = '';
-    for(let i = 1; i <= Math.min(pdf.numPages, 30); i++){
+    for(let i = 1; i <= Math.min(pdf.numPages, 60); i++){
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       // Joindre les items avec espace, conserver les fins de ligne
@@ -5289,7 +5289,7 @@ CATALOGUE EXISTANT (id|nom|marque|indices|STOCK si verre de stock):
 ${catCtx}
 
 TEXTE DU PDF (${pdfText.length} caractères):
-${pdfText.substring(0, 18000)}
+${pdfText.substring(0, 50000)}
 
 MISSION: Extrais TOUS les verres avec leurs prix depuis le PDF.
 Pour chaque verre trouvé, cherche la correspondance dans le catalogue existant (par nom ou marque).
@@ -5753,7 +5753,7 @@ async function _iaExtractAndAnalyze(arrayBuffer){
     pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS + '/pdf.worker.min.js';
     const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
     let fullText = '';
-    for(let i = 1; i <= Math.min(pdf.numPages, 30); i++){
+    for(let i = 1; i <= Math.min(pdf.numPages, 60); i++){
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       fullText += content.items.map(s => s.str).join(' ') + '\n';
@@ -6023,7 +6023,7 @@ CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
 ${catCtx}
 
 TEXTE DU PDF (${pdfText.length} caractères):
-${pdfText.substring(0, 18000)}
+${pdfText.substring(0, 50000)}
 
 VERRE DE STOCK = verre sphérique pré-fabriqué, non surfacé, livraison J+1, prix catalogue fixe (beaucoup moins cher).
 Mots-clés stock dans le PDF: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made", "de série".
@@ -8223,7 +8223,7 @@ async function _catLaunchIA(type){
     pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS+'/pdf.worker.min.js';
     const pdf = await pdfjsLib.getDocument({data:buf}).promise;
     let fullText = '';
-    for(let i=1;i<=Math.min(pdf.numPages,30);i++){
+    for(let i=1;i<=Math.min(pdf.numPages,60);i++){
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       fullText += content.items.map(s=>s.str).join(' ')+'\n';
@@ -8244,7 +8244,7 @@ CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
 ${catCtx}
 
 TEXTE DU PDF (${fullText.length} car.):
-${fullText.substring(0,18000)}
+${fullText.substring(0,50000)}
 
 VERRE DE STOCK = verre sphérique pré-fabriqué, livraison J+1, prix catalogue fixe.
 Mots-clés stock: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made", "de série".
@@ -8272,7 +8272,7 @@ CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
 ${catCtx}
 
 TEXTE DU PDF (${fullText.length} car.):
-${fullText.substring(0,18000)}
+${fullText.substring(0,50000)}
 
 MISSION: Extrait TOUS les prix d'achat HT opticien pour les verres du catalogue. Les verres de stock ont des prix beaucoup plus bas que les verres surfacés.
 
