@@ -89,6 +89,12 @@ select option{background:#fff;color:var(--txt-primary)}
 .contrat-pick-btn{width:100%;display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:12px;border:2px solid var(--bdr-light);background:var(--surf-secondary);cursor:pointer;font-family:var(--font);font-size:14px;font-weight:700;color:var(--txt-primary);transition:border-color .15s,background .15s,transform .1s}
 .contrat-pick-btn:hover{border-color:#D97706;background:#FFFBEB;transform:translateY(-1px)}
 .contrat-pick-btn i{font-size:18px;color:#D97706}
+.contrat-pick-lbl{display:flex;flex-direction:column;gap:1px;text-align:left}
+.contrat-pick-sub{font-size:10px;font-weight:600;color:var(--txt-muted);letter-spacing:0}
+.contrat-pick-btn.sans-opti{border-color:var(--bdr-medium);background:#fff}
+.contrat-pick-btn.sans-opti i{color:var(--txt-muted)}
+.contrat-pick-btn.sans-opti:hover{border-color:var(--blue-600);background:#EFF6FF}
+.contrat-pick-btn.sans-opti:hover i{color:var(--blue-600)}
 
 /* VISION CARDS */
 .grid-4{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -2413,9 +2419,12 @@ const mutuelles = [
   {id:'cb',      label:'Carte Blanche', section:'sous', lastMaj:'09/01/2026', plafond_monture:150, plafond_verre:250, remiseMonture:0,  prixPrecalibrage:20, optislimInclus:false},
   {id:'sc',      label:'Santéclair',    section:'sous', lastMaj:'07/01/2026', plafond_monture:120, plafond_verre:220, remiseMonture:15, prixPrecalibrage:4.92, optislimInclus:false},
   {id:'itelis',  label:'Itelis',        section:'sous', hasContrats:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:10, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
-  {id:'itelis_opti2', label:'Itelis Opti 2', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:null, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
-  {id:'itelis_opti3', label:'Itelis Opti 3', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:null, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
-  {id:'itelis_opti4', label:'Itelis Opti 4', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:null, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
+  // Sans Opti = Itelis classique : précalibrage à l'ancien prix (10€), AUCUN tarif réseau Opti (prix verre standard)
+  {id:'itelis_sansopti', label:'Itelis Sans Opti', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:10, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
+  // Opti 2/3/4 = précalibrage 1€ (PDF Itelis : « Précalibrage 1€ à ajouter », identique aux 3 niveaux)
+  {id:'itelis_opti2', label:'Itelis Opti 2', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:1, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
+  {id:'itelis_opti3', label:'Itelis Opti 3', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:1, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
+  {id:'itelis_opti4', label:'Itelis Opti 4', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:1, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
   {id:'seveane', label:'Séveane',       section:'sous', lastMaj:'07/01/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20, prixPrecalibrage:9,  optislimInclus:false},
   {id:'optilys', label:'Optilys',       section:'sous', lastMaj:'19/05/2025', plafond_monture:130, plafond_verre:210, remiseMonture:15, prixPrecalibrage:15, optislimInclus:false},
   // ── Sans Contrat ─────────────────────────────────────────────
@@ -3338,8 +3347,11 @@ function _showContratPicker(mutId, onClickFn){
     let bhtml = '';
     contrats.forEach(c => {
       const lvl = c.label.replace(/^Itelis\s*/i, '');
-      bhtml += '<button class="contrat-pick-btn" data-cid="' + c.id + '" data-cfn="' + onClickFn + '">'
-        + '<i class="ti ti-rosette"></i><span>' + lvl + '</span></button>';
+      const isSans = /sansopti/i.test(c.id);
+      const icon = isSans ? 'ti-circle-off' : 'ti-rosette';
+      const sub  = isSans ? '<span class="contrat-pick-sub">Itelis classique — prix verre standard</span>' : '';
+      bhtml += '<button class="contrat-pick-btn' + (isSans ? ' sans-opti' : '') + '" data-cid="' + c.id + '" data-cfn="' + onClickFn + '">'
+        + '<i class="ti ' + icon + '"></i><span class="contrat-pick-lbl">' + lvl + sub + '</span></button>';
     });
     btnsEl.innerHTML = bhtml;
     btnsEl.querySelectorAll('[data-cid]').forEach(btn => {
