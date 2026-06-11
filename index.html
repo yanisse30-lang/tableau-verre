@@ -3252,47 +3252,69 @@ function _renderMutGrid(containerId, onClickFn, f=''){
   const container = document.getElementById(containerId);
   if(!container) return;
   const list = (f ? mutuelles.filter(m => m.label.toLowerCase().includes(f)) : mutuelles).filter(m => !m.hidden);
-  container.innerHTML = mutSections.map(s => {
+  let html = '';
+  mutSections.forEach(s => {
     const items = list.filter(m => m.section === s.key);
-    if(!items.length) return '';
-    return `<div class="mut-section-header">${s.label}</div>
-    <div class="mut-logo-grid">
-      ${items.map(m => {
-        const clickHandler = m.hasContrats
-          ? `_showContratPicker('${m.id}','${onClickFn}')`
-          : `${onClickFn}('${m.id}')`;
-        return `
-        <div class="mut-logo-card${s.key==='sans'?' sans-contrat':s.key==='hors'?' hors-ocam':''}${m.hasContrats?' has-contrats':''}" onclick="${clickHandler}">
-          ${m.remiseMontureTiers ? `<div class="mut-remise-badge">Palier monture</div>` : m.remiseMonture > 0 ? `<div class="mut-remise-badge">-${m.remiseMonture}% monture</div>` : ''}
-          <div>${mutLogos[m.id]||''}</div>
-          <div class="mut-maj">Dernière maj : ${m.lastMaj||''}</div>
-          ${m.hasContrats ? `<div class="mut-contrat-hint"><i class="ti ti-layers-subtract"></i> Opti 2 · 3 · 4</div>` : ''}
-        </div>`;
-      }).join('')}
-    </div>`;
-  }).join('');
+    if(!items.length) return;
+    html += '<div class="mut-section-header">' + s.label + '</div><div class="mut-logo-grid">';
+    items.forEach(m => {
+      const badge = m.remiseMontureTiers
+        ? '<div class="mut-remise-badge">Palier monture</div>'
+        : m.remiseMonture > 0 ? '<div class="mut-remise-badge">-' + m.remiseMonture + '% monture</div>' : '';
+      const hint  = m.hasContrats ? '<div class="mut-contrat-hint"><i class="ti ti-layers-subtract"></i> Opti 2 · 3 · 4</div>' : '';
+      const cls   = 'mut-logo-card'
+        + (s.key === 'sans' ? ' sans-contrat' : s.key === 'hors' ? ' hors-ocam' : '')
+        + (m.hasContrats ? ' has-contrats' : '');
+      const action = m.hasContrats
+        ? 'data-contrat-mut="' + m.id + '" data-contrat-fn="' + onClickFn + '"'
+        : 'onclick="' + onClickFn + '(\'' + m.id + '\')"';
+      html += '<div class="' + cls + '" ' + action + '>'
+        + badge
+        + '<div>' + (mutLogos[m.id] || '') + '</div>'
+        + '<div class="mut-maj">Dernière maj : ' + (m.lastMaj || '') + '</div>'
+        + hint
+        + '</div>';
+    });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+  // event delegation pour les cartes avec contrats
+  container.querySelectorAll('[data-contrat-mut]').forEach(el => {
+    el.addEventListener('click', function(){
+      _showContratPicker(this.dataset.contratMut, this.dataset.contratFn);
+    });
+  });
 }
 
 function _showContratPicker(mutId, onClickFn){
   const picker = document.getElementById('contrat-picker-modal');
+  if(!picker) return;
   const titleEl = document.getElementById('contrat-picker-title');
   const btnsEl  = document.getElementById('contrat-picker-btns');
   const m = mutuelles.find(x => x.id === mutId);
-  titleEl.textContent = `Contrat ${m?.label || mutId}`;
+  if(titleEl) titleEl.textContent = 'Contrat ' + (m ? m.label : mutId);
   const contrats = mutuelles.filter(x => x.hidden && x.id.startsWith(mutId + '_'));
-  btnsEl.innerHTML = contrats.map(c => {
-    const level = c.label.split(' ').pop(); // "Opti 2" → last word
-    return `<button class="contrat-pick-btn" onclick="_selectContrat('${c.id}','${onClickFn}')">
-      <i class="ti ti-rosette"></i>
-      <span>${c.label.replace(/^Itelis\s*/,'')}</span>
-    </button>`;
-  }).join('');
+  if(btnsEl){
+    let bhtml = '';
+    contrats.forEach(c => {
+      const lvl = c.label.replace(/^Itelis\s*/i, '');
+      bhtml += '<button class="contrat-pick-btn" data-cid="' + c.id + '" data-cfn="' + onClickFn + '">'
+        + '<i class="ti ti-rosette"></i><span>' + lvl + '</span></button>';
+    });
+    btnsEl.innerHTML = bhtml;
+    btnsEl.querySelectorAll('[data-cid]').forEach(btn => {
+      btn.addEventListener('click', function(){
+        _selectContrat(this.dataset.cid, this.dataset.cfn);
+      });
+    });
+  }
   picker.style.display = 'flex';
 }
 
 function _selectContrat(id, onClickFn){
-  document.getElementById('contrat-picker-modal').style.display = 'none';
-  window[onClickFn](id);
+  const picker = document.getElementById('contrat-picker-modal');
+  if(picker) picker.style.display = 'none';
+  if(typeof window[onClickFn] === 'function') window[onClickFn](id);
 }
 
 function filterMut(){
