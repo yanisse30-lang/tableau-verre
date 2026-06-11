@@ -5538,29 +5538,40 @@ ${catCtx}
 TEXTE DE LA CONVENTION ${reseauLabel} (${fullText.length} caractères) :
 ${fullText.substring(0, 50000)}
 
-MISSION : Pour CHAQUE verre du catalogue qui correspond à un produit listé dans la convention, donne le PRIX DE VENTE MAXIMUM négocié par indice (le prix que l'opticien peut facturer pour un reste à charge zéro). Associe par NOM DE PRODUIT, par ex. :
-  • catalogue "Nikon Presio Clear P 13"  ↔ convention "P.Clear P 13"
-  • catalogue "Nikon ECC+UV Sphérique"   ↔ convention "Nikon Sph … ECC+UV"
-  • catalogue "Nikon Presio Touch"        ↔ convention "P.Touch"
-Tiens compte du TRAITEMENT (ECC+UV / SeeCoat Blue (SCBUV) / Pure Blue (PurBlueUV)) et de l'INDICE pour choisir la bonne ligne.
+Les conventions se présentent sous DEUX formes — extrais les DEUX quand elles sont présentes :
+(A) PAR PRODUIT NOMMÉ (ex: grille Nikon "P.Clear P 13", "P.Touch", "Sph ECC+UV"…) → mappe sur les id du catalogue.
+(B) PAR CATÉGORIE (ex: "verre unifocal simple/complexe", "progressif", "verre de stock") sans nommer de produit → remplis la grille générique par verrier.
+
+MISSION :
+1) "verres" : pour chaque verre du catalogue correspondant à un PRODUIT NOMMÉ dans la convention, donne le PRIX DE VENTE MAX par indice. Associe par NOM + TRAITEMENT (ECC+UV / SeeCoat Blue (SCBUV) / Pure Blue (PurBlueUV)) + INDICE. Ex : "Nikon Presio Clear P 13" ↔ "P.Clear P 13" ; "Nikon Presio Touch" ↔ "P.Touch".
+2) "verriers" : la grille tarifaire PAR CATÉGORIE (toujours utile, surtout si la convention ne nomme pas les produits). Si la convention ne précise pas le verrier, utilise quand même la clé "Nikon" (l'opticien ne monte que du Nikon).
 
 Réponds UNIQUEMENT avec ce JSON valide, sans texte autour :
 {
   "reseau": "${reseauLabel}",
+  "seuil_complexe": 6.0,
   "precalibrage_max": 1.00,
   "verres": {
     "nk_h3": {"1.60": 160},
     "nk_e3": {"1.50": 48, "1.60": 55, "1.67": 60, "1.74": 92}
+  },
+  "verriers": {
+    "Nikon": {
+      "unifocal_stock":    {"1.50": 35, "1.60": 42},
+      "unifocal_simple":   {"1.50": 45, "1.60": 55, "1.67": 68, "1.74": 88},
+      "unifocal_complexe": {"1.50": 68, "1.60": 80, "1.67": 97, "1.74": 122},
+      "progressif":        {"1.50": 120, "1.60": 145, "1.67": 175},
+      "amincissement":     {"1.60": 14, "1.67": 24, "1.74": 38}
+    }
   }
 }
 
 RÈGLES STRICTES :
-- Les CLÉS de "verres" sont les "id" EXACTS du catalogue ci-dessus (ex: "nk_h3"). N'utilise jamais un id absent du catalogue.
-- Donne un prix UNIQUEMENT pour les couples verre/indice réellement présents dans la convention avec un montant concret. Les indices non listés sont omis.
-- Le verre du catalogue et la ligne de convention doivent correspondre en PRODUIT + TRAITEMENT. En cas de doute, n'associe pas (mieux vaut omettre que se tromper).
-- Si la convention comporte plusieurs niveaux/contrats (ex: Opti 2/3/4), choisis la grille du niveau le plus complet présent dans le texte.
-- "precalibrage_max" : montant du supplément précalibrage si indiqué (sinon omettre le champ).
-- N'INVENTE AUCUN prix. Si aucun verre du catalogue ne correspond : {"reseau":"${reseauLabel}","verres":{}}`;
+- "verres" : CLÉS = id EXACTS du catalogue ci-dessus (ex: "nk_h3"). Jamais d'id absent. Un prix par couple verre/indice réellement présent. Correspondance PRODUIT + TRAITEMENT obligatoire ; en cas de doute, OMETTRE (mieux vaut rien que se tromper). Mets "verres":{} si la convention ne nomme aucun produit.
+- "verriers" : grille par catégorie. unifocal_stock si le PDF mentionne "stock"/"de série"/"ready-made". seuil_complexe = seuil dioptries simple/complexe (défaut 6.0). amincissement = supplément par indice aminci (omettre si absent).
+- Si la convention a plusieurs niveaux/contrats (ex: Opti 2/3/4), choisis la grille du niveau le plus complet présent dans le texte.
+- "precalibrage_max" : supplément précalibrage si indiqué (sinon omettre).
+- N'INVENTE AUCUN prix. Inclure uniquement indices/catégories réellement trouvés.`;
 
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -5669,10 +5680,13 @@ function _calcConvVerre(v, ind, visionId, eqSph, convParsed){
   // les conventions réseau → laissés au tarif libre.
   if(visionId==='interieur' || visionId==='degressif') return null;
   const marque=(v.marque||'').toLowerCase();
-  const verrieurKey=Object.keys(convParsed.verriers).find(k=>{
+  const vkeys=Object.keys(convParsed.verriers);
+  let verrieurKey=vkeys.find(k=>{
     const kl=k.toLowerCase();
     return kl===marque||marque.includes(kl)||kl.includes(marque);
   });
+  // Convention générique (un seul verrier / non nommé) → l'appliquer à tous les verres
+  if(!verrieurKey && vkeys.length===1) verrieurKey=vkeys[0];
   if(!verrieurKey) return null;
   const verrier=convParsed.verriers[verrieurKey];
   const seuil=parseFloat(convParsed.seuil_complexe)||6.0;
@@ -8091,13 +8105,10 @@ function _renderConvBody(id){
 
 function _renderConvAiCard(data){
   if(!data) return '';
-  // Nouveau format : prix par verre id (IA mappe le catalogue)
-  if(data.verres && typeof data.verres==='object'){
+  // Nouveau format : prix par verre id (IA mappe le catalogue) — uniquement si des verres sont mappés
+  if(data.verres && Object.keys(data.verres).length){
     const ids=Object.keys(data.verres);
     const all=[...catalogue, ...catalogue2e];
-    if(!ids.length){
-      return `<div class="conv-ai-result"><div class="conv-ai-res-hd"><i class="ti ti-cpu"></i> Analyse IA — ${data.reseau||'Convention'}</div><div class="conv-ai-res-body"><div class="conv-ai-row"><span class="conv-ai-lbl">Résultat</span><span class="conv-ai-val">Aucun verre du catalogue reconnu dans ce PDF</span></div></div></div>`;
-    }
     const rows=ids.map(id=>{
       const v=all.find(x=>x.id===id);
       const nom=v?v.nom:id;
