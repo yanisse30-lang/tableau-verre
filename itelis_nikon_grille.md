@@ -224,3 +224,24 @@ Très élevé (5) Prog Nikon P.Bal Z FP 12 1.74 PurBlueUV SCC+UV NG 237
 Très élevé (5) Prog Nikon P.Bal Z FP 14 1.74 PurBlueUV SCC+UV NG 237
 Très élevé (5) Prog Nikon P.Definit P 12 1.74 PurBlueUV SCC+UV NG 243
 Très élevé (5) Prog Nikon P.Definit P 14 1.74 PurBlueUV SCC+UV NG 243
+
+## Mapping appliqué (verres app → prix réseau Itelis)
+
+Règle : correspondance produit + géométrie + traitement **exacts**, et marge positive.
+Précalibrage : Opti 2/3/4 = 1€ ; Sans Opti = 10€ (Itelis classique, prix verre standard).
+
+| Verre app | Opti 2 | Opti 3 | Opti 4 |
+|---|---|---|---|
+| Nikon Presio Clear P 13 | 1.60:160€ | — | — |
+| Nikon Presio Clear P 13 Pure Blue UV | — | 1.50:185€ / 1.60:192€ | 1.60:192€ |
+| Nikon Presio Clear 13 | 1.60:150€ | — | — |
+| Nikon Presio Clear 13 Pure Blue UV | — | 1.50:175€ / 1.60:182€ | — |
+| Nikon Presio i Focus 13 | 1.50:130€ / 1.60:140€ | — | — |
+| Nikon Presio Touch | 1.50:103€ / 1.60:110€ | — | — |
+| Nikon ECC+UV Sphérique | 1.50:48€ / 1.60:55€ / 1.67:60€ / 1.74:92€ | — | — |
+| Nikon Pure Blue UV Sphérique | — | 1.50:53€ / 1.60:60€ | — |
+
+### Verres NON mappés (prix standard sous Itelis)
+- Unifocaux premium/asphériques : SCC+UV NG, SeeCoat Blue UV, SeeMax, SuperSee, RelaxSee Neo, ECC+UV/Pure Blue Asphérique (pas d’équivalent négocié Itelis, ou prix entrée < prix d’achat).
+- Sur-mesure Opti 4 (P.Balance FP, P.Bal Z FP, P.Definit P) : absents du catalogue app.
+- Toutes versions Transitions Gen S, Soltes Wide, Home & Office Neo : non listées chez Itelis.
