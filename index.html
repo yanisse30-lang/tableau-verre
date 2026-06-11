@@ -3896,12 +3896,21 @@ function showVerres(){
     if(mutId && v.tarifsReseau && v.tarifsReseau[mutId]?.[ind] != null){
       vente = v.tarifsReseau[mutId][ind];
     }
-    // Tarif conv IA — priorité haute (calculé depuis PDF conventionnement)
+    // Tarif conv IA — priorité haute (extrait du PDF conventionnement)
     const convParsed = _getConvParsed(mutId);
     let _convData = null;
     if(convParsed){
-      _convData = _calcConvVerre(v, ind, state.vision?.id, eqMax, convParsed);
-      if(_convData && _convData.venteConv > 0) vente = _convData.venteConv;
+      // Nouveau format : prix par verre id (IA mappe directement le catalogue) — prioritaire
+      const directPrix = convParsed.verres?.[v.id]?.[ind];
+      if(directPrix != null && parseFloat(directPrix) > 0){
+        const p = Math.round(parseFloat(directPrix)*100)/100;
+        vente = p;
+        _convData = {venteConv:p, base:p, verreType:'produit', produitNom:v.id, verrieurKey:(v.marque||''), amincissement:0, precalibrage_max:(convParsed.precalibrage_max!=null?parseFloat(convParsed.precalibrage_max):null), photochromique_supp:null};
+      } else {
+        // Ancien format générique (verriers/produits) — repli rétrocompatible
+        _convData = _calcConvVerre(v, ind, state.vision?.id, eqMax, convParsed);
+        if(_convData && _convData.venteConv > 0) vente = _convData.venteConv;
+      }
     }
     // Plafond mutuelle : calcul reste à charge patient
     const plafond = state.mutuelle?.plafond_verre ?? null;
@@ -5506,7 +5515,7 @@ async function analyzeConvPdfWithAI(id){
     pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS + '/pdf.worker.min.js';
     const pdf = await pdfjsLib.getDocument({data: bytes.buffer}).promise;
     let fullText = '';
-    for(let i = 1; i <= Math.min(pdf.numPages, 25); i++){
+    for(let i = 1; i <= Math.min(pdf.numPages, 60); i++){
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       fullText += content.items.map(s => s.str).join(' ') + '\n';
@@ -5515,75 +5524,43 @@ async function analyzeConvPdfWithAI(id){
     const reseauInfo = _CONV_RESEAUX.find(r => r.id === id);
     const reseauLabel = reseauInfo ? reseauInfo.label : id;
 
-    const prompt = `Tu es un expert en conventionnement optique en France. Analyse ce texte extrait d'un document de conventionnement réseau optique (${reseauLabel}).
+    // Catalogue opticien envoyé à l'IA → mapping direct prix négocié ↔ verre (id)
+    const _allVerres = [...catalogue, ...catalogue2e];
+    const catCtx = _allVerres
+      .map(v => `${v.id}|${v.nom}|${v.marque||''}|[${Object.keys(v.indices||{}).join(',')}]`)
+      .join('\n');
 
-CONTEXTE OPTIQUE:
-Un verre ophtalmique est composé de :
-- Base verre selon le TYPE:
-  • unifocal_stock    = verre sphérique PRÉ-FABRIQUÉ de stock (livraison J+1, pas de surfaçage, prix catalogue fixe, le moins cher)
-  • unifocal_simple   = verre unifocal surfacé/taillé, correction faible (éq. sphérique ≤ seuil)
-  • unifocal_complexe = verre unifocal surfacé, forte correction (éq. sphérique > seuil)
-  • progressif        = verre avec addition (presbytie)
-- IMPORTANT: dans le PDF, les termes "stock", "de stock", "sphérique de stock", "verre stock", "non surfacé", "Ready-Made" désignent unifocal_stock
-- Le type SIMPLE vs COMPLEXE dépend de l'équivalent sphérique = |sphère + cylindre/2| comparé au seuil (souvent 6D)
-- L'amincissement (indice 1.60, 1.67, 1.74) peut être un supplément séparé ou inclus
-- Supplément photochromique = teinte qui fonce au soleil (Transitions, Reactiv, PhotoFusion, Sensity…)
-- Supplément précalibrage = découpe verre sur mesure monture
+    const prompt = `Tu es un expert en conventionnement optique en France. On te donne (1) le CATALOGUE de verres de l'opticien et (2) le texte d'un document de conventionnement réseau (${reseauLabel}) qui liste les PRIX DE VENTE MAXIMA négociés (reste à charge zéro / "prix maxima" / "prix de vente max" / plafond verre).
 
-VERRIERS CONNUS: Nikon, Essilor, Zeiss, Hoya, Novacel, BBGR, Indo, Seiko, Rodenstock, Shamir, Kodak
+CATALOGUE OPTICIEN — une ligne par verre, format « id | nom | marque | [indices disponibles] » :
+${catCtx}
 
-TEXTE DU PDF (${fullText.length} caractères):
-${fullText.substring(0, 20000)}
+TEXTE DE LA CONVENTION ${reseauLabel} (${fullText.length} caractères) :
+${fullText.substring(0, 50000)}
 
-MISSION: Extrait la grille tarifaire par verrier (prix plafonds remboursés ou prix de vente max du réseau).
+MISSION : Pour CHAQUE verre du catalogue qui correspond à un produit listé dans la convention, donne le PRIX DE VENTE MAXIMUM négocié par indice (le prix que l'opticien peut facturer pour un reste à charge zéro). Associe par NOM DE PRODUIT, par ex. :
+  • catalogue "Nikon Presio Clear P 13"  ↔ convention "P.Clear P 13"
+  • catalogue "Nikon ECC+UV Sphérique"   ↔ convention "Nikon Sph … ECC+UV"
+  • catalogue "Nikon Presio Touch"        ↔ convention "P.Touch"
+Tiens compte du TRAITEMENT (ECC+UV / SeeCoat Blue (SCBUV) / Pure Blue (PurBlueUV)) et de l'INDICE pour choisir la bonne ligne.
 
-Réponds UNIQUEMENT avec ce JSON valide:
+Réponds UNIQUEMENT avec ce JSON valide, sans texte autour :
 {
   "reseau": "${reseauLabel}",
-  "seuil_complexe": 6.0,
-  "verriers": {
-    "Nikon": {
-      "produits": {
-        "seemax":            {"1.50": 156.00, "1.60": 167.00, "1.67": 200.00},
-        "supersee":          {"1.50": 99.00, "1.60": 106.00},
-        "relaxsee":          {"1.50": 118.00, "1.60": 133.00},
-        "sph":               {"1.50": 96.00, "1.60": 103.00},
-        "sph_stock":         {"1.50": 74.00, "1.60": 83.00},
-        "presio_master":     {"1.50": 261.00, "1.60": 279.00},
-        "presio_clear":      {"1.50": 190.00, "1.60": 197.00},
-        "presio_touch":      {"1.50": 154.00, "1.60": 177.00}
-      },
-      "unifocal_stock":    {"1.50": 35.00, "1.60": 42.00},
-      "unifocal_simple":   {"1.50": 45.00, "1.60": 55.00, "1.67": 68.00, "1.74": 88.00},
-      "unifocal_complexe": {"1.50": 68.00, "1.60": 80.00, "1.67": 97.00, "1.74": 122.00},
-      "progressif":        {"1.50": 120.00, "1.60": 145.00, "1.67": 175.00},
-      "amincissement":     {"1.60": 14.00, "1.67": 24.00, "1.74": 38.00},
-      "precalibrage_max":  50.00,
-      "photochromique_supp": 32.00
-    }
+  "precalibrage_max": 1.00,
+  "verres": {
+    "nk_h3": {"1.60": 160},
+    "nk_e3": {"1.50": 48, "1.60": 55, "1.67": 60, "1.74": 92}
   }
 }
 
-GRILLE "produits" (IMPORTANTE — les conventions réseau Nikon listent les prix par DESIGN NOMMÉ, pas par catégorie) :
-- Repère dans le PDF les lignes par produit nommé et extrais le PRIX DE VENTE RÉSEAU (prix net négocié ou prix de vente affiché) par indice.
-- Utilise EXACTEMENT ces clés normalisées (matériau blanc/standard de préférence) :
-  • "seemax" (SeeMax, SeeMax AP)        • "supersee" (SuperSee, SuperSee AP)
-  • "relaxsee" (RelaxSee, RelaxSee AP)  • "myopsee" (MyopSee)
-  • "sph" (verre sphérique/asphérique SPH de prescription)
-  • "sph_stock" (SPH ST, sphérique de stock / série)
-  • "presio_master", "presio_power", "presio_definition", "presio_clear", "presio_touch", "presio_ifocus" (gammes Presio progressives)
-- N'inclure une clé que si le produit figure réellement dans le PDF avec un prix concret. Omettre "produits" entièrement si le document ne liste aucun produit nommé.
-
-RÈGLES STRICTES:
-- Inclure UNIQUEMENT les verriers ET indices trouvés dans le document avec des prix concrets
-- Conserver AUSSI les catégories génériques (unifocal_simple/complexe/progressif/unifocal_stock) en repli, déduites au mieux des produits
-- unifocal_stock: si le PDF mentionne "stock", "de série", "ready-made" → extraire cette ligne séparément
-- seuil_complexe: seuil en dioptries séparant simple/complexe (cherche "fort" "complexe" "sphéro-cylindrique" — défaut 6.0)
-- amincissement: supplément pour les indices amincis (si non trouvé, omettre le champ)
-- precalibrage_max: montant max du supplément précalibrage (si non trouvé, omettre)
-- photochromique_supp: supplément teinte photochromique par verre (si non trouvé, omettre)
-- Ne pas inventer de prix
-- Si aucun verrier identifié: {"reseau":"${reseauLabel}","seuil_complexe":6.0,"verriers":{}}`;
+RÈGLES STRICTES :
+- Les CLÉS de "verres" sont les "id" EXACTS du catalogue ci-dessus (ex: "nk_h3"). N'utilise jamais un id absent du catalogue.
+- Donne un prix UNIQUEMENT pour les couples verre/indice réellement présents dans la convention avec un montant concret. Les indices non listés sont omis.
+- Le verre du catalogue et la ligne de convention doivent correspondre en PRODUIT + TRAITEMENT. En cas de doute, n'associe pas (mieux vaut omettre que se tromper).
+- Si la convention comporte plusieurs niveaux/contrats (ex: Opti 2/3/4), choisis la grille du niveau le plus complet présent dans le texte.
+- "precalibrage_max" : montant du supplément précalibrage si indiqué (sinon omettre le champ).
+- N'INVENTE AUCUN prix. Si aucun verre du catalogue ne correspond : {"reseau":"${reseauLabel}","verres":{}}`;
 
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -5595,7 +5572,7 @@ RÈGLES STRICTES:
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
-        max_tokens: 3000,
+        max_tokens: 4096,
         messages: [{role: 'user', content: prompt}]
       })
     });
@@ -5606,17 +5583,24 @@ RÈGLES STRICTES:
     }
 
     const data = await resp.json();
-    let rawJson = data.content[0].text.trim();
+    let rawJson = (data.content?.[0]?.text || '').trim();
     const jsonMatch = rawJson.match(/\{[\s\S]*\}/);
-    if(!jsonMatch) throw new Error('Réponse IA invalide');
+    if(!jsonMatch) throw new Error('Réponse IA invalide (aucun JSON)');
     const parsed = JSON.parse(jsonMatch[0]);
 
     // Stocker les données structurées (utilisées pour le calcul de prix dans showVerres)
     localStorage.setItem('conv_parsed_' + id, JSON.stringify(parsed));
     if(resEl) resEl.innerHTML = _renderConvAiCard(parsed);
     if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Réanalyser avec IA'; }
+    const nbVerres = parsed.verres ? Object.keys(parsed.verres).length : 0;
     const nbVerriers = Object.keys(parsed.verriers||{}).length;
-    showToast(`${reseauLabel} analysé — ${nbVerriers} verrier(s) détecté(s). Prix appliqués automatiquement.`);
+    if(nbVerres > 0){
+      showToast(`${reseauLabel} analysé — ${nbVerres} verre(s) tarifé(s). Prix appliqués automatiquement.`);
+    } else if(nbVerriers > 0){
+      showToast(`${reseauLabel} analysé — ${nbVerriers} verrier(s) détecté(s).`);
+    } else {
+      showToast(`${reseauLabel} analysé — aucun verre du catalogue reconnu dans ce PDF.`);
+    }
 
   } catch(e) {
     console.error('Conv AI error:', e);
@@ -8106,7 +8090,29 @@ function _renderConvBody(id){
 }
 
 function _renderConvAiCard(data){
-  if(!data||!data.verriers) return '';
+  if(!data) return '';
+  // Nouveau format : prix par verre id (IA mappe le catalogue)
+  if(data.verres && typeof data.verres==='object'){
+    const ids=Object.keys(data.verres);
+    const all=[...catalogue, ...catalogue2e];
+    if(!ids.length){
+      return `<div class="conv-ai-result"><div class="conv-ai-res-hd"><i class="ti ti-cpu"></i> Analyse IA — ${data.reseau||'Convention'}</div><div class="conv-ai-res-body"><div class="conv-ai-row"><span class="conv-ai-lbl">Résultat</span><span class="conv-ai-val">Aucun verre du catalogue reconnu dans ce PDF</span></div></div></div>`;
+    }
+    const rows=ids.map(id=>{
+      const v=all.find(x=>x.id===id);
+      const nom=v?v.nom:id;
+      const prix=data.verres[id]||{};
+      const px=Object.keys(prix).map(ind=>`${ind}: <strong>${prix[ind]}€</strong>`).join(' · ');
+      return `<div class="conv-ai-row"><span class="conv-ai-lbl">${nom}</span><span class="conv-ai-val">${px}</span></div>`;
+    }).join('');
+    const precal = data.precalibrage_max!=null ? `<div class="conv-ai-row"><span class="conv-ai-lbl">Précalibrage max</span><span class="conv-ai-val"><strong>${data.precalibrage_max}€</strong></span></div>` : '';
+    return `<div class="conv-ai-result">
+      <div class="conv-ai-res-hd"><i class="ti ti-cpu"></i> Prix négociés IA — ${data.reseau||'Convention'} · ${ids.length} verre(s)</div>
+      <div class="conv-ai-res-body">${rows}${precal}<div class="conv-ai-row" style="margin-top:6px;border-top:1px solid #EDE9FE;padding-top:6px"><span class="conv-ai-lbl" style="color:#059669">✓ Actif</span><span class="conv-ai-val" style="color:#059669;font-weight:600">Prix appliqués automatiquement aux verres</span></div></div>
+    </div>`;
+  }
+  // Ancien format générique (verriers/produits) — rétrocompat
+  if(!data.verriers) return '';
   const verriers=Object.keys(data.verriers);
   if(!verriers.length) return `<div class="conv-ai-result"><div class="conv-ai-res-hd"><i class="ti ti-cpu"></i> Analyse IA — ${data.reseau||'Convention'}</div><div class="conv-ai-res-body"><div class="conv-ai-row"><span class="conv-ai-lbl">Résultat</span><span class="conv-ai-val">Aucun verrier détecté dans ce PDF</span></div></div></div>`;
   const _PLBL={seemax:'SeeMax',supersee:'SuperSee',relaxsee:'RelaxSee',myopsee:'MyopSee',sph:'SPH',sph_stock:'SPH stock',presio_master:'Presio Master',presio_power:'Presio Power',presio_definition:'Presio Definition',presio_clear:'Presio Clear',presio_touch:'Presio Touch',presio_ifocus:'Presio i Focus',presio:'Presio'};
