@@ -82,6 +82,13 @@ select option{background:#fff;color:var(--txt-primary)}
 .mut-card .sub{font-size:11px;color:var(--txt-muted);line-height:1.4}
 .mut-logo-card{position:relative}
 .mut-remise-badge{position:absolute;top:5px;right:5px;background:#E53935;color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:20px;letter-spacing:.3px;pointer-events:none}
+.mut-contrat-hint{font-size:10px;font-weight:700;color:#D97706;margin-top:5px;letter-spacing:.02em}
+.mut-contrat-hint i{font-size:11px;vertical-align:-1px}
+.has-contrats{border-color:#FDE68A!important}
+.has-contrats:hover{border-color:#D97706!important;background:#FFFBEB!important}
+.contrat-pick-btn{width:100%;display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:12px;border:2px solid var(--bdr-light);background:var(--surf-secondary);cursor:pointer;font-family:var(--font);font-size:14px;font-weight:700;color:var(--txt-primary);transition:border-color .15s,background .15s,transform .1s}
+.contrat-pick-btn:hover{border-color:#D97706;background:#FFFBEB;transform:translateY(-1px)}
+.contrat-pick-btn i{font-size:18px;color:#D97706}
 
 /* VISION CARDS */
 .grid-4{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -1446,6 +1453,21 @@ select option{background:#fff;color:var(--txt-primary)}
     </div>
   </div>
 
+  <!-- ══════════ MODAL CONTRAT PICKER (Itelis Opti 2/3/4) ══════════ -->
+  <div id="contrat-picker-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,20,35,0.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:9999" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:#fff;border:1px solid var(--bdr-light);border-radius:22px;padding:28px 28px 24px;width:100%;max-width:340px;box-shadow:0 24px 64px rgba(0,0,0,0.18)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#b45309,#D97706);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-layers-subtract" style="color:#fff;font-size:19px"></i></div>
+        <div>
+          <div id="contrat-picker-title" style="font-size:16px;font-weight:800;color:var(--txt-primary)">Contrat Itelis</div>
+          <div style="font-size:11px;color:var(--txt-muted)">Sélectionnez le niveau de contrat</div>
+        </div>
+        <button onclick="document.getElementById('contrat-picker-modal').style.display='none'" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--txt-muted);font-size:20px;line-height:1;padding:4px"><i class="ti ti-x"></i></button>
+      </div>
+      <div id="contrat-picker-btns" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
+
   <!-- ══════════ MODAL CONVENTIONNEMENT MUTUELLE ══════════ -->
   <div id="conv-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(240,244,248,0.96);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;z-index:9995;overflow-y:auto;padding:24px">
     <div style="background:#fff;border:1px solid var(--bdr-light);border-radius:24px;padding:32px;width:100%;max-width:720px;margin:auto;box-shadow:0 20px 60px rgba(0,0,0,0.09)">
@@ -2386,7 +2408,10 @@ const mutuelles = [
   {id:'kalixia', label:'Kalixia',       section:'sous', lastMaj:'27/04/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20, prixPrecalibrage:12, optislimInclus:false},
   {id:'cb',      label:'Carte Blanche', section:'sous', lastMaj:'09/01/2026', plafond_monture:150, plafond_verre:250, remiseMonture:0,  prixPrecalibrage:20, optislimInclus:false},
   {id:'sc',      label:'Santéclair',    section:'sous', lastMaj:'07/01/2026', plafond_monture:120, plafond_verre:220, remiseMonture:15, prixPrecalibrage:4.92, optislimInclus:false},
-  {id:'itelis',  label:'Itelis',        section:'sous', lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:10, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
+  {id:'itelis',  label:'Itelis',        section:'sous', hasContrats:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:10, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
+  {id:'itelis_opti2', label:'Itelis Opti 2', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:null, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
+  {id:'itelis_opti3', label:'Itelis Opti 3', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:null, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
+  {id:'itelis_opti4', label:'Itelis Opti 4', section:'sous', hidden:true, lastMaj:'06/01/2025', plafond_monture:130, plafond_verre:220, remiseMonture:25, prixPrecalibrage:null, optislimInclus:false, remiseMontureTiers:[{label:'Inférieur à 70€',display:'Prix affiché',pct:0},{label:'Entre 70€ et 200€',display:'15%',pct:15},{label:'Supérieur à 200€',display:'25%',pct:25}]},
   {id:'seveane', label:'Séveane',       section:'sous', lastMaj:'07/01/2026', plafond_monture:130, plafond_verre:200, remiseMonture:20, prixPrecalibrage:9,  optislimInclus:false},
   {id:'optilys', label:'Optilys',       section:'sous', lastMaj:'19/05/2025', plafond_monture:130, plafond_verre:210, remiseMonture:15, prixPrecalibrage:15, optislimInclus:false},
   // ── Sans Contrat ─────────────────────────────────────────────
@@ -3226,20 +3251,48 @@ const mutSections = [
 function _renderMutGrid(containerId, onClickFn, f=''){
   const container = document.getElementById(containerId);
   if(!container) return;
-  const list = f ? mutuelles.filter(m => m.label.toLowerCase().includes(f)) : mutuelles;
+  const list = (f ? mutuelles.filter(m => m.label.toLowerCase().includes(f)) : mutuelles).filter(m => !m.hidden);
   container.innerHTML = mutSections.map(s => {
     const items = list.filter(m => m.section === s.key);
     if(!items.length) return '';
     return `<div class="mut-section-header">${s.label}</div>
     <div class="mut-logo-grid">
-      ${items.map(m => `
-        <div class="mut-logo-card${s.key==='sans'?' sans-contrat':s.key==='hors'?' hors-ocam':''}" onclick="${onClickFn}('${m.id}')">
+      ${items.map(m => {
+        const clickHandler = m.hasContrats
+          ? `_showContratPicker('${m.id}','${onClickFn}')`
+          : `${onClickFn}('${m.id}')`;
+        return `
+        <div class="mut-logo-card${s.key==='sans'?' sans-contrat':s.key==='hors'?' hors-ocam':''}${m.hasContrats?' has-contrats':''}" onclick="${clickHandler}">
           ${m.remiseMontureTiers ? `<div class="mut-remise-badge">Palier monture</div>` : m.remiseMonture > 0 ? `<div class="mut-remise-badge">-${m.remiseMonture}% monture</div>` : ''}
           <div>${mutLogos[m.id]||''}</div>
           <div class="mut-maj">Dernière maj : ${m.lastMaj||''}</div>
-        </div>`).join('')}
+          ${m.hasContrats ? `<div class="mut-contrat-hint"><i class="ti ti-layers-subtract"></i> Opti 2 · 3 · 4</div>` : ''}
+        </div>`;
+      }).join('')}
     </div>`;
   }).join('');
+}
+
+function _showContratPicker(mutId, onClickFn){
+  const picker = document.getElementById('contrat-picker-modal');
+  const titleEl = document.getElementById('contrat-picker-title');
+  const btnsEl  = document.getElementById('contrat-picker-btns');
+  const m = mutuelles.find(x => x.id === mutId);
+  titleEl.textContent = `Contrat ${m?.label || mutId}`;
+  const contrats = mutuelles.filter(x => x.hidden && x.id.startsWith(mutId + '_'));
+  btnsEl.innerHTML = contrats.map(c => {
+    const level = c.label.split(' ').pop(); // "Opti 2" → last word
+    return `<button class="contrat-pick-btn" onclick="_selectContrat('${c.id}','${onClickFn}')">
+      <i class="ti ti-rosette"></i>
+      <span>${c.label.replace(/^Itelis\s*/,'')}</span>
+    </button>`;
+  }).join('');
+  picker.style.display = 'flex';
+}
+
+function _selectContrat(id, onClickFn){
+  document.getElementById('contrat-picker-modal').style.display = 'none';
+  window[onClickFn](id);
 }
 
 function filterMut(){
@@ -7732,7 +7785,7 @@ function renderComparateur(){
     const achat = ind && v.achats ? (v.achats[ind]||null) : null;
     if(vente && ind && v.tarifsReseau){
       const mId=state.mutuelle?.id;
-      const netP=mId==='cb'?v.tarifsReseau.cb?.[ind]:mId==='actil'?v.tarifsReseau.actil?.[ind]:null;
+      const netP=mId && v.tarifsReseau[mId]?.[ind] != null ? v.tarifsReseau[mId][ind] : null;
       if(netP) vente=netP;
     }
     const marge = vente && achat ? vente - achat : null;
