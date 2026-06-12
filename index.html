@@ -1129,6 +1129,7 @@ select option{background:#fff;color:var(--txt-primary)}
           </div>
         </div>
         <div id="claude-key-status" style="font-size:11px;color:var(--txt-muted);display:flex;align-items:center;gap:5px;margin-bottom:4px"></div>
+        <div id="cloud-sync-status" style="font-size:11px;display:flex;align-items:center;gap:5px;margin-bottom:4px"></div>
         <div style="font-size:11px;color:var(--txt-muted)">Obtenez votre clé sur <strong>console.anthropic.com</strong> · ~0,01 € par PDF analysé</div>
       </div>
       <!-- ── SECTION LOGS DE L'APPLICATION — Superhôte uniquement ── -->
@@ -4185,6 +4186,47 @@ async function sbFetch(path, options={}){
 
 let currentUser = null;
 
+// ─── SYNC CLOUD (clé API, conventions, prix) — partagé entre appareils ──
+// Table Supabase requise : app_config(id text primary key, value text, updated_at timestamptz)
+const _SYNC_PREFIXES = ['conv_parsed_','cat_ia_result_'];
+const _SYNC_EXACT = ['maneo_claude_key','maneo_prix','maneo_appel','maneo_tags','maneo_stock','maneo_accords'];
+function _isSyncKey(k){ return _SYNC_EXACT.includes(k) || _SYNC_PREFIXES.some(p=>k.startsWith(p)); }
+let _cloudSyncOK = false; // passe à true si la table app_config répond
+
+async function _cloudUpsert(key, val){
+  try{
+    await sbFetch('/rest/v1/app_config?on_conflict=id', {
+      method:'POST',
+      headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body: JSON.stringify({ id:key, value: (val==null?'':String(val)), updated_at:new Date().toISOString() })
+    });
+    _cloudSyncOK = true;
+  }catch(e){ /* table absente / hors-ligne → silencieux */ }
+}
+async function _cloudDelete(key){
+  try{ await sbFetch('/rest/v1/app_config?id=eq.'+encodeURIComponent(key), {method:'DELETE', headers:{'Prefer':'return=minimal'}}); }catch(e){}
+}
+// Pousse la valeur localStorage actuelle d'une clé vers le cloud (ou la supprime si absente)
+function _cloudPush(key){
+  const v = localStorage.getItem(key);
+  if(v==null) _cloudDelete(key); else _cloudUpsert(key, v);
+}
+// Récupère toute la config cloud et l'écrit en localStorage. Retourne le nb de clés, ou -1 si indisponible.
+async function _cloudLoadAll(){
+  try{
+    const rows = await sbFetch('/rest/v1/app_config?select=id,value');
+    let n=0;
+    (rows||[]).forEach(r=>{
+      if(!r || !r.id || !_isSyncKey(r.id)) return;
+      if(r.value==null || r.value==='') localStorage.removeItem(r.id);
+      else localStorage.setItem(r.id, r.value);
+      n++;
+    });
+    _cloudSyncOK = true;
+    return n;
+  }catch(e){ return -1; }
+}
+
 // ─── SUPERHOTE ─────────────────────────────────────────────────
 const _SUPERHOTE_USER = 'ykafia';
 
@@ -4701,6 +4743,9 @@ async function doLogin(){
     const data = await sbFetch(`/rest/v1/comptes?username=eq.${encodeURIComponent(u)}&password=eq.${encodeURIComponent(p)}&select=*`);
     if(data && data.length > 0){
       currentUser = data[0];
+      // Récupère la config partagée (clé API, conventions, prix) depuis le cloud → tous les appareils alignés
+      const _nSync = await _cloudLoadAll();
+      if(_nSync > 0){ try{ loadSavedPrix(); }catch(e){} }
       btn.innerHTML = '<i class="ti ti-check"></i> Connecté !';
       // Lance l'animation WOW puis setup l'app
       _loginWowAnimation(()=>{
@@ -5004,6 +5049,7 @@ function savePrixVerre(vid){
     if(v.appel) savedAppel[vid] = v.appel;
     else delete savedAppel[vid];
     localStorage.setItem('maneo_appel', JSON.stringify(savedAppel));
+    _cloudPush('maneo_prix'); _cloudPush('maneo_appel');  // sync
   }catch(e){}
   const badge = document.getElementById('saved-'+vid);
   badge.style.display='flex';
@@ -5239,6 +5285,7 @@ function saveClaudeKey(){
   const val = document.getElementById('claude-key-input').value.trim();
   if(val){ localStorage.setItem('maneo_claude_key', val); showToast('Clé API sauvegardée !'); }
   else { localStorage.removeItem('maneo_claude_key'); showToast('Clé API supprimée.'); }
+  _cloudPush('maneo_claude_key');  // synchronise sur tous les appareils
   _refreshClaudeKeyStatus();
 }
 
@@ -5252,6 +5299,12 @@ function _refreshClaudeKeyStatus(){
     if(inp) inp.placeholder = '••••••••••••••••••••••••••';
   } else {
     el.innerHTML = '<i class="ti ti-alert-circle" style="color:#D97706"></i> <span style="color:#D97706">Aucune clé — mode regex (moins précis)</span>';
+  }
+  const sync = document.getElementById('cloud-sync-status');
+  if(sync){
+    sync.innerHTML = _cloudSyncOK
+      ? '<i class="ti ti-cloud-check" style="color:#16A34A"></i> <span style="color:#16A34A;font-weight:600">Synchronisé sur tous vos appareils</span>'
+      : '<i class="ti ti-cloud-off" style="color:#D97706"></i> <span style="color:#D97706">Sync cloud inactive — créez la table <strong>app_config</strong> dans Supabase</span>';
   }
 }
 
@@ -5598,6 +5651,7 @@ RÈGLES STRICTES :
 
     // Stocker les données structurées (utilisées pour le calcul de prix dans showVerres)
     localStorage.setItem('conv_parsed_' + id, JSON.stringify(parsed));
+    _cloudPush('conv_parsed_' + id);  // synchronise la convention sur tous les appareils
     if(resEl) resEl.innerHTML = _renderConvAiCard(parsed);
     if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Réanalyser avec IA'; }
     const nbVerres = parsed.verres ? Object.keys(parsed.verres).length : 0;
@@ -6024,7 +6078,7 @@ function resetIaPdfDrop(){
 function _loadAccords(){
   try{ return JSON.parse(localStorage.getItem('maneo_accords')||'{}'); }catch(e){ return {}; }
 }
-function _saveAccords(data){ localStorage.setItem('maneo_accords', JSON.stringify(data)); }
+function _saveAccords(data){ localStorage.setItem('maneo_accords', JSON.stringify(data)); _cloudPush('maneo_accords'); }
 
 function _getAccord(marque){
   if(!marque) return null;
@@ -6883,6 +6937,7 @@ function applyPdfPrix(){
     localStorage.setItem('maneo_prix', JSON.stringify(saved));
     localStorage.setItem('maneo_tags', JSON.stringify(savedTags));
     localStorage.setItem('maneo_stock', JSON.stringify(savedStock));
+    _cloudPush('maneo_prix'); _cloudPush('maneo_tags'); _cloudPush('maneo_stock');  // sync
   }catch(e){}
   document.getElementById('pdf-result').style.display = 'none';
   renderVerresEdit();
@@ -8582,6 +8637,7 @@ RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de
 
     // Sauvegarder le résultat fusionné en cache
     localStorage.setItem('cat_ia_result_'+type, JSON.stringify(merged));
+    _cloudPush('cat_ia_result_'+type);  // synchronise sur tous les appareils
     _catRenderIAResults(type, merged, true);
 
   } catch(err){
@@ -8699,6 +8755,7 @@ function _catApplyIA(type){
   localStorage.setItem('maneo_appel', JSON.stringify(savedAppel));
   localStorage.setItem('maneo_tags', JSON.stringify(savedTags));
   localStorage.setItem('maneo_stock', JSON.stringify(savedStock));
+  ['maneo_prix','maneo_appel','maneo_tags','maneo_stock'].forEach(_cloudPush);  // sync
 
   const parts=[];
   if(countPrix)  parts.push(`${countPrix} prix mis à jour`);
@@ -8835,6 +8892,7 @@ async function pdfDel(key, bodyId, id, isConv){
   if(isConv){
     // Supprimer aussi le cache IA du réseau
     localStorage.removeItem('conv_parsed_' + id);
+    _cloudDelete('conv_parsed_' + id);  // propage la suppression aux autres appareils
     const bodyEl = document.getElementById(bodyId);
     if(bodyEl) bodyEl.innerHTML = _renderConvBody(id);
   } else {
