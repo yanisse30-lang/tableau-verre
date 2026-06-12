@@ -1492,6 +1492,7 @@ select option{background:#fff;color:var(--txt-primary)}
         <button onclick="document.getElementById('conv-modal').style.display='none'" style="background:var(--surf-secondary);border:1px solid var(--bdr-light);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--txt-secondary)"><i class="ti ti-x"></i> Fermer</button>
       </div>
       <div style="height:1px;background:var(--bdr-light);margin:18px 0"></div>
+      <div id="conv-verrier-banner" style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#92400E;display:flex;align-items:center;gap:8px"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" id="conv-slots-grid">
         <!-- généré JS -->
       </div>
@@ -3477,8 +3478,6 @@ function renderVerreCard(v,i,showTop,paire2=false){
               return {rid, label: m?.label || rid.toUpperCase(), p};
             }).filter(Boolean);
             if(!allReseaux.length) return '';
-            const resteC = (plafond!=null && isUnderContract && activeNetP!=null) ? Math.max(0, activeNetP - plafond) : null;
-            const priseC = (plafond!=null && isUnderContract && activeNetP!=null) ? Math.min(activeNetP, plafond) : null;
             return `<div style="margin-top:12px;background:#1a1a2a;border:1px solid #2a2a4a;border-radius:10px;padding:12px 14px">
               <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#7090d0;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px"><i class="ti ti-building-store" style="font-size:13px"></i> Tarifs réseau — indice ${ind}</div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -3488,19 +3487,6 @@ function renderVerreCard(v,i,showTop,paire2=false){
                   <div style="font-size:9px;color:#556;margin-top:1px">le verre</div>
                 </div>`).join('')}
               </div>
-              ${(plafond!=null && isUnderContract && activeNetP!=null) ? `
-              <div style="margin-top:10px;display:flex;gap:8px">
-                <div style="flex:1;background:#0a2040;border:1px solid #1e4080;border-radius:8px;padding:8px;text-align:center">
-                  <div style="font-size:9px;color:#7090d0;font-weight:700;text-transform:uppercase;margin-bottom:3px">Plafond remboursé</div>
-                  <div style="font-size:15px;font-weight:800;color:#60b0ff">${priseC} €</div>
-                  <div style="font-size:9px;color:#556">par verre</div>
-                </div>
-                <div style="flex:1;background:${resteC===0?'#0a2e1a':'#2a1010'};border:1px solid ${resteC===0?'#1a6040':'#6a2020'};border-radius:8px;padding:8px;text-align:center">
-                  <div style="font-size:9px;color:${resteC===0?'#60d090':'#e08080'};font-weight:700;text-transform:uppercase;margin-bottom:3px">Reste à charge</div>
-                  <div style="font-size:15px;font-weight:800;color:${resteC===0?'#50e0a0':'#ff8080'}">${resteC===0?'0 €':resteC+' €'}</div>
-                  <div style="font-size:9px;color:#556">par verre</div>
-                </div>
-              </div>` : ''}
             </div>`;
           })()}
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
@@ -3550,23 +3536,8 @@ function renderVerreLigne(v){
   const trHTML = v.traitements.slice(0,3).map(t =>
     `<div class="vt-trait"><strong><i class="ti ${t.icon}" style="margin-right:4px;color:#378ADD"></i>${t.nom}</strong>${t.desc.substring(0,90)}…</div>`
   ).join('');
-  // Plafond / reste à charge patient
-  const plafond = state.mutuelle?.plafond_verre ?? null;
-  const resteC  = v.resteCharge  ?? (plafond != null ? Math.max(0, v.vente - plafond) : null);
-  const priseC  = v.priseEnCharge ?? (plafond != null ? Math.min(v.vente, plafond)    : null);
-  const plafondHTML = (plafond != null && state.mutuelle?.section === 'sous') ? `
-    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-      <div style="flex:1;min-width:110px;background:#0a2040;border:1px solid #1e4080;border-radius:8px;padding:8px 10px;text-align:center">
-        <div style="font-size:9px;color:#7090d0;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px">Prise en charge mutuelle</div>
-        <div style="font-size:15px;font-weight:800;color:#60b0ff">${priseC} €</div>
-        <div style="font-size:9px;color:#556;margin-top:2px">par verre</div>
-      </div>
-      <div style="flex:1;min-width:110px;background:${resteC===0?'#0a2e1a':'#2a1010'};border:1px solid ${resteC===0?'#1a6040':'#6a2020'};border-radius:8px;padding:8px 10px;text-align:center">
-        <div style="font-size:9px;color:${resteC===0?'#60d090':'#e08080'};font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px">Reste à charge patient</div>
-        <div style="font-size:15px;font-weight:800;color:${resteC===0?'#50e0a0':'#ff8080'}">${resteC===0?'Intégral':'+'+ resteC +' €'}</div>
-        <div style="font-size:9px;color:#556;margin-top:2px">par verre</div>
-      </div>
-    </div>` : '';
+  // Reste à charge / prise en charge mutuelle : retirés (l'app affiche le prix de vente net du réseau)
+  const plafondHTML = '';
 
   // Détail accords fournisseur (visible uniquement admin + superhôte)
   const _canSeeAccords = !!(currentUser?.admin || isSuperhote());
@@ -3632,7 +3603,6 @@ function renderVerreLigne(v){
             : `<span class="vt-precal-non">—</span>`)}</td>
       <td style="text-align:right">
         <span class="vt-prix ${isReseau?'reseau':''} ${isConvIA?'conv-ia':''}">${v.vente} €</span>
-        ${plafond!=null&&state.mutuelle?.section==='sous'?`<br><span style="font-size:10px;color:${resteC===0?'#50d090':'#ff8080'}">RAC: ${resteC===0?'0 €':resteC+' €'}</span>`:''}
       </td>
       <td class="vt-saisie">${v.vente} €</td>
       <td class="vt-saisie">${precalSaisie}</td>
@@ -5546,6 +5516,9 @@ async function analyzeConvPdfWithAI(id){
     const catCtx = _allVerres
       .map(v => `${v.id}|${v.nom}|${_vType(v)}|${_vTrait(v)}|[${Object.keys(v.indices||{}).join(',')}]`)
       .join('\n');
+    // Verriers réellement présents dans le catalogue (pour cibler la bonne page de la convention)
+    const _verriers = _catalogueVerriers();
+    const _verriersStr = _verriers.length ? _verriers.join(', ') : 'le(s) verrier(s) du catalogue';
 
     // Construit le prompt pour un morceau du texte de convention
     const mkPrompt = (txt, partInfo) => `Tu es un expert en conventionnement optique en France. On te donne (1) le CATALOGUE de verres de l'opticien et (2) un EXTRAIT${partInfo} du texte d'un document de conventionnement réseau (${reseauLabel}) qui liste les PRIX DE VENTE MAXIMA négociés (reste à charge zéro / "prix maxima" / "prix de vente max" / plafond verre).
@@ -5577,18 +5550,18 @@ Les conventions se présentent sous TROIS formes — extrais TOUTES celles prés
    • FABRICATIONS SPÉCIALES : le précalibrage s'appelle souvent "Optislim", "détourage", "précal" → precalibrage_max.
 
 Pour une MATRICE, n'essaie PAS de calculer le total : EXTRAIS les 4 grilles séparément dans "composants" (le logiciel fera la somme). Recopie les libellés et montants EXACTEMENT comme dans le PDF.
-⚠️ Si le verrier est NIKON, extrais UNIQUEMENT la grille Nikon (ignore Essilor/Zeiss/Seiko). Ne mélange pas les verriers.
+⚠️ VERRIER : l'opticien monte uniquement : ${_verriersStr}. Le PDF liste souvent plusieurs verriers (Essilor, Nikon, Zeiss, Seiko, BBGR…) sur des pages distinctes — extrais UNIQUEMENT la/les grille(s) de : ${_verriersStr}. Ignore les autres verriers et ne mélange jamais leurs colonnes.
 ⚠️ INDICE matériau : garde les colonnes telles quelles ("1.5","1.59","1.6","1.67","1.74"). Le 1.59 (polycarbonate) est une colonne distincte du 1.6.
 
-MISSION — pour CE morceau, remplis ce qui est présent :
+MISSION — pour CE morceau, remplis ce qui est présent. Sois EXHAUSTIF : dans CHAQUE catégorie, extrais TOUS les éléments listés, n'en omets AUCUN.
 1) "composants" (forme MATRICE) :
-   - "materiau" : {"unifocal":{indice:prix...}, "multifocal":{indice:prix...}} (Multifocal = progressif).
-   - "surface" : {nom_design: prix} — TOUS les designs nommés (Presio Touch, Presio Clear P, Presio Definition, Presio Power, SuperSee, SeeMax AP, Relaxsee, Sphérique, Asphérique…).
-   - "traitement" : {nom_traitement: prix} — ECC+UV, See Coat Plus UV, See Coat Next UV, See Coat Blue UV, etc.
-   - "photochromie" : {nom: prix} — Transitions Gen S, Xtractive…
+   - "materiau" : {"unifocal":{indice:prix...}, "multifocal":{indice:prix...}} — TOUS les indices des deux types (Multifocal = progressif).
+   - "surface" : {nom_design: prix} — TOUS les designs/géométries nommés, unifocaux ET progressifs, sans exception (ex: Presio Touch, Presio I Focus, Presio Clear P, Presio Definition, Presio Power, Presio Master…, SuperSee, SuperSee AP, SeeMax AP, Relaxsee, Sphérique, Asphérique…).
+   - "traitement" : {nom_traitement: prix} — TOUS les antireflets/traitements (ECC+UV, See Coat Plus UV, See Coat Next UV, See Coat Blue UV, PureBlueUV…).
+   - "photochromie" : {nom: prix} — TOUTES (Transitions Gen S, Xtractive, Xtractive Polarized…).
 2) "verres" (forme PRODUIT A) : si le PDF donne un prix tout-compris par produit nommé mappable au catalogue.
-3) "verriers" (forme CATÉGORIE B) : prix complet par catégorie+indice (clé "Nikon").
-4) "precalibrage_max" : supplément précalibrage / Optislim / détourage.
+3) "verriers" (forme CATÉGORIE B) : prix complet par catégorie+indice.
+4) "precalibrage_max" : supplément précalibrage / Optislim / détourage / usinage.
 
 Réponds UNIQUEMENT avec ce JSON valide, AUCUN texte ni tableau autour :
 {
@@ -5607,7 +5580,7 @@ Réponds UNIQUEMENT avec ce JSON valide, AUCUN texte ni tableau autour :
 
 RÈGLES STRICTES :
 - N'INVENTE AUCUN prix ni libellé : recopie exactement le PDF. Omets toute grille absente de CE morceau.
-- Verrier NIKON uniquement (si présent). Ne mélange pas les colonnes Essilor/Zeiss.
+- Verrier(s) ${_verriersStr} UNIQUEMENT (si présents). Ne mélange pas les colonnes des autres verriers.
 - "verres" : CLÉS = id EXACTS du catalogue. seuil_complexe défaut 6.0.
 - Si plusieurs niveaux/contrats (Opti 2/3/4…), prends la grille du niveau le plus complet.`;
 
@@ -5642,6 +5615,19 @@ RÈGLES STRICTES :
     if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Analyser avec IA'; }
     showToast('Erreur IA : ' + _aiFriendlyError(e.message));
   }
+}
+
+// Verriers réellement montés par l'opticien (déduits du catalogue) — pour cibler la bonne page de convention
+function _catalogueVerriers(){
+  const skip = /panier|classe\s*a|100\s*%|générique|generique/i;
+  const seen = new Set(); const out = [];
+  [...catalogue, ...catalogue2e].forEach(v => {
+    const m = (v.marque||'').trim();
+    if(!m || skip.test(m)) return;
+    const key = m.toLowerCase();
+    if(!seen.has(key)){ seen.add(key); out.push(m); }
+  });
+  return out;
 }
 
 // Appel API Claude avec retry automatique sur 429 (rate limit). onWait(sec) notifie l'attente.
@@ -8309,6 +8295,14 @@ let _pdfCurrentSlot = null; // slot en cours de sélection
 function openConventionnement(){
   const grid = document.getElementById('conv-slots-grid');
   const _convCanIA = !!(currentUser?.admin || isSuperhote());
+  // Bandeau : verrier(s) du catalogue → l'IA extraira la grille correspondante
+  const _verriers = _catalogueVerriers();
+  const banner = document.getElementById('conv-verrier-banner');
+  if(banner){
+    banner.innerHTML = _verriers.length
+      ? `<i class="ti ti-eyeglass-2" style="color:#D97706"></i> Catalogue : <strong>${_verriers.join(' · ')}</strong> — l'IA extrait automatiquement la grille de ${_verriers.length>1?'ces verriers':'ce verrier'} dans chaque convention.`
+      : `<i class="ti ti-info-circle"></i> Aucun verrier détecté dans le catalogue.`;
+  }
   grid.innerHTML = _CONV_RESEAUX.map(r => `
     <div class="conv-slot">
       <div class="conv-slot-hdr" style="background:linear-gradient(135deg,${r.color}cc,${r.color})">
