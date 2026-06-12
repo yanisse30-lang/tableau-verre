@@ -3592,13 +3592,12 @@ function renderVerreLigne(v){
   let convDetailHtml = '';
   if(isConvIA && _convData){
     let calcLine;
-    if(_convData.mode==='composants'){
-      // Prix = base(type) + design + traitement + amincissement
-      const parts = [`Base <strong style="color:#fff">${_convData.typeLbl}</strong> : <strong style="color:#fff">${_convData.base}€</strong>`];
-      if(_convData.design>0) parts.push(`Design <span style="opacity:.8">${_convData.designLbl}</span> +<strong style="color:#fff">${_convData.design}€</strong>`);
-      if(_convData.traitement>0) parts.push(`Traitement +<strong style="color:#fff">${_convData.traitement}€</strong>${(_convData.traitDetail&&_convData.traitDetail.length)?` <span style="opacity:.7">(${_convData.traitDetail.join(', ')})</span>`:''}`);
-      if(_convData.amincissement>0) parts.push(`Amincissement ind.${v.indiceChoisi} +<strong style="color:#fff">${_convData.amincissement}€</strong>`);
-      calcLine = parts.join(' &nbsp;+&nbsp; ') + ` &nbsp;=&nbsp; <strong style="color:#60d090">${_convData.venteConv}€</strong>`;
+    if(_convData.mode==='matrice' || _convData.mode==='composants'){
+      // Prix = base/matériau + (surface/design + traitement + photochromie/amincissement…)
+      const baseLbl = _convData.mode==='matrice' ? ('Matériau '+_convData.typeLbl) : ('Base '+_convData.typeLbl);
+      const parts = [`${baseLbl} : <strong style="color:#fff">${_convData.base}€</strong>`];
+      (_convData.traitDetail||[]).forEach(d => parts.push(d.replace(/\+(\d[\d.]*)€/,'+ <strong style="color:#fff">$1€</strong>')));
+      calcLine = parts.join(' &nbsp; ') + ` &nbsp;=&nbsp; <strong style="color:#60d090">${_convData.venteConv}€</strong>`;
     } else {
       const baseLbl = (_convData.verreType==='produit')
         ? (_CONV_PROD_LBL[_convData.produitNom]||_convData.produitNom||'produit')+' <span style="opacity:.6">(tarif produit)</span>'
@@ -5539,16 +5538,19 @@ async function analyzeConvPdfWithAI(id){
     const reseauInfo = _CONV_RESEAUX.find(r => r.id === id);
     const reseauLabel = reseauInfo ? reseauInfo.label : id;
 
-    // Catalogue opticien envoyé à l'IA → mapping direct prix négocié ↔ verre (id)
+    // Catalogue opticien envoyé à l'IA → calcul/mapping prix négocié ↔ verre (id)
+    // Format enrichi : id|nom|type|traitement|[indices] pour permettre le calcul par composants
     const _allVerres = [...catalogue, ...catalogue2e];
+    const _vType = v => (v.compatible||[]).some(c=>['progressif','degressif','interieur'].includes(c)) ? 'progressif' : 'unifocal';
+    const _vTrait = v => (v.traitements && v.traitements[0] && v.traitements[0].nom) ? v.traitements[0].nom : (v.tags||[]).join('+');
     const catCtx = _allVerres
-      .map(v => `${v.id}|${v.nom}|${v.marque||''}|[${Object.keys(v.indices||{}).join(',')}]`)
+      .map(v => `${v.id}|${v.nom}|${_vType(v)}|${_vTrait(v)}|[${Object.keys(v.indices||{}).join(',')}]`)
       .join('\n');
 
     // Construit le prompt pour un morceau du texte de convention
     const mkPrompt = (txt, partInfo) => `Tu es un expert en conventionnement optique en France. On te donne (1) le CATALOGUE de verres de l'opticien et (2) un EXTRAIT${partInfo} du texte d'un document de conventionnement réseau (${reseauLabel}) qui liste les PRIX DE VENTE MAXIMA négociés (reste à charge zéro / "prix maxima" / "prix de vente max" / plafond verre).
 
-CATALOGUE OPTICIEN — une ligne par verre, format « id | nom | marque | [indices disponibles] » :
+CATALOGUE OPTICIEN — une ligne par verre, format « id | nom | type | traitement | [indices disponibles] » :
 ${catCtx}
 
 TEXTE DE LA CONVENTION ${reseauLabel}${partInfo} :
@@ -5567,44 +5569,47 @@ Les conventions se présentent sous TROIS formes — extrais TOUTES celles prés
 (B) PAR CATÉGORIE prix complet (ex: "progressif 1.60 = 145€") → "verriers" (grille par type + indice).
 (C) PAR COMPOSANTS SÉPARÉS — le prix d'un verre = SOMME de composants tarifés séparément → "composants". C'est le cas le plus fréquent des réseaux : le PDF donne un prix de BASE par type de verre, puis des SUPPLÉMENTS à ajouter pour le design/géométrie, le traitement, et l'amincissement.
 
-MODÈLE PAR COMPOSANTS — prix verre = base(type) + design + traitement + amincissement :
-- "base" : prix de base par TYPE de verre, pour un verre STANDARD (indice 1.50, sans option). Clés : "unifocal_simple", "unifocal_complexe", "progressif".
-- "design" : SUPPLÉMENT selon le niveau de gamme / la qualité du design-géométrie du verre. Clés : "entree" (design standard/basique), "milieu" (design intermédiaire), "haut" (design premium / haut de gamme / personnalisé). Mets 0 si non facturé.
-- "traitement" : SUPPLÉMENT par traitement. Clés : "ar" (anti-reflet/durci, souvent 0 ou inclus), "lb" (filtre lumière bleue), "tr" (photochromique/Transitions). Mets 0 si inclus.
-- "amincissement" : SUPPLÉMENT par indice aminci. Clés : "1.60", "1.67", "1.74".
+(C) PAR MATRICE DE COMPOSANTS (cas le plus fréquent des réseaux, ex: Santéclair). Le PDF donne des GRILLES séparées qu'il faut ADDITIONNER pour obtenir le prix d'un verre :
+   • MATÉRIAU : prix de base par TYPE (Unifocal / Multifocal=progressif) et par INDICE (colonnes 1.5 / 1.59 / 1.6 / 1.67 / 1.74).
+   • SURFACE / DESIGN : supplément selon le DESIGN du verre, nommé (ex: "Presio Touch", "Presio Clear P", "Presio Definition", "Presio Power", "SuperSee", "SeeMax AP", "Relaxsee", "Sphérique", "Asphérique"…).
+   • TRAITEMENT : supplément du traitement antireflet (ex: "ECC+UV", "See Coat Plus UV", "See Coat Next UV", "See Coat Blue UV", "PureBlueUV").
+   • PHOTOCHROMIE : supplément si le verre est photochromique/Transitions.
+   • FABRICATIONS SPÉCIALES : le précalibrage s'appelle souvent "Optislim", "détourage", "précal" → precalibrage_max.
 
-MISSION :
-1) "verres" : pour chaque verre du catalogue correspondant à un PRODUIT NOMMÉ, prix de vente max par indice. Associe par NOM + TRAITEMENT + INDICE.
-2) "composants" : si le PDF tarife par composants séparés (base + suppléments), remplis les 4 grilles ci-dessus.
-3) "verriers" : si le PDF donne directement un prix complet par catégorie+indice, remplis cette grille. Clé verrier "Nikon" par défaut (l'opticien ne monte que du Nikon).
+Pour une MATRICE, n'essaie PAS de calculer le total : EXTRAIS les 4 grilles séparément dans "composants" (le logiciel fera la somme). Recopie les libellés et montants EXACTEMENT comme dans le PDF.
+⚠️ Si le verrier est NIKON, extrais UNIQUEMENT la grille Nikon (ignore Essilor/Zeiss/Seiko). Ne mélange pas les verriers.
+⚠️ INDICE matériau : garde les colonnes telles quelles ("1.5","1.59","1.6","1.67","1.74"). Le 1.59 (polycarbonate) est une colonne distincte du 1.6.
 
-Réponds UNIQUEMENT avec ce JSON valide, sans texte autour :
+MISSION — pour CE morceau, remplis ce qui est présent :
+1) "composants" (forme MATRICE) :
+   - "materiau" : {"unifocal":{indice:prix...}, "multifocal":{indice:prix...}} (Multifocal = progressif).
+   - "surface" : {nom_design: prix} — TOUS les designs nommés (Presio Touch, Presio Clear P, Presio Definition, Presio Power, SuperSee, SeeMax AP, Relaxsee, Sphérique, Asphérique…).
+   - "traitement" : {nom_traitement: prix} — ECC+UV, See Coat Plus UV, See Coat Next UV, See Coat Blue UV, etc.
+   - "photochromie" : {nom: prix} — Transitions Gen S, Xtractive…
+2) "verres" (forme PRODUIT A) : si le PDF donne un prix tout-compris par produit nommé mappable au catalogue.
+3) "verriers" (forme CATÉGORIE B) : prix complet par catégorie+indice (clé "Nikon").
+4) "precalibrage_max" : supplément précalibrage / Optislim / détourage.
+
+Réponds UNIQUEMENT avec ce JSON valide, AUCUN texte ni tableau autour :
 {
   "reseau": "${reseauLabel}",
   "seuil_complexe": 6.0,
-  "precalibrage_max": 1.00,
-  "verres": { "nk_h3": {"1.60": 160} },
+  "precalibrage_max": 6,
   "composants": {
-    "base":         {"unifocal_simple": 45, "unifocal_complexe": 68, "progressif": 120},
-    "design":       {"entree": 0, "milieu": 20, "haut": 45},
-    "traitement":   {"ar": 0, "lb": 15, "tr": 50},
-    "amincissement":{"1.60": 14, "1.67": 24, "1.74": 38}
+    "materiau": {"unifocal": {"1.5":19,"1.6":28,"1.67":40,"1.74":57}, "multifocal": {"1.5":22,"1.6":33,"1.67":45,"1.74":74}},
+    "surface": {"Presio Touch":57,"Presio Clear P":102,"Presio Definition":136,"Presio Power":158,"SuperSee":23,"SeeMax AP":38,"Sphérique":11,"Asphérique":17},
+    "traitement": {"ECC+UV":34,"See Coat Next UV":45,"See Coat Blue UV":48,"See Coat Plus UV":45},
+    "photochromie": {"Transitions Gen S":39}
   },
-  "verriers": {
-    "Nikon": {
-      "unifocal_simple":   {"1.50": 45, "1.60": 55, "1.67": 68, "1.74": 88},
-      "progressif":        {"1.50": 120, "1.60": 145, "1.67": 175},
-      "amincissement":     {"1.60": 14, "1.67": 24, "1.74": 38}
-    }
-  }
+  "verres": {},
+  "verriers": {}
 }
 
 RÈGLES STRICTES :
-- N'INVENTE AUCUN prix. N'inclure que ce qui figure réellement dans CE morceau. Omettre toute clé/grille absente. "verres":{} si aucun produit nommé.
-- "verres" : CLÉS = id EXACTS du catalogue (ex: "nk_h3"). Jamais d'id absent.
-- "composants" vs "verriers" : si le PDF additionne base + suppléments → utilise "composants". S'il donne un prix complet tout-compris par catégorie → utilise "verriers". Tu peux remplir les deux si les deux apparaissent.
-- seuil_complexe = seuil dioptries simple/complexe (défaut 6.0). "precalibrage_max" = supplément précalibrage si indiqué.
-- Si plusieurs niveaux/contrats (Opti 2/3/4…), prends la grille du niveau le plus complet présent dans le texte.`;
+- N'INVENTE AUCUN prix ni libellé : recopie exactement le PDF. Omets toute grille absente de CE morceau.
+- Verrier NIKON uniquement (si présent). Ne mélange pas les colonnes Essilor/Zeiss.
+- "verres" : CLÉS = id EXACTS du catalogue. seuil_complexe défaut 6.0.
+- Si plusieurs niveaux/contrats (Opti 2/3/4…), prends la grille du niveau le plus complet.`;
 
     // Découpage en plusieurs passes : lit toute la convention sans dépasser la limite IA/minute
     const chunks = _chunkText(fullText, 24000, 6);
@@ -5856,25 +5861,101 @@ function _convDesignValue(designObj, gamme){
   }
   return 0;
 }
+// Normalise un libellé pour comparaison (minuscules, sans accents, tokens alphanumériques)
+function _convNorm(s){ return (s==null?'':s).toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+// Meilleure clé d'un objet {clé:prix} correspondant à un texte.
+// Basé sur les tokens DISTINCTIFS de la clé (ignore "presio/nikon/uv"…), exige ≥ minHits token distinctif présent.
+const _CONV_STOP = new Set(['presio','nikon','verre','verres','de','le','la','du','uv','classe','organique','mineral','see','coat','transitions']);
+function _convBestMatch(text, obj, minHits){
+  if(!obj || typeof obj!=='object') return null;
+  const tn=_convNorm(text); const tset=new Set(tn.split(' ').filter(Boolean));
+  let best=null;
+  for(const k of Object.keys(obj)){
+    const kn=_convNorm(k); if(!kn) continue;
+    const kt=kn.split(' ').filter(Boolean); if(!kt.length) continue;
+    const distinct=kt.filter(x=>!_CONV_STOP.has(x) && !/^\d+$/.test(x));
+    const checkToks = distinct.length ? distinct : kt;
+    let hits=0; checkToks.forEach(x=>{ if(tset.has(x)) hits++; });
+    const allHits=kt.filter(x=>tset.has(x)).length;
+    const score = hits + (tn.includes(kn)?0.5:0) + 0.02*allHits;
+    if(!best || score>best.score) best={key:k, prix:parseFloat(obj[k])||0, score, hits};
+  }
+  return (best && best.hits >= (minHits==null?1:minHits)) ? best : null;
+}
+// Valeur matériau pour un indice (1.50↔1.5, 1.60↔1.6 par égalité numérique)
+function _convMateriau(obj, ind){
+  if(!obj || typeof obj!=='object') return null;
+  const t=parseFloat(ind);
+  for(const k of Object.keys(obj)){ if(parseFloat(k.toString().replace(',','.'))===t){ const n=parseFloat(obj[k]); return isNaN(n)?null:n; } }
+  return null;
+}
+// Texte de traitement d'un verre, enrichi des alias Nikon (SCC+UV NG → See Coat Next UV, etc.)
+function _convCoatingText(v){
+  let t=((v.traitements||[]).map(x=>x&&x.nom).filter(Boolean).join(' '))+' '+(v.nom||'');
+  const n=_convNorm(t);
+  if(/\bscc\b/.test(n)&&/\bng\b/.test(n)) t+=' see coat next uv';
+  else if(/\bscc\b/.test(n)) t+=' see coat plus uv';
+  if(/\becc\b/.test(n)) t+=' ecc uv';
+  if(/pure blue|see coat blue|\bscb\b|blue uv/.test(n)) t+=' see coat blue uv';
+  return t;
+}
+
 function _calcConvComposants(v, ind, eqSph, parsed){
   const c = parsed && parsed.composants;
-  if(!c || !c.base || typeof c.base!=='object') return null;
+  if(!c) return null;
   const seuil = parseFloat(parsed.seuil_complexe) || 6.0;
-  const isProg = (v.compatible||[]).includes('progressif') || (v.compatible||[]).includes('degressif') || (v.compatible||[]).includes('interieur');
+  const isProg = (v.compatible||[]).some(x=>['progressif','degressif','interieur'].includes(x));
+
+  // ─── FORME MATRICE : matériau(type×indice) + surface(design) + traitement + photochromie ───
+  if(c.materiau || c.surface){
+    const typeKey = isProg ? 'multifocal' : 'unifocal';
+    let base = c.materiau ? (_convMateriau(c.materiau[typeKey], ind) ?? _convMateriau(c.materiau[isProg?'progressif':'unifocal'], ind)) : 0;
+    if(base==null) return null;
+    base = parseFloat(base)||0;
+    let surface=0, surfaceLbl='';
+    if(c.surface){
+      let m=_convBestMatch(v.nom, c.surface, 1);
+      if(!m && !isProg) m=_convBestMatch(v.aspherique?'aspherique aspherique':'spherique', c.surface, 1);
+      if(m){ surface=m.prix; surfaceLbl=m.key; }
+    }
+    let traitement=0, traitLbl='';
+    if(c.traitement){
+      const m=_convBestMatch(_convCoatingText(v), c.traitement, 1);
+      if(m){ traitement=m.prix; traitLbl=m.key; }
+    }
+    let photo=0, photoLbl='';
+    if((v.tags||[]).includes('tr') && c.photochromie){
+      const m=_convBestMatch((v.nom||'')+' transitions photochromique', c.photochromie, 1);
+      if(m){ photo=m.prix; photoLbl=m.key; }
+    }
+    const venteConv=Math.round((base+surface+traitement+photo)*100)/100;
+    if(isNaN(venteConv)||venteConv<=0) return null;
+    const traitDetail=[];
+    if(surface>0) traitDetail.push('Surface '+surfaceLbl+' +'+surface+'€');
+    if(traitement>0) traitDetail.push('Traitement '+traitLbl+' +'+traitement+'€');
+    if(photo>0) traitDetail.push('Photochromie '+photoLbl+' +'+photo+'€');
+    return {
+      mode:'matrice', verreType:typeKey, typeLbl:(isProg?'Progressif (multifocal)':'Unifocal'),
+      base, surface, surfaceLbl, traitement, traitLbl, photo, traitDetail, venteConv,
+      design:surface, designLbl:surfaceLbl, amincissement:0,
+      precalibrage_max:(parsed.precalibrage_max!=null?parseFloat(parsed.precalibrage_max):null),
+      photochromique_supp:null, verrieurKey:(v.marque||''), produitNom:surfaceLbl||null
+    };
+  }
+
+  // ─── FORME SIMPLE : base(type) + design(gamme) + traitement(tags) + amincissement ───
+  if(!c.base || typeof c.base!=='object') return null;
   let verreType, typeLbl;
   if(isProg){ verreType='progressif'; typeLbl='Progressif'; }
   else if(eqSph > seuil){ verreType='unifocal_complexe'; typeLbl='Unifocal complexe'; }
   else { verreType='unifocal_simple'; typeLbl='Unifocal simple'; }
-  // Base par type (repli complexe→simple, ou clé "unifocal")
   let base = c.base[verreType];
   if(base==null && verreType==='unifocal_complexe') base = c.base['unifocal_simple'];
   if(base==null && !isProg) base = c.base['unifocal'];
   if(base==null) return null;
   base = parseFloat(base);
   if(isNaN(base) || base<=0) return null;
-  // Supplément design/géométrie selon la gamme du verre (tolérant aux noms variés : premium/standard/intermédiaire…)
   const design = _convDesignValue(c.design, v.gamme);
-  // Supplément(s) traitement selon les tags du verre
   let traitement = 0; const traitDetail = [];
   if(c.traitement){
     (v.tags||[]).forEach(tag => {
@@ -5884,10 +5965,11 @@ function _calcConvComposants(v, ind, eqSph, parsed){
       }
     });
   }
-  // Supplément amincissement selon l'indice
   const amincissement = (c.amincissement && c.amincissement[ind]!=null) ? parseFloat(c.amincissement[ind]) : 0;
   const venteConv = Math.round((base + design + (traitement||0) + (amincissement||0))*100)/100;
   if(isNaN(venteConv) || venteConv<=0) return null;
+  if(design>0) traitDetail.unshift('Design '+( _CONV_GAMME_LBL[v.gamme]||v.gamme)+' +'+design+'€');
+  if(amincissement>0) traitDetail.push('Amincissement ind.'+ind+' +'+amincissement+'€');
   return {
     mode:'composants', verreType, typeLbl, base, design, designLbl:_CONV_GAMME_LBL[v.gamme]||v.gamme,
     traitement, traitDetail, amincissement, venteConv,
@@ -8285,21 +8367,33 @@ function _renderConvBody(id){
 
 function _renderConvAiCard(data){
   if(!data) return '';
-  // Modèle par COMPOSANTS (base + design + traitement + amincissement)
+  // Modèle par COMPOSANTS / MATRICE
   const _c = data.composants;
-  if(_c && (_c.base || _c.design || _c.traitement || _c.amincissement)){
-    const grid = (obj, map) => obj ? Object.keys(obj).map(k=>`${map?(map[k]||k):k}: <strong>${obj[k]}€</strong>`).join(' · ') : '';
-    const TYPE={unifocal_simple:'Unif. simple',unifocal_complexe:'Unif. complexe',progressif:'Progressif',unifocal:'Unifocal'};
+  if(_c && (_c.materiau || _c.surface || _c.base || _c.design || _c.traitement || _c.amincissement)){
+    const grid = (obj, map, max) => {
+      if(!obj || typeof obj!=='object') return '';
+      let ks=Object.keys(obj); const more = (max && ks.length>max);
+      if(more) ks=ks.slice(0,max);
+      return ks.map(k=>`${map?(map[k]||k):k}: <strong>${obj[k]}€</strong>`).join(' · ') + (more?` <span style="opacity:.6">… +${Object.keys(obj).length-max}</span>`:'');
+    };
+    const TYPE={unifocal_simple:'Unif. simple',unifocal_complexe:'Unif. complexe',progressif:'Progressif',unifocal:'Unifocal',multifocal:'Progressif'};
     const GAM={entree:'Entrée',milieu:'Milieu',haut:'Haut'};
     const TR={ar:'Anti-reflet',lb:'Lumière bleue',tr:'Photochromique'};
     const row=(lbl,html)=> html ? `<div class="conv-ai-row"><span class="conv-ai-lbl">${lbl}</span><span class="conv-ai-val">${html}</span></div>` : '';
-    const rows = row('Base (type)', grid(_c.base,TYPE)) + row('Design / géométrie', grid(_c.design,GAM)) + row('Traitement', grid(_c.traitement,TR)) + row('Amincissement', grid(_c.amincissement));
-    const nbVerres = data.verres?Object.keys(data.verres).length:0;
-    const verresLine = nbVerres ? row('+ Produits nommés', nbVerres+' verre(s) tarifés à part') : '';
-    const precal = data.precalibrage_max!=null ? row('Précalibrage max', `<strong>${data.precalibrage_max}€</strong>`) : '';
+    let rows='';
+    if(_c.materiau){
+      rows += row('Matériau · Unifocal', grid(_c.materiau.unifocal)) + row('Matériau · Progressif', grid(_c.materiau.multifocal||_c.materiau.progressif));
+      rows += row('Surface / design', grid(_c.surface, null, 8));
+      rows += row('Traitement', grid(_c.traitement, null, 6));
+      if(_c.photochromie) rows += row('Photochromie', grid(_c.photochromie, null, 4));
+    } else {
+      rows = row('Base (type)', grid(_c.base,TYPE)) + row('Design / géométrie', grid(_c.design,GAM)) + row('Traitement', grid(_c.traitement,TR)) + row('Amincissement', grid(_c.amincissement));
+    }
+    const formule = _c.materiau ? 'matériau + surface + traitement + photochromie' : 'base + design + traitement + amincissement';
+    const precal = data.precalibrage_max!=null ? row('Précalibrage (Optislim)', `<strong>${data.precalibrage_max}€</strong>`) : '';
     return `<div class="conv-ai-result">
       <div class="conv-ai-res-hd"><i class="ti ti-cpu"></i> Tarifs par composants IA — ${data.reseau||'Convention'}</div>
-      <div class="conv-ai-res-body">${rows}${verresLine}${precal}<div class="conv-ai-row" style="margin-top:6px;border-top:1px solid #EDE9FE;padding-top:6px"><span class="conv-ai-lbl" style="color:#059669">✓ Actif</span><span class="conv-ai-val" style="color:#059669;font-weight:600">Prix = base + design + traitement + amincissement</span></div></div>
+      <div class="conv-ai-res-body">${rows}${precal}<div class="conv-ai-row" style="margin-top:6px;border-top:1px solid #EDE9FE;padding-top:6px"><span class="conv-ai-lbl" style="color:#059669">✓ Actif</span><span class="conv-ai-val" style="color:#059669;font-weight:600">Prix = ${formule}</span></div></div>
     </div>`;
   }
   // Format : prix par verre id (IA mappe le catalogue) — uniquement si des verres sont mappés
