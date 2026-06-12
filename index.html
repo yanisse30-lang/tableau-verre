@@ -5554,6 +5554,14 @@ ${catCtx}
 TEXTE DE LA CONVENTION ${reseauLabel}${partInfo} :
 ${txt}
 
+⚠️ VALEUR À EXTRAIRE — TRÈS IMPORTANT :
+- Extrais le PRIX DE VENTE de l'opticien (= prix facturé au client / "prix de vente" / "prix verre" / "tarif opticien" / "prix net réseau" / "prix maxima" / "PVP").
+- N'EXTRAIS JAMAIS : le "montant remboursé", la "base de remboursement", le "remboursement mutuelle/Sécu", la "prise en charge", le "RAC"/"reste à charge", le "taux", un pourcentage. Ces colonnes sont des REMBOURSEMENTS, PAS des prix de vente.
+- Repère de tête de colonne : prends celle intitulée prix/tarif/vente, pas celle intitulée remboursement/prise en charge/base.
+- Ordre de grandeur attendu : un PROGRESSIF coûte plus cher qu'un UNIFOCAL ; des prix de vente verre sont typiquement de quelques dizaines à quelques centaines d'euros. Si tu obtiens des progressifs à moins de ~50€, tu as probablement pris la mauvaise colonne (remboursement) — corrige.
+
+PRÉCALIBRAGE : repère le supplément de précalibrage / détourage / usinage / montage sur mesure (mots-clés : "précalibrage", "détourage", "usinage", "Optislim", "montage nylor/percé", "verre détouré") et mets son montant max dans "precalibrage_max".
+
 Les conventions se présentent sous TROIS formes — extrais TOUTES celles présentes dans CE morceau :
 (A) PAR PRODUIT NOMMÉ (ex: "P.Clear P 13", "P.Touch", "Sph ECC+UV"…) → "verres" (mappe sur les id du catalogue).
 (B) PAR CATÉGORIE prix complet (ex: "progressif 1.60 = 145€") → "verriers" (grille par type + indice).
@@ -5831,6 +5839,23 @@ function _calcConvVerre(v, ind, visionId, eqSph, convParsed){
 // Utilisé quand la convention chiffre par composants séparés (parsed.composants).
 const _CONV_GAMME_LBL = {entree:'Entrée de gamme', milieu:'Milieu de gamme', haut:'Haut de gamme'};
 const _CONV_TRAIT_LBL = {ar:'Anti-reflet', lb:'Lumière bleue', tr:'Photochromique'};
+// Résout le supplément design d'une gamme, tolérant aux noms variés renvoyés par l'IA
+const _CONV_DESIGN_ALIAS = {
+  haut:   ['haut','premium','hautdegamme','hdg','superieur','perso','personnalise','surmesure','freeform','digital','optimise'],
+  milieu: ['milieu','intermediaire','milieudegamme','standardplus','confort','plus','evolution'],
+  entree: ['entree','standard','basique','base','entreedegamme','eco','economique','simple','classique']
+};
+function _convDesignValue(designObj, gamme){
+  if(!designObj || typeof designObj!=='object') return 0;
+  const norm = s => (s==null?'':s).toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+  if(designObj[gamme]!=null){ const n=parseFloat(designObj[gamme]); return isNaN(n)?0:n; }
+  const keysNorm={}; Object.keys(designObj).forEach(k=>{ keysNorm[norm(k)]=designObj[k]; });
+  for(const a of (_CONV_DESIGN_ALIAS[gamme]||[])){
+    const v=keysNorm[norm(a)];
+    if(v!=null){ const n=parseFloat(v); return isNaN(n)?0:n; }
+  }
+  return 0;
+}
 function _calcConvComposants(v, ind, eqSph, parsed){
   const c = parsed && parsed.composants;
   if(!c || !c.base || typeof c.base!=='object') return null;
@@ -5847,8 +5872,8 @@ function _calcConvComposants(v, ind, eqSph, parsed){
   if(base==null) return null;
   base = parseFloat(base);
   if(isNaN(base) || base<=0) return null;
-  // Supplément design/géométrie selon la gamme du verre
-  const design = (c.design && c.design[v.gamme]!=null) ? parseFloat(c.design[v.gamme]) : 0;
+  // Supplément design/géométrie selon la gamme du verre (tolérant aux noms variés : premium/standard/intermédiaire…)
+  const design = _convDesignValue(c.design, v.gamme);
   // Supplément(s) traitement selon les tags du verre
   let traitement = 0; const traitDetail = [];
   if(c.traitement){
