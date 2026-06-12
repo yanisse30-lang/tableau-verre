@@ -5603,6 +5603,7 @@ Les conventions se présentent sous TROIS formes — extrais TOUTES celles prés
    • FABRICATIONS SPÉCIALES : le précalibrage s'appelle souvent "Optislim", "détourage", "précal" → precalibrage_max.
 
 Pour une MATRICE, n'essaie PAS de calculer le total : EXTRAIS les 4 grilles séparément dans "composants" (le logiciel fera la somme). Recopie les libellés et montants EXACTEMENT comme dans le PDF.
+⚠️ STRUCTURE : mets tout dans UN SEUL objet "composants" au premier niveau (PAS de tableau "grilles"). Si le verrier a plusieurs pages (ex: "Verres essentiels" + "Verres spéciaux"), FUSIONNE-les dans le même "composants". Verres ORGANIQUES par défaut (ignore les colonnes minéral). Mets le précalibrage/Optislim dans "precalibrage_max" (pas ailleurs).
 ⚠️ VERRIER : l'opticien monte uniquement : ${_verriersStr}. Le PDF liste souvent plusieurs verriers (Essilor, Nikon, Zeiss, Seiko, BBGR…) sur des pages distinctes — extrais UNIQUEMENT la/les grille(s) de : ${_verriersStr}. Ignore les autres verriers et ne mélange jamais leurs colonnes.
 ⚠️ INDICE matériau : garde les colonnes telles quelles ("1.5","1.59","1.6","1.67","1.74"). Le 1.59 (polycarbonate) est une colonne distincte du 1.6.
 
@@ -5646,7 +5647,7 @@ RÈGLES STRICTES :
       const raw = await _aiCall(claudeKey, mkPrompt(chunks[ci], partInfo), { maxTokens:4096, onWait:(s)=>{
         if(btn) btn.innerHTML = `<i class="ti ti-clock"></i> Pause ${s}s (limite IA)…`;
       }});
-      _mergeConvParsed(parsed, _extractJson(raw));
+      _mergeConvParsed(parsed, _normalizeConvParsed(_extractJson(raw)));
     }
 
     // Stocker les données structurées (utilisées pour le calcul de prix dans showVerres)
@@ -5724,6 +5725,49 @@ function _extractJson(raw){
 }
 
 // Fusionne un résultat conv partiel (verres + verriers) dans l'accumulateur
+// Normalise la réponse IA (formes variées) vers la structure canonique attendue par l'app.
+// Gère : grilles[]{composants}, materiau "organique_unifocal"/"mineral_*", Optislim dans fabrications_speciales…
+function _normalizeConvParsed(raw){
+  if(!raw || typeof raw!=='object') return raw||{};
+  const out = { reseau: raw.reseau, seuil_complexe: raw.seuil_complexe, precalibrage_max: raw.precalibrage_max,
+                verres: raw.verres, verriers: raw.verriers };
+  // Récupère tous les blocs "composants" : top-level + dans grilles[] (Verres essentiels + spéciaux…)
+  const blocs = [];
+  if(raw.composants) blocs.push(raw.composants);
+  if(Array.isArray(raw.grilles)) raw.grilles.forEach(g => { if(g && g.composants) blocs.push(g.composants); });
+  if(Array.isArray(raw.composants)) raw.composants.forEach(c => blocs.push(c));
+  if(!blocs.length) return out;
+  const C = { materiau:{}, surface:{}, traitement:{}, photochromie:{} };
+  const num = x => { const n = parseFloat(String(x).replace(',','.')); return isNaN(n) ? null : n; };
+  blocs.forEach(c => {
+    if(c.materiau && typeof c.materiau==='object'){
+      for(const k in c.materiau){
+        const kn = k.toLowerCase();
+        if(kn.includes('mineral') || kn.includes('minéral')) continue; // verres organiques par défaut
+        if(typeof c.materiau[k] !== 'object') continue;
+        const tgt = (kn.includes('multi') || kn.includes('progress')) ? 'multifocal'
+                  : (kn.includes('uni') || kn==='unifocal') ? 'unifocal' : null;
+        if(tgt) C.materiau[tgt] = Object.assign(C.materiau[tgt]||{}, c.materiau[k]);
+      }
+    }
+    if(c.surface)      Object.assign(C.surface, c.surface);
+    if(c.traitement)   Object.assign(C.traitement, c.traitement);
+    if(c.photochromie) Object.assign(C.photochromie, c.photochromie);
+    // Précalibrage : souvent rangé dans fabrications_speciales sous "Optislim"
+    const fab = c.fabrications_speciales || c.fabrication || c.fabrications || {};
+    for(const k in fab){
+      if(/optislim|precal|précal|détour|detour|usinage/i.test(k)){ const v = num(fab[k]); if(v!=null && out.precalibrage_max==null) out.precalibrage_max = v; }
+    }
+  });
+  // Nettoie les valeurs non numériques (ex: "NC")
+  ['surface','traitement','photochromie'].forEach(g => {
+    for(const k in C[g]){ const v = num(C[g][k]); if(v==null) delete C[g][k]; else C[g][k]=v; }
+  });
+  for(const t in C.materiau){ for(const i in C.materiau[t]){ const v=num(C.materiau[t][i]); if(v==null) delete C.materiau[t][i]; else C.materiau[t][i]=v; } }
+  out.composants = C;
+  return out;
+}
+
 function _mergeConvParsed(into, part){
   if(!into.reseau && part.reseau) into.reseau = part.reseau;
   if(into.seuil_complexe==null && part.seuil_complexe!=null) into.seuil_complexe = part.seuil_complexe;
