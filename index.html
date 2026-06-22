@@ -5590,34 +5590,46 @@ ${txt}
 
 PRÉCALIBRAGE : repère le supplément de précalibrage / détourage / usinage / montage sur mesure (mots-clés : "précalibrage", "détourage", "usinage", "Optislim", "montage nylor/percé", "verre détouré") et mets son montant max dans "precalibrage_max".
 
-Les conventions se présentent sous TROIS formes — extrais TOUTES celles présentes dans CE morceau :
-(A) PAR PRODUIT NOMMÉ (ex: "P.Clear P 13", "P.Touch", "Sph ECC+UV"…) → "verres" (mappe sur les id du catalogue).
-(B) PAR CATÉGORIE prix complet (ex: "progressif 1.60 = 145€") → "verriers" (grille par type + indice).
-(C) PAR COMPOSANTS SÉPARÉS — le prix d'un verre = SOMME de composants tarifés séparément → "composants". C'est le cas le plus fréquent des réseaux : le PDF donne un prix de BASE par type de verre, puis des SUPPLÉMENTS à ajouter pour le design/géométrie, le traitement, et l'amincissement.
+⚠️ DEUX FAÇONS DE TARIFER — CHOISIS LA BONNE SELON CE QUE MONTRE LE PDF :
 
-(C) PAR MATRICE DE COMPOSANTS (cas le plus fréquent des réseaux, ex: Santéclair). Le PDF donne des GRILLES séparées qu'il faut ADDITIONNER pour obtenir le prix d'un verre :
+━━ CAS 1 — PRIX COMPLET (le plus fréquent : Itelis, Carte Blanche, Actil, Kalixia, Séveane, Optilys…). ━━
+Le PDF donne DIRECTEMENT le prix de vente TOTAL d'un verre, ligne par ligne, par catégorie (unifocal/progressif), souvent par gamme/classe (A/B/C, entrée/milieu/haut) ou par produit nommé, et par indice. RIEN à additionner.
+→ Pour CHAQUE verre du CATALOGUE ci-dessus, trouve dans le PDF la ligne qui lui correspond (selon son type, sa gamme, son traitement, son nom de produit) et donne son PRIX COMPLET par indice dans "verres" — clé = id EXACT du catalogue.
+→ Exemple : "verres": {"nk_h1": {"1.5":285,"1.6":308}, "sg1": {"1.5":101,"1.6":122}}
+→ N'utilise PAS "composants" dans ce cas. Mappe le plus de verres possible du catalogue.
+
+━━ CAS 2 — MATRICE ADDITIVE (ex: Santéclair). ━━
+Le PDF présente PLUSIEURS grilles SÉPARÉES qu'il faut ADDITIONNER pour obtenir le prix d'un verre :
    • MATÉRIAU : prix de base par TYPE (Unifocal / Multifocal=progressif) et par INDICE (colonnes 1.5 / 1.59 / 1.6 / 1.67 / 1.74).
-   • SURFACE / DESIGN : supplément selon le DESIGN du verre, nommé (ex: "Presio Touch", "Presio Clear P", "Presio Definition", "Presio Power", "SuperSee", "SeeMax AP", "Relaxsee", "Sphérique", "Asphérique"…).
+   • SURFACE / DESIGN : supplément selon le DESIGN nommé (ex: "Presio Touch", "Presio Clear P", "Presio Definition", "Presio Power", "SuperSee", "SeeMax AP", "Relaxsee", "Sphérique", "Asphérique"…).
    • TRAITEMENT : supplément du traitement antireflet (ex: "ECC+UV", "See Coat Plus UV", "See Coat Next UV", "See Coat Blue UV", "PureBlueUV").
    • PHOTOCHROMIE : supplément si le verre est photochromique/Transitions.
    • FABRICATIONS SPÉCIALES : le précalibrage s'appelle souvent "Optislim", "détourage", "précal" → precalibrage_max.
+→ N'essaie PAS de calculer le total : EXTRAIS les grilles séparément dans "composants" (le logiciel fera la somme). Recopie libellés et montants EXACTEMENT.
+⚠️ STRUCTURE composants : mets tout dans UN SEUL objet "composants" au premier niveau (PAS de tableau "grilles"). Si le verrier a plusieurs pages (ex: "Verres essentiels" + "Verres spéciaux"), FUSIONNE-les. Verres ORGANIQUES par défaut (ignore les colonnes minéral). Précalibrage/Optislim → "precalibrage_max".
+   - "materiau" : {"unifocal":{indice:prix...}, "multifocal":{indice:prix...}} — TOUS les indices des deux types.
+   - "surface" : {nom_design: prix} — TOUS les designs nommés, unifocaux ET progressifs, sans exception.
+   - "traitement" : {nom_traitement: prix} — TOUS les antireflets/traitements.
+   - "photochromie" : {nom: prix} — TOUTES.
 
-Pour une MATRICE, n'essaie PAS de calculer le total : EXTRAIS les 4 grilles séparément dans "composants" (le logiciel fera la somme). Recopie les libellés et montants EXACTEMENT comme dans le PDF.
-⚠️ STRUCTURE : mets tout dans UN SEUL objet "composants" au premier niveau (PAS de tableau "grilles"). Si le verrier a plusieurs pages (ex: "Verres essentiels" + "Verres spéciaux"), FUSIONNE-les dans le même "composants". Verres ORGANIQUES par défaut (ignore les colonnes minéral). Mets le précalibrage/Optislim dans "precalibrage_max" (pas ailleurs).
-⚠️ VERRIER : l'opticien monte uniquement : ${_verriersStr}. Le PDF liste souvent plusieurs verriers (Essilor, Nikon, Zeiss, Seiko, BBGR…) sur des pages distinctes — extrais UNIQUEMENT la/les grille(s) de : ${_verriersStr}. Ignore les autres verriers et ne mélange jamais leurs colonnes.
-⚠️ INDICE matériau : garde les colonnes telles quelles ("1.5","1.59","1.6","1.67","1.74"). Le 1.59 (polycarbonate) est une colonne distincte du 1.6.
+🔑 RÈGLE DE DÉCISION : si le PDF donne un prix COMPLET par catégorie/produit (le cas de la plupart des réseaux) → CAS 1 ("verres"). Réserve "composants" UNIQUEMENT aux PDF qui présentent des grilles de suppléments à additionner. Dans le doute → CAS 1.
 
-MISSION — pour CE morceau, remplis ce qui est présent. Sois EXHAUSTIF : dans CHAQUE catégorie, extrais TOUS les éléments listés, n'en omets AUCUN.
-1) "composants" (forme MATRICE) :
-   - "materiau" : {"unifocal":{indice:prix...}, "multifocal":{indice:prix...}} — TOUS les indices des deux types (Multifocal = progressif).
-   - "surface" : {nom_design: prix} — TOUS les designs/géométries nommés, unifocaux ET progressifs, sans exception (ex: Presio Touch, Presio I Focus, Presio Clear P, Presio Definition, Presio Power, Presio Master…, SuperSee, SuperSee AP, SeeMax AP, Relaxsee, Sphérique, Asphérique…).
-   - "traitement" : {nom_traitement: prix} — TOUS les antireflets/traitements (ECC+UV, See Coat Plus UV, See Coat Next UV, See Coat Blue UV, PureBlueUV…).
-   - "photochromie" : {nom: prix} — TOUTES (Transitions Gen S, Xtractive, Xtractive Polarized…).
-2) "verres" (forme PRODUIT A) : si le PDF donne un prix tout-compris par produit nommé mappable au catalogue.
-3) "verriers" (forme CATÉGORIE B) : prix complet par catégorie+indice.
-4) "precalibrage_max" : supplément précalibrage / Optislim / détourage / usinage.
+⚠️ VERRIER : l'opticien monte uniquement : ${_verriersStr}. Le PDF liste souvent plusieurs verriers (Essilor, Nikon, Zeiss, Seiko, BBGR…) — n'extrais QUE la/les grille(s) de : ${_verriersStr}. Ne mélange jamais leurs colonnes.
+⚠️ INDICE : garde les colonnes telles quelles ("1.5","1.59","1.6","1.67","1.74"). Le 1.59 (polycarbonate) ≠ 1.6.
 
-Réponds UNIQUEMENT avec ce JSON valide, AUCUN texte ni tableau autour :
+MISSION — pour CE morceau, sois EXHAUSTIF : mappe TOUS les verres du catalogue dont tu trouves le prix (CAS 1), ou extrais TOUTES les grilles de suppléments (CAS 2). N'omets aucun verre/élément. Renseigne aussi "precalibrage_max" (supplément précalibrage / Optislim / détourage / usinage) si présent.
+
+Réponds UNIQUEMENT avec ce JSON valide, AUCUN texte ni tableau autour.
+
+▶ EXEMPLE CAS 1 (prix complet — la plupart des réseaux : Itelis, Carte Blanche, Actil…) :
+{
+  "reseau": "${reseauLabel}",
+  "seuil_complexe": 6.0,
+  "precalibrage_max": 6,
+  "verres": {"nk_h1": {"1.5":285,"1.6":308}, "nk_h2": {"1.5":269,"1.6":302}, "sg1": {"1.5":101,"1.6":122}}
+}
+
+▶ EXEMPLE CAS 2 (matrice additive — Santéclair) :
 {
   "reseau": "${reseauLabel}",
   "seuil_complexe": 6.0,
@@ -5627,15 +5639,14 @@ Réponds UNIQUEMENT avec ce JSON valide, AUCUN texte ni tableau autour :
     "surface": {"Presio Touch":57,"Presio Clear P":102,"Presio Definition":136,"Presio Power":158,"SuperSee":23,"SeeMax AP":38,"Sphérique":11,"Asphérique":17},
     "traitement": {"ECC+UV":34,"See Coat Next UV":45,"See Coat Blue UV":48,"See Coat Plus UV":45},
     "photochromie": {"Transitions Gen S":39}
-  },
-  "verres": {},
-  "verriers": {}
+  }
 }
 
 RÈGLES STRICTES :
-- N'INVENTE AUCUN prix ni libellé : recopie exactement le PDF. Omets toute grille absente de CE morceau.
+- Choisis UN seul format : "verres" (CAS 1) OU "composants" (CAS 2). Ne renvoie pas les deux. Défaut = "verres".
+- N'INVENTE AUCUN prix ni libellé : recopie exactement le PDF. N'inclus un verre dans "verres" QUE si tu trouves réellement son prix dans CE morceau.
 - Verrier(s) ${_verriersStr} UNIQUEMENT (si présents). Ne mélange pas les colonnes des autres verriers.
-- "verres" : CLÉS = id EXACTS du catalogue. seuil_complexe défaut 6.0.
+- "verres" : CLÉS = id EXACTS du catalogue (colonne id ci-dessus). seuil_complexe défaut 6.0.
 - Si plusieurs niveaux/contrats (Opti 2/3/4…), prends la grille du niveau le plus complet.`;
 
     // Découpage en plusieurs passes : lit toute la convention sans dépasser la limite IA/minute
@@ -5653,7 +5664,7 @@ RÈGLES STRICTES :
     // Stocker les données structurées (utilisées pour le calcul de prix dans showVerres)
     localStorage.setItem('conv_parsed_' + id, JSON.stringify(parsed));
     _cloudPush('conv_parsed_' + id);  // synchronise la convention sur tous les appareils
-    if(resEl) resEl.innerHTML = _renderConvAiCard(parsed);
+    if(resEl) resEl.innerHTML = _renderConvAiCard(parsed, id);
     if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Réanalyser avec IA'; }
     const nbVerres = parsed.verres ? Object.keys(parsed.verres).length : 0;
     const nbVerriers = Object.keys(parsed.verriers||{}).length;
@@ -6060,6 +6071,55 @@ function _calcConvComposants(v, ind, eqSph, parsed){
     precalibrage_max:(parsed.precalibrage_max!=null?parseFloat(parsed.precalibrage_max):null),
     photochromique_supp:null, verrieurKey:(v.marque||''), produitNom:null
   };
+}
+
+// Prix de vente réseau calculé pour un verre/indice — MÊME priorité que showVerres :
+//   1) prix direct IA (parsed.verres[id][ind])  2) calcul composants/matrice  3) grille legacy  4) tarifsReseau codé en dur
+// Renvoie {prix, source} ou null si aucun prix réseau pour cet indice.
+function _convVerrePrice(v, ind, mutId){
+  if(!v.indices || v.indices[ind]==null) return null;
+  const cp=_getConvParsed(mutId);
+  if(cp){
+    const d=(cp.verres && cp.verres[v.id]) ? cp.verres[v.id][ind] : null;
+    if(d!=null && parseFloat(d)>0) return {prix:Math.round(parseFloat(d)*100)/100, source:'IA'};
+    const isProg=(v.compatible||[]).some(x=>['progressif','degressif','interieur'].includes(x));
+    const eq=isProg?9:2;
+    let cd=_calcConvComposants(v, ind, eq, cp);
+    if(!cd) cd=_calcConvVerre(v, ind, isProg?'progressif':'loin', eq, cp);
+    if(cd && cd.venteConv>0) return {prix:cd.venteConv, source:'IA'};
+  }
+  if(mutId && v.tarifsReseau && v.tarifsReseau[mutId] && v.tarifsReseau[mutId][ind]!=null)
+    return {prix:v.tarifsReseau[mutId][ind], source:'grille'};
+  return null;
+}
+
+// Tableau de vérification : prix de vente calculé pour CHAQUE verre du catalogue sur ce réseau.
+// Permet de comparer instantanément au PDF après une (ré)analyse IA.
+function _convVerrePreview(mutId){
+  if(!mutId) return '';
+  const all=[...catalogue, ...catalogue2e];
+  let nbIA=0;
+  const rows=[];
+  all.forEach(v=>{
+    const inds=Object.keys(v.indices||{}).filter(i=>v.indices[i]!=null);
+    const cells=inds.map(i=>{
+      const r=_convVerrePrice(v,i,mutId);
+      if(!r) return null;
+      if(r.source==='IA') nbIA++;
+      const col=r.source==='IA'?'#059669':'#94A3B8';
+      return `<span style="white-space:nowrap">${i}: <strong style="color:${col}">${r.prix}€</strong></span>`;
+    }).filter(Boolean);
+    if(cells.length) rows.push(`<div class="conv-ai-row"><span class="conv-ai-lbl" style="font-size:11px">${v.nom}</span><span class="conv-ai-val" style="font-size:11px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">${cells.join('')}</span></div>`);
+  });
+  if(!rows.length) return '';
+  const legend = nbIA>0
+    ? `<span style="color:#059669;font-weight:600">${nbIA} prix issus du PDF (vert)</span>${rows.length?` · <span style="color:#94A3B8">gris = grille par défaut</span>`:''}`
+    : `<span style="color:#D97706;font-weight:600">⚠ Aucun prix issu du PDF — l'IA n'a pas pu calculer, les prix gris viennent de la grille par défaut codée</span>`;
+  return `<div class="conv-ai-result" style="margin-top:8px">
+    <div class="conv-ai-res-hd"><i class="ti ti-list-check"></i> Prix de vente calculés par verre — vérification</div>
+    <div style="font-size:11px;color:#64748B;padding:0 14px 6px">${legend}</div>
+    <div class="conv-ai-res-body" style="max-height:300px;overflow-y:auto">${rows.join('')}</div>
+  </div>`;
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -8436,7 +8496,7 @@ function _renderConvBody(id){
   if(stored){
     const info = JSON.parse(stored);
     const aiStored = localStorage.getItem('conv_parsed_' + id);
-    const aiHtml = aiStored ? _renderConvAiCard(JSON.parse(aiStored)) : '';
+    const aiHtml = aiStored ? _renderConvAiCard(JSON.parse(aiStored), id) : '';
     const canIA = !!(currentUser?.admin || isSuperhote());
     const iaBtn = canIA
       ? `<button class="pdf-btn-ia" id="conv-ai-btn-${id}" onclick="analyzeConvPdfWithAI('${id}')"><i class="ti ti-cpu"></i> ${aiStored ? 'Réanalyser IA' : 'Analyser IA'}</button>`
@@ -8458,7 +8518,10 @@ function _renderConvBody(id){
   </div>`;
 }
 
-function _renderConvAiCard(data){
+function _renderConvAiCard(data, mutId){
+  return _renderConvAiCardInner(data) + (mutId ? _convVerrePreview(mutId) : '');
+}
+function _renderConvAiCardInner(data){
   if(!data) return '';
   // Modèle par COMPOSANTS / MATRICE
   const _c = data.composants;
