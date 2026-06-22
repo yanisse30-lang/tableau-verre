@@ -3875,28 +3875,10 @@ function showVerres(){
       }
     }
     const mutId=state.mutuelle?.id;
-    // Tarif réseau hard-codé (tarifsReseau) — priorité basse
-    if(mutId && v.tarifsReseau && v.tarifsReseau[mutId]?.[ind] != null){
-      vente = v.tarifsReseau[mutId][ind];
-    }
-    // Tarif conv IA — priorité haute (extrait du PDF conventionnement)
-    const convParsed = _getConvParsed(mutId);
+    // Prix de vente réseau — source unique de vérité (conv IA exacte > tarif niveau sous-contrat > conv parente > grille codée)
     let _convData = null;
-    if(convParsed){
-      // 1) Prix par verre id (IA mappe directement le catalogue) — prioritaire
-      const directPrix = convParsed.verres?.[v.id]?.[ind];
-      if(directPrix != null && parseFloat(directPrix) > 0){
-        const p = Math.round(parseFloat(directPrix)*100)/100;
-        vente = p;
-        _convData = {venteConv:p, base:p, verreType:'produit', produitNom:v.id, verrieurKey:(v.marque||''), amincissement:0, precalibrage_max:(convParsed.precalibrage_max!=null?parseFloat(convParsed.precalibrage_max):null), photochromique_supp:null};
-      } else {
-        // 2) Modèle par COMPOSANTS : base(type) + design + traitement + amincissement
-        _convData = _calcConvComposants(v, ind, eqMax, convParsed);
-        // 3) Repli legacy (verriers/produits par type+indice)
-        if(!_convData) _convData = _calcConvVerre(v, ind, state.vision?.id, eqMax, convParsed);
-        if(_convData && _convData.venteConv > 0) vente = _convData.venteConv;
-      }
-    }
+    const _reseauRes = _resolveReseauPrix(v, ind, eqMax, state.vision?.id, mutId);
+    if(_reseauRes){ vente = _reseauRes.prix; _convData = _reseauRes.convData; }
     // Plafond mutuelle : calcul reste à charge patient
     const plafond = state.mutuelle?.plafond_verre ?? null;
     const resteCharge = plafond != null ? Math.max(0, Math.round((vente - plafond)*100)/100) : null;
@@ -5846,9 +5828,13 @@ function _aiFriendlyError(msg){
 // ─── Helpers conv parsed ──────────────────────────────────────
 function _getConvParsed(mutId){
   if(!mutId) return null;
-  const read = k => { try{ const s=localStorage.getItem('conv_parsed_'+k); return s?JSON.parse(s):null; }catch(e){ return null; } };
   // Sous-contrat (itelis_opti2, kalixia_oxantis…) → repli sur la convention du réseau parent (itelis, kalixia).
-  return read(mutId) || (mutId.includes('_') ? read(mutId.split('_')[0]) : null);
+  return _getConvParsedExact(mutId) || (mutId.includes('_') ? _getConvParsedExact(mutId.split('_')[0]) : null);
+}
+// Lit UNIQUEMENT la convention de cet id exact (sans repli parent).
+function _getConvParsedExact(mutId){
+  if(!mutId) return null;
+  try{ const s=localStorage.getItem('conv_parsed_'+mutId); return s?JSON.parse(s):null; }catch(e){ return null; }
 }
 
 // Déduit la famille produit réseau d'un verre, depuis son nom (pour le tarif convention par produit).
@@ -6073,24 +6059,48 @@ function _calcConvComposants(v, ind, eqSph, parsed){
   };
 }
 
-// Prix de vente réseau calculé pour un verre/indice — MÊME priorité que showVerres :
-//   1) prix direct IA (parsed.verres[id][ind])  2) calcul composants/matrice  3) grille legacy  4) tarifsReseau codé en dur
-// Renvoie {prix, source} ou null si aucun prix réseau pour cet indice.
-function _convVerrePrice(v, ind, mutId){
-  if(!v.indices || v.indices[ind]==null) return null;
-  const cp=_getConvParsed(mutId);
-  if(cp){
-    const d=(cp.verres && cp.verres[v.id]) ? cp.verres[v.id][ind] : null;
-    if(d!=null && parseFloat(d)>0) return {prix:Math.round(parseFloat(d)*100)/100, source:'IA'};
-    const isProg=(v.compatible||[]).some(x=>['progressif','degressif','interieur'].includes(x));
-    const eq=isProg?9:2;
-    let cd=_calcConvComposants(v, ind, eq, cp);
-    if(!cd) cd=_calcConvVerre(v, ind, isProg?'progressif':'loin', eq, cp);
-    if(cd && cd.venteConv>0) return {prix:cd.venteConv, source:'IA'};
-  }
-  if(mutId && v.tarifsReseau && v.tarifsReseau[mutId] && v.tarifsReseau[mutId][ind]!=null)
-    return {prix:v.tarifsReseau[mutId][ind], source:'grille'};
+// ─── SOURCE UNIQUE DE VÉRITÉ du prix de vente réseau ───────────────
+// Utilisée par showVerres (affichage réel) ET par l'aperçu de vérification, pour qu'ils
+// ne divergent jamais. Priorité :
+//   1) convention IA EXACTE de ce réseau/niveau (prix direct verres[id], sinon calcul matrice/composants)
+//   2) tarif spécifique au niveau pour un sous-contrat (Itelis Opti 2/3/4…) — prime sur la conv parente générique
+//   3) convention IA du réseau PARENT (repli sous-contrat)
+//   4) grille tarifsReseau codée en dur pour ce mutId
+// Renvoie {prix, convData, source} ou null si aucun prix réseau pour cet indice.
+function _resolveReseauPrix(v, ind, eqSph, visionId, mutId){
+  if(!mutId || !v.indices || v.indices[ind]==null) return null;
+  const calc = parsed => {
+    if(!parsed) return null;
+    const d=(parsed.verres && parsed.verres[v.id]) ? parsed.verres[v.id][ind] : null;
+    if(d!=null && parseFloat(d)>0){
+      const p=Math.round(parseFloat(d)*100)/100;
+      return {venteConv:p, base:p, verreType:'produit', produitNom:v.id, verrieurKey:(v.marque||''), amincissement:0,
+              precalibrage_max:(parsed.precalibrage_max!=null?parseFloat(parsed.precalibrage_max):null), photochromique_supp:null};
+    }
+    let cd=_calcConvComposants(v, ind, eqSph, parsed);
+    if(!cd) cd=_calcConvVerre(v, ind, visionId, eqSph, parsed);
+    return (cd && cd.venteConv>0) ? cd : null;
+  };
+  const isSub = mutId.includes('_');
+  // 1) convention exacte
+  let cd = calc(_getConvParsedExact(mutId));
+  if(cd) return {prix:cd.venteConv, convData:cd, source:'IA'};
+  // 2) tarif niveau spécifique (sous-contrat) prime sur la conv parente
+  if(isSub && v.tarifsReseau && v.tarifsReseau[mutId] && v.tarifsReseau[mutId][ind]!=null)
+    return {prix:v.tarifsReseau[mutId][ind], convData:null, source:'grille'};
+  // 3) convention parente (repli sous-contrat)
+  if(isSub){ cd = calc(_getConvParsedExact(mutId.split('_')[0])); if(cd) return {prix:cd.venteConv, convData:cd, source:'IA'}; }
+  // 4) grille hard-codée du mutId
+  if(v.tarifsReseau && v.tarifsReseau[mutId] && v.tarifsReseau[mutId][ind]!=null)
+    return {prix:v.tarifsReseau[mutId][ind], convData:null, source:'grille'};
   return null;
+}
+
+// Prix de vente réseau pour un verre/indice (aperçu de vérification). Délègue à _resolveReseauPrix.
+function _convVerrePrice(v, ind, mutId){
+  const isProg=(v.compatible||[]).some(x=>['progressif','degressif','interieur'].includes(x));
+  const r=_resolveReseauPrix(v, ind, isProg?9:2, isProg?'progressif':'loin', mutId);
+  return r ? {prix:r.prix, source:r.source} : null;
 }
 
 // Tableau de vérification : prix de vente calculé pour CHAQUE verre du catalogue sur ce réseau.
@@ -8696,9 +8706,15 @@ ${txt}
 VERRE DE STOCK = verre sphérique pré-fabriqué, livraison J+1, prix catalogue fixe.
 Mots-clés stock: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made", "de série".
 
-MISSION:
-1. Identifie les verres du catalogue ci-dessus présents dans CE morceau de texte
-2. Extrais leurs prix d'achat (achat HT opticien) et/ou prix de vente conseillés
+⚠️ ACHAT vs VENTE — NE PAS CONFONDRE LES COLONNES :
+- "achats" = prix d'ACHAT opticien (tarif fournisseur, HT, "prix net", "tarif opticien", "PA"). C'est ce que l'opticien PAIE.
+- "ventes" = prix de VENTE conseillé public (TTC, "PVP", "prix conseillé", "tarif public") s'il figure dans le PDF.
+- L'achat est TOUJOURS nettement INFÉRIEUR à la vente. Un progressif coûte plus cher qu'un unifocal, un indice élevé (1.67/1.74) plus cher qu'un 1.50. Si un "achat" dépasse une "vente" pour le même verre, tu as inversé les colonnes — corrige.
+- Un catalogue fournisseur ne donne souvent QUE l'achat : dans ce cas, remplis "achats" et laisse "ventes" vide.
+
+MISSION — sois EXHAUSTIF, n'omets aucun verre du catalogue présent dans CE morceau :
+1. Identifie les verres du catalogue ci-dessus présents dans CE morceau de texte (mappe sur l'id EXACT)
+2. Extrais leurs prix d'ACHAT HT (et prix de vente conseillé seulement s'il est explicite)
 3. Détecte le traitement de chaque verre selon les appellations par verrier
 4. Détecte si le verre est de stock (stock:true)
 5. Propose une appellation commerciale courte (max 40 car.) pour le client
