@@ -3789,10 +3789,6 @@ function showVerres(){
     forcePrecalibrage = true;
   }
 
-  // Plafond mutuelle verre
-  const plafondVerre = state.mutuelle?.plafond_verre ?? null;
-  const hasConventionnement = state.mutuelle?.section === 'sous';
-
   // Recap
   const montureLabel = selectedMonture==='cercle'?'Cerclée':selectedMonture==='nylor'?'Nylor (semi-percée)':selectedMonture==='percee'?'Percée':'-';
   // Équivalent sphérique OD/OG pour affichage
@@ -3805,7 +3801,6 @@ function showVerres(){
     <div class="summary-row"><span class="key">OD</span><span class="val">${odSph||'—'} / ${odCyl||'0'} / ${odAxe||'—'}°${odAdd?' add +'+odAdd:''}  <span style="font-size:10px;color:#888">éq. ${eqOD} D</span></span></div>
     <div class="summary-row"><span class="key">OG</span><span class="val">${ogSph||'—'} / ${ogCyl||'0'} / ${ogAxe||'—'}°${ogAdd?' add +'+ogAdd:''}  <span style="font-size:10px;color:#888">éq. ${eqOG} D</span></span></div>
     <div class="summary-row"><span class="key"><i class="ti ti-stack-2" style="font-size:14px"></i> Indice recommandé</span><span class="val" style="color:#f0c040" id="indice-recap-val">${getIndiceLabel(indiceRec)}</span></div>
-    ${hasConventionnement && plafondVerre ? `<div class="summary-row" style="background:#0a1e30;border-left:3px solid #185FA5;padding-left:10px;border-radius:4px"><span class="key"><i class="ti ti-building-store" style="font-size:14px;color:#60a0e0"></i>&nbsp;<strong style="color:#80c0ff">Plafond mutuelle</strong></span><span class="val" style="color:#80c0ff;font-weight:800">${plafondVerre} € / verre</span></div>` : ''}
     ${_buildRemiseMontureHTML(state.mutuelle)}
     ${state.mutuelle.optislimInclus
       ? `<div class="summary-row" style="background:#F0FDF4;border-left:3px solid #16A34A;padding-left:10px;border-radius:4px"><span class="key"><i class="ti ti-tool" style="font-size:14px;color:#50d080"></i>&nbsp;<strong style="color:#50d080">Précalibrage Optislim</strong></span><span class="val" style="color:#16A34A;font-weight:700">Inclus dans le tarif verre</span></div>`
