@@ -3537,6 +3537,22 @@ function renderVerreLigne(v){
   const trHTML = v.traitements.slice(0,3).map(t =>
     `<div class="vt-trait"><strong><i class="ti ${t.icon}" style="margin-right:4px;color:#378ADD"></i>${t.nom}</strong>${t.desc.substring(0,90)}…</div>`
   ).join('');
+  // Sélecteur d'antireflet : change le traitement du verre et recalcule le prix réseau.
+  const _convForTrait = _getConvParsed(mutId);
+  const _antireflets  = _verreAntireflets(v, _convForTrait);
+  const _selTrait     = _getTraitChoisi(v);
+  const _traitGrid    = _convForTrait && _convForTrait.composants && _convForTrait.composants.traitement;
+  const traitSelectorHTML = (_antireflets.length > 1) ? `
+    <div style="margin-bottom:10px;background:#0a1a2e;border:1px solid #1a3a5e;border-radius:8px;padding:10px 12px">
+      <label style="font-size:11px;font-weight:700;color:#7fb3ff;display:block;margin-bottom:5px"><i class="ti ti-adjustments-alt" style="font-size:11px"></i> Traitement antireflet${_traitGrid?' — modifie le prix réseau':''}</label>
+      <select onclick="event.stopPropagation()" onchange="event.stopPropagation();selectVerreTrait('${v.id}',this.value)" style="width:100%;background:#0f1e30;color:#e8e8e8;border:1px solid #2a4a6e;border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;cursor:pointer">
+        ${_antireflets.map(n=>{
+          const supp=_traitGrid?_convTraitSupp(n,_traitGrid):null;
+          const lbl=(supp!=null)?`${n}  (+${supp} €)`:n;
+          return `<option value="${n.replace(/"/g,'&quot;')}" ${n===_selTrait?'selected':''}>${lbl}</option>`;
+        }).join('')}
+      </select>
+    </div>` : '';
   // Reste à charge / prise en charge mutuelle : retirés (l'app affiche le prix de vente net du réseau)
   const plafondHTML = '';
 
@@ -3613,6 +3629,7 @@ function renderVerreLigne(v){
     <tr class="vt-detail" id="vt-${v.id}">
       <td colspan="8">
         <div class="vt-detail-inner">
+          ${traitSelectorHTML}
           ${trHTML}
           ${accordDetailHtml}
           ${convDetailHtml}
@@ -4166,7 +4183,7 @@ let currentUser = null;
 // ─── SYNC CLOUD (clé API, conventions, prix) — partagé entre appareils ──
 // Table Supabase requise : app_config(id text primary key, value text, updated_at timestamptz)
 const _SYNC_PREFIXES = ['conv_parsed_','cat_ia_result_'];
-const _SYNC_EXACT = ['maneo_claude_key','maneo_prix','maneo_appel','maneo_tags','maneo_stock','maneo_accords'];
+const _SYNC_EXACT = ['maneo_claude_key','maneo_prix','maneo_appel','maneo_tags','maneo_stock','maneo_accords','maneo_trait_choisi','maneo_antireflets'];
 function _isSyncKey(k){ return _SYNC_EXACT.includes(k) || _SYNC_PREFIXES.some(p=>k.startsWith(p)); }
 let _cloudSyncOK = false; // passe à true si la table app_config répond
 
@@ -5039,6 +5056,7 @@ function loadSavedPrix(){
     const savedAppel = JSON.parse(localStorage.getItem('maneo_appel') ||'{}');
     const savedTags  = JSON.parse(localStorage.getItem('maneo_tags')  ||'{}');
     const savedStock = JSON.parse(localStorage.getItem('maneo_stock') ||'{}');
+    const savedAR    = JSON.parse(localStorage.getItem('maneo_antireflets') ||'{}');
     const all = [...catalogue, ...catalogue2e];
     all.forEach(v => {
       if(saved[v.id]){
@@ -5052,7 +5070,11 @@ function loadSavedPrix(){
       }
       // Restaurer le flag stock (détecté par IA ou hardcodé)
       if(savedStock[v.id]) v.stock = true;
+      // Antireflets disponibles extraits du catalogue PDF (liste sélectionnable par verre)
+      if(Array.isArray(savedAR[v.id]) && savedAR[v.id].length) v.antireflets = savedAR[v.id].slice();
     });
+    // Recharger les choix de traitement (le cloud a pu les mettre à jour après l'init du script)
+    try{ _traitChoisi = JSON.parse(localStorage.getItem('maneo_trait_choisi')||'{}'); }catch(e){}
   }catch(e){}
 }
 
@@ -5573,7 +5595,8 @@ PRÉCALIBRAGE : repère le supplément de précalibrage / détourage / usinage /
 Le PDF donne DIRECTEMENT le prix de vente TOTAL d'un verre, ligne par ligne, par catégorie (unifocal/progressif), souvent par gamme/classe (A/B/C, entrée/milieu/haut) ou par produit nommé, et par indice. RIEN à additionner.
 → Pour CHAQUE verre du CATALOGUE ci-dessus, trouve dans le PDF la ligne qui lui correspond (selon son type, sa gamme, son traitement, son nom de produit) et donne son PRIX COMPLET par indice dans "verres" — clé = id EXACT du catalogue.
 → Exemple : "verres": {"nk_h1": {"1.5":285,"1.6":308}, "sg1": {"1.5":101,"1.6":122}}
-→ N'utilise PAS "composants" dans ce cas. Mappe le plus de verres possible du catalogue.
+→ Le prix d'un verre dans "verres" correspond à son traitement antireflet D'ORIGINE (celui indiqué dans le catalogue ci-dessus).
+→ ⚠️ MÊME EN CAS 1 : si le PDF chiffre les antireflets séparément (ex. supplément pour passer de ECC+UV à See Coat Next UV / See Coat Blue UV…), extrais AUSSI la grille des suppléments traitement dans "composants":{"traitement":{...}} — le logiciel l'utilise pour recalculer le prix quand l'opticien change l'antireflet d'un verre.
 
 ━━ CAS 2 — MATRICE ADDITIVE (ex: Santéclair). ━━
 Le PDF présente PLUSIEURS grilles SÉPARÉES qu'il faut ADDITIONNER pour obtenir le prix d'un verre :
@@ -5620,7 +5643,7 @@ Réponds UNIQUEMENT avec ce JSON valide, AUCUN texte ni tableau autour.
 }
 
 RÈGLES STRICTES :
-- Choisis UN seul format : "verres" (CAS 1) OU "composants" (CAS 2). Ne renvoie pas les deux. Défaut = "verres".
+- Format du PRIX DE BASE : "verres" (CAS 1) OU le couple "materiau"+"surface" de "composants" (CAS 2), pas les deux. Défaut = "verres". Tu PEUX cependant toujours ajouter "composants":{"traitement":{...}} (grille des suppléments antireflet) en plus de "verres", car elle sert au recalcul quand l'opticien change le traitement.
 - N'INVENTE AUCUN prix ni libellé : recopie exactement le PDF. N'inclus un verre dans "verres" QUE si tu trouves réellement son prix dans CE morceau.
 - Verrier(s) ${_verriersStr} UNIQUEMENT (si présents). Ne mélange pas les colonnes des autres verriers.
 - "verres" : CLÉS = id EXACTS du catalogue (colonne id ci-dessus). seuil_complexe défaut 6.0.
@@ -5794,6 +5817,7 @@ function _mergeCatVerres(into, partVerres){
       ex.ventes = Object.assign(ex.ventes||{}, item.ventes||{});
       if(!ex.appel && item.appel) ex.appel = item.appel;
       if((!ex.traitements || !ex.traitements.length) && item.traitements) ex.traitements = item.traitements;
+      if(item.antireflets && item.antireflets.length) ex.antireflets = [...new Set([...(ex.antireflets||[]), ...item.antireflets])];
       if(item.stock) ex.stock = true;
     } else {
       into.push(item);
@@ -5976,6 +6000,56 @@ function _convCoatingText(v){
   return t;
 }
 
+// ─── TRAITEMENT ANTIREFLET SÉLECTIONNABLE PAR VERRE ───────────────
+// Gamme antireflet Nikon par défaut (repli quand le catalogue PDF n'a pas fourni la liste par verre).
+const _ANTIREFLETS_DEFAUT = [
+  {nom:'ECC+UV',           tag:'ar', icon:'ti-shield'},
+  {nom:'SCC+UV NG',        tag:'ar', icon:'ti-shield'},
+  {nom:'See Coat Next UV', tag:'ar', icon:'ti-shield'},
+  {nom:'See Coat Plus UV', tag:'ar', icon:'ti-shield'},
+  {nom:'See Coat Blue UV', tag:'lb', icon:'ti-device-desktop'},
+  {nom:'Pure Blue UV',     tag:'lb', icon:'ti-device-desktop'}
+];
+// Antireflet "d'origine" d'un verre = 1er traitement antireflet de son catalogue.
+function _verreDefaultTrait(v){
+  const t=(v.traitements||[]).map(x=>x&&x.nom).find(n=>n && /uv|coat|ecc|scc|hcc|antireflet|crizal|duravision|reflet|blue/i.test(n));
+  return t || ((v.traitements||[])[0]&&v.traitements[0].nom) || 'ECC+UV';
+}
+// Liste des antireflets sélectionnables pour un verre :
+//   1) v.antireflets (extraits du catalogue PDF) si présents, sinon gamme par défaut filtrée par tags
+//   + on garantit le traitement d'origine et on ajoute les traitements tarifés par la convention.
+function _verreAntireflets(v, convParsed){
+  let noms = (Array.isArray(v.antireflets) && v.antireflets.length)
+    ? v.antireflets.slice()
+    : (()=>{ const tags=new Set(v.tags||['ar']); let l=_ANTIREFLETS_DEFAUT.filter(a=>tags.has(a.tag)).map(a=>a.nom); return l.length?l:_ANTIREFLETS_DEFAUT.filter(a=>a.tag==='ar').map(a=>a.nom); })();
+  const def=_verreDefaultTrait(v);
+  if(def && !noms.some(n=>n.toLowerCase()===def.toLowerCase())) noms.unshift(def);
+  const grid = convParsed && convParsed.composants && convParsed.composants.traitement;
+  if(grid) Object.keys(grid).forEach(k=>{ if(!noms.some(n=>n.toLowerCase()===k.toLowerCase())) noms.push(k); });
+  return [...new Set(noms)];
+}
+// Sélection utilisateur du traitement par verre (persistée + synchronisée).
+let _traitChoisi = {};
+try{ _traitChoisi = JSON.parse(localStorage.getItem('maneo_trait_choisi')||'{}'); }catch(e){ _traitChoisi = {}; }
+function _getTraitChoisi(v){
+  const id=typeof v==='string'?v:v.id;
+  if(_traitChoisi[id]) return _traitChoisi[id];
+  return (typeof v==='object') ? _verreDefaultTrait(v) : null;
+}
+function selectVerreTrait(vId, name){
+  if(name) _traitChoisi[vId]=name; else delete _traitChoisi[vId];
+  localStorage.setItem('maneo_trait_choisi', JSON.stringify(_traitChoisi));
+  if(typeof _cloudPush==='function') _cloudPush('maneo_trait_choisi');
+  if(typeof showVerres==='function') showVerres(); // recalcul des prix avec le nouveau traitement
+}
+// Supplément (€) d'un traitement nommé dans la grille convention. null si inconnu.
+function _convTraitSupp(name, grid){
+  if(!grid || !name) return null;
+  if(grid[name]!=null){ const n=parseFloat(grid[name]); return isNaN(n)?null:n; }
+  const m=_convBestMatch(name, grid, 1);
+  return m ? m.prix : null;
+}
+
 function _calcConvComposants(v, ind, eqSph, parsed){
   const c = parsed && parsed.composants;
   if(!c) return null;
@@ -5996,7 +6070,12 @@ function _calcConvComposants(v, ind, eqSph, parsed){
     }
     let traitement=0, traitLbl='';
     if(c.traitement){
-      const m=_convBestMatch(_convCoatingText(v), c.traitement, 1);
+      // Traitement CHOISI par l'utilisateur (menu) prioritaire, sinon antireflet d'origine du verre.
+      const sel=_getTraitChoisi(v);
+      let m=null;
+      if(sel && c.traitement[sel]!=null) m={key:sel, prix:parseFloat(c.traitement[sel])||0};
+      if(!m && sel) m=_convBestMatch(sel, c.traitement, 1);
+      if(!m) m=_convBestMatch(_convCoatingText(v), c.traitement, 1);
       if(m){ traitement=m.prix; traitLbl=m.key; }
     }
     let photo=0, photoLbl='';
@@ -6068,9 +6147,20 @@ function _resolveReseauPrix(v, ind, eqSph, visionId, mutId){
     if(!parsed) return null;
     const d=(parsed.verres && parsed.verres[v.id]) ? parsed.verres[v.id][ind] : null;
     if(d!=null && parseFloat(d)>0){
-      const p=Math.round(parseFloat(d)*100)/100;
+      let p=Math.round(parseFloat(d)*100)/100;
+      // Prix direct = prix avec l'antireflet D'ORIGINE du verre. Si l'utilisateur a choisi un autre
+      // antireflet ET que la convention chiffre les traitements, on applique le DELTA (sel − origine).
+      const grid = parsed.composants && parsed.composants.traitement;
+      const traitDetail=[]; let traitLbl='';
+      if(grid){
+        const sel=_getTraitChoisi(v), def=_verreDefaultTrait(v);
+        if(sel && def && sel.toLowerCase()!==def.toLowerCase()){
+          const sSel=_convTraitSupp(sel, grid), sDef=_convTraitSupp(def, grid);
+          if(sSel!=null && sDef!=null){ p=Math.round((p - sDef + sSel)*100)/100; traitLbl=sel; traitDetail.push('Traitement '+sel+' ('+(sSel>=sDef?'+':'−')+Math.abs(sSel-sDef)+'€ vs '+def+')'); }
+        }
+      }
       return {venteConv:p, base:p, verreType:'produit', produitNom:v.id, verrieurKey:(v.marque||''), amincissement:0,
-              precalibrage_max:(parsed.precalibrage_max!=null?parseFloat(parsed.precalibrage_max):null), photochromique_supp:null};
+              traitLbl, traitDetail, precalibrage_max:(parsed.precalibrage_max!=null?parseFloat(parsed.precalibrage_max):null), photochromique_supp:null};
     }
     let cd=_calcConvComposants(v, ind, eqSph, parsed);
     if(!cd) cd=_calcConvVerre(v, ind, visionId, eqSph, parsed);
@@ -8713,6 +8803,7 @@ MISSION — sois EXHAUSTIF, n'omets aucun verre du catalogue présent dans CE mo
 3. Détecte le traitement de chaque verre selon les appellations par verrier
 4. Détecte si le verre est de stock (stock:true)
 5. Propose une appellation commerciale courte (max 40 car.) pour le client
+6. ANTIREFLETS DISPONIBLES : liste dans "antireflets" TOUS les noms d'antireflet proposés pour CE verre (ex: ["ECC+UV","See Coat Next UV","See Coat Blue UV"]). Un même design de verre est souvent décliné en plusieurs antireflets — recopie leurs noms EXACTS tels qu'écrits dans le PDF. Si un seul est proposé, mets-le seul. Si aucun n'est précisé, omets le champ.
 
 CODES TRAITEMENTS PAR VERRIER:
 "ar" = ECC+UV/SCC+UV/HCC/SeeCoat(Nikon) · Crizal/Crizal Sapphire/Crizal Rock(Essilor) · DuraVision/DuraVision Platinum(Zeiss) · Hi-Vision Aqua/Hi-Vision LongLife(Hoya) · Novatek/Novaclear/Novaprotek(BBGR) · Novalux/Novaprotect(Novacel) · Solitaire/Clearstar/SurfaceCoating(Rodenstock) · Glacier/Glacier UV(Shamir) · iCoat/Precitech(Indo) · SCC/HCC/SuperResistant(Seiko)
@@ -8720,8 +8811,8 @@ CODES TRAITEMENTS PAR VERRIER:
 "tr" = Transitions/GEN8/XTRActive/Signature · PhotoFusion X/PhotoFusion(Zeiss) · Sensity/Sensity Dark(Hoya) · Reactiv/Reactiv XTra(BBGR) · ColorMatic IQ/ColorMatic(Rodenstock)
 
 Réponds UNIQUEMENT JSON valide:
-{"verres":[{"id":"id_catalogue","nom":"nom PDF","appel":"Appellation commerciale","stock":false,"achats":{"1.50":21.30},"ventes":{"1.50":99.00},"traitements":["ar"]}]}
-RÈGLES: Ne pas inventer de prix · stock:true si verre de stock · id = id catalogue existant · Si rien dans ce morceau: {"verres":[]}`;
+{"verres":[{"id":"id_catalogue","nom":"nom PDF","appel":"Appellation commerciale","stock":false,"achats":{"1.50":21.30},"ventes":{"1.50":99.00},"traitements":["ar"],"antireflets":["ECC+UV","See Coat Next UV"]}]}
+RÈGLES: Ne pas inventer de prix ni de nom d'antireflet · stock:true si verre de stock · id = id catalogue existant · Si rien dans ce morceau: {"verres":[]}`;
       }
       // tarif → focus sur les prix d'achat
       return `Tu es un expert en optique ophtalmique. Analyse ce PDF de grille tarifaire fournisseur${partInfo}.
@@ -8836,11 +8927,12 @@ function _catApplyIA(type){
   const stored = localStorage.getItem('cat_ia_result_'+type);
   if(!stored){ showToast('Aucun résultat IA à appliquer'); return; }
   const parsed = JSON.parse(stored);
-  let countPrix=0, countAppel=0, countTags=0, countStock=0;
+  let countPrix=0, countAppel=0, countTags=0, countStock=0, countAR=0;
   const savedPrix  = JSON.parse(localStorage.getItem('maneo_prix') ||'{}');
   const savedAppel = JSON.parse(localStorage.getItem('maneo_appel')||'{}');
   const savedTags  = JSON.parse(localStorage.getItem('maneo_tags') ||'{}');
   const savedStock = JSON.parse(localStorage.getItem('maneo_stock')||'{}');
+  const savedAR    = JSON.parse(localStorage.getItem('maneo_antireflets')||'{}');
 
   (parsed.verres||[]).forEach(item=>{
     const v = _catFindVerre(item);
@@ -8877,6 +8969,11 @@ function _catApplyIA(type){
     }
     // Stock
     if(item.stock===true && !v.stock){ v.stock=true; countStock++; }
+    // Antireflets disponibles (liste sélectionnable au clic sur le verre)
+    if(Array.isArray(item.antireflets) && item.antireflets.length){
+      const noms=[...new Set(item.antireflets.map(s=>(s||'').toString().trim()).filter(Boolean))];
+      if(noms.length){ v.antireflets=noms; savedAR[v.id]=noms; countAR++; }
+    }
     // Persister
     savedPrix[v.id]={indices:{...v.indices},achats:{...v.achats}};
     if(v.appel) savedAppel[v.id]=v.appel;
@@ -8888,12 +8985,14 @@ function _catApplyIA(type){
   localStorage.setItem('maneo_appel', JSON.stringify(savedAppel));
   localStorage.setItem('maneo_tags', JSON.stringify(savedTags));
   localStorage.setItem('maneo_stock', JSON.stringify(savedStock));
-  ['maneo_prix','maneo_appel','maneo_tags','maneo_stock'].forEach(_cloudPush);  // sync
+  localStorage.setItem('maneo_antireflets', JSON.stringify(savedAR));
+  ['maneo_prix','maneo_appel','maneo_tags','maneo_stock','maneo_antireflets'].forEach(_cloudPush);  // sync
 
   const parts=[];
   if(countPrix)  parts.push(`${countPrix} prix mis à jour`);
   if(countAppel) parts.push(`${countAppel} appellations`);
   if(countTags)  parts.push(`${countTags} traitements`);
+  if(countAR)    parts.push(`${countAR} listes antireflet`);
   if(countStock) parts.push(`${countStock} stock identifiés`);
   showToast(parts.length ? parts.join(' · ')+' ✓' : 'Aucune donnée applicable trouvée');
 
