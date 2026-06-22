@@ -8689,27 +8689,44 @@ RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de
   }
 }
 
+// Matching multi-niveaux : ID exact → nom exact → tokens significatifs
+function _catFindVerre(item){
+  const all = [...catalogue, ...catalogue2e];
+  if(item.id){ const v=all.find(v=>v.id===item.id); if(v) return v; }
+  const nomIA=(item.nom||'').toLowerCase().trim();
+  if(nomIA){ const v=all.find(v=>v.nom.toLowerCase()===nomIA); if(v) return v; }
+  const stop=new Set(['de','du','le','la','les','un','une','des','par','et','ou','en','au','avec','pour','gen']);
+  const tokIA=nomIA.split(/[\s\-\/]+/).filter(w=>w.length>=4&&!stop.has(w));
+  const marqueIA=(item.marque||'').toLowerCase();
+  if(tokIA.length>=1){
+    return all.find(v=>{
+      const vNom=v.nom.toLowerCase();
+      const vMarque=(v.marque||'').toLowerCase();
+      if(marqueIA && !vMarque.includes(marqueIA) && !marqueIA.includes(vMarque)) return false;
+      const tokCat=vNom.split(/[\s\-\/]+/).filter(w=>w.length>=4&&!stop.has(w));
+      const hits=tokIA.filter(t=>tokCat.some(c=>c===t||c.startsWith(t)||t.startsWith(c)));
+      return hits.length>=Math.min(2,tokIA.length);
+    })||null;
+  }
+  return null;
+}
+
 function _catRenderIAResults(type, parsed, freshAnalysis){
   const zone = document.getElementById('slot-'+type+'-ia-zone');
   if(!zone) return;
-  const all = [...catalogue, ...catalogue2e];
-  const verres = (parsed.verres||[]).filter(item => {
-    let t = item.id ? all.find(v=>v.id===item.id) : null;
-    if(!t) t = all.find(v=>v.nom.toLowerCase()===(item.nom||'').toLowerCase());
-    return !!t;
-  });
+  const totalIA = (parsed.verres||[]).length;
+  const verres = (parsed.verres||[]).filter(item => !!_catFindVerre(item));
 
   if(!verres.length){
-    zone.innerHTML = `<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400E;">Aucun verre du catalogue identifié dans ce PDF.</div>`;
+    const hint = totalIA > 0
+      ? `L'IA a trouvé ${totalIA} verre(s) dans le PDF mais aucun ne correspond aux noms/IDs de votre catalogue. Vérifiez que le PDF correspond bien à vos verriers (Nikon, Sign…).`
+      : `L'IA n'a trouvé aucun verre dans ce PDF. Le PDF est peut-être scanné (image) ou ne contient pas de grille tarifaire.`;
+    zone.innerHTML = `<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400E;"><strong>Aucun verre identifié</strong><br><span style="font-size:12px">${hint}</span></div>`;
     return;
   }
 
   // Enrichir avec les données catalogue
-  const enriched = verres.map(item=>{
-    let target = item.id ? all.find(v=>v.id===item.id) : null;
-    if(!target) target = all.find(v=>v.nom.toLowerCase()===(item.nom||'').toLowerCase());
-    return {...item, _target: target};
-  });
+  const enriched = verres.map(item=>({...item, _target: _catFindVerre(item)}));
 
   const lignes = enriched.map(item=>{
     const v = item._target;
@@ -8745,7 +8762,6 @@ function _catApplyIA(type){
   const stored = localStorage.getItem('cat_ia_result_'+type);
   if(!stored){ showToast('Aucun résultat IA à appliquer'); return; }
   const parsed = JSON.parse(stored);
-  const all = [...catalogue, ...catalogue2e];
   let countPrix=0, countAppel=0, countTags=0, countStock=0;
   const savedPrix  = JSON.parse(localStorage.getItem('maneo_prix') ||'{}');
   const savedAppel = JSON.parse(localStorage.getItem('maneo_appel')||'{}');
@@ -8753,8 +8769,7 @@ function _catApplyIA(type){
   const savedStock = JSON.parse(localStorage.getItem('maneo_stock')||'{}');
 
   (parsed.verres||[]).forEach(item=>{
-    let v = item.id ? all.find(x=>x.id===item.id) : null;
-    if(!v) v = all.find(x=>x.nom.toLowerCase()===(item.nom||'').toLowerCase());
+    const v = _catFindVerre(item);
     if(!v) return;
     // Prix d'achat
     if(item.achats && Object.keys(item.achats).length){
