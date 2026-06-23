@@ -8596,11 +8596,15 @@ function _renderConvBody(id){
     const iaBtn = canIA
       ? `<button class="pdf-btn-ia" id="conv-ai-btn-${id}" onclick="analyzeConvPdfWithAI('${id}')"><i class="ti ti-cpu"></i> ${aiStored ? 'Réanalyser IA' : 'Analyser IA'}</button>`
       : '';
+    const dbgBtn = (canIA && aiStored)
+      ? `<button class="pdf-btn-view" onclick="_convCopyDebug('${id}')" title="Copier les données IA extraites (debug)"><i class="ti ti-clipboard-text"></i> Copier données IA</button>`
+      : '';
     return `<div class="pdf-file-info">
       <span class="pdf-file-name"><i class="ti ti-file-type-pdf" style="color:#E11D48;font-size:16px"></i>${info.name}</span>
       <div class="pdf-file-actions">
         <button class="pdf-btn-view" onclick="pdfView('${key}')"><i class="ti ti-eye"></i> Voir</button>
         ${iaBtn}
+        ${dbgBtn}
         <button class="pdf-btn-del" onclick="pdfDel('${key}','conv-body-${id}','${id}',true)"><i class="ti ti-trash"></i></button>
       </div>
     </div>
@@ -8611,6 +8615,36 @@ function _renderConvBody(id){
     <div style="font-size:13px;font-weight:700">Déposer la convention réseau PDF</div>
     <div style="font-size:11px;margin-top:5px;opacity:.75">L'IA extrait la grille tarifaire par verrier</div>
   </div>`;
+}
+
+// Debug : copie dans le presse-papier les données IA extraites + les prix calculés par verre.
+// Sert à diagnostiquer un prix faux (on voit la structure exacte renvoyée par l'IA).
+function _convCopyDebug(id){
+  const raw = localStorage.getItem('conv_parsed_' + id);
+  if(!raw){ showToast('Aucune donnée IA pour ce réseau.'); return; }
+  let parsed; try{ parsed = JSON.parse(raw); }catch(e){ parsed = raw; }
+  const all = [...catalogue, ...catalogue2e];
+  const calcul = [];
+  all.forEach(v=>{
+    Object.keys(v.indices||{}).filter(i=>v.indices[i]!=null).forEach(i=>{
+      const r = _convVerrePrice(v, i, id);
+      if(r) calcul.push(`${v.id} | ${v.nom} | ind ${i} | ${r.prix}€ (${r.source}) | trait: ${_getTraitChoisi(v)}`);
+    });
+  });
+  const txt = `=== CONVENTION ${id.toUpperCase()} — DONNÉES IA EXTRAITES ===\n`
+    + JSON.stringify(parsed, null, 2)
+    + `\n\n=== PRIX CALCULÉS PAR VERRE ===\n` + calcul.join('\n');
+  const done = ()=> showToast('Données IA copiées — colle-les dans le chat.');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>{ _convDebugFallback(txt); });
+  } else { _convDebugFallback(txt); }
+}
+function _convDebugFallback(txt){
+  const ta=document.createElement('textarea'); ta.value=txt;
+  ta.style.cssText='position:fixed;top:10px;left:10px;width:90%;height:60%;z-index:99999';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); showToast('Données copiées — colle-les dans le chat.'); }catch(e){ showToast('Sélectionne et copie le texte affiché.'); return; }
+  setTimeout(()=>ta.remove(), 300);
 }
 
 function _renderConvAiCard(data, mutId){
