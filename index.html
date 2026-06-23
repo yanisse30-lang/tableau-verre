@@ -5612,6 +5612,12 @@ Le PDF présente PLUSIEURS grilles SÉPARÉES qu'il faut ADDITIONNER pour obteni
    - "traitement" : {nom_traitement: prix} — TOUS les antireflets/traitements.
    - "photochromie" : {nom: prix} — TOUTES.
 
+🚫 ERREURS À NE JAMAIS COMMETTRE (vérifie ta réponse avant de la rendre) :
+1. MULTIFOCAL ≠ UNIFOCAL : un progressif (multifocal) coûte TOUJOURS plus cher qu'un unifocal au même indice. Ne recopie JAMAIS la grille unifocale dans multifocal. Si le PDF ne donne qu'une grille, mets-la dans "unifocal" et OMETS "multifocal".
+2. MONOTONIE INDICE : le prix matériau AUGMENTE avec l'indice (1.5 ≤ 1.6 ≤ 1.67 ≤ 1.74). Si tu obtiens 1.5=31 puis 1.6=11, tu as lu une mauvaise ligne — relis la bonne colonne.
+3. SURFACE = DESIGNS UNIQUEMENT : ne mets JAMAIS un antireflet/traitement (ECC+UV, SCC+UV, SeeCoat, Pure Blue, Blue UV…) dans "surface". Ces noms vont EXCLUSIVEMENT dans "traitement". "surface" ne contient QUE des noms de design/géométrie (Presio…, SuperSee, SeeMax, Relaxsee, Asphérique, Sphérique).
+4. NE PAS confondre prix de VENTE et REMBOURSEMENT (cf. plus haut).
+
 🔑 RÈGLE DE DÉCISION : si le PDF donne un prix COMPLET par catégorie/produit (le cas de la plupart des réseaux) → CAS 1 ("verres"). Réserve "composants" UNIQUEMENT aux PDF qui présentent des grilles de suppléments à additionner. Dans le doute → CAS 1.
 
 ⚠️ VERRIER : l'opticien monte uniquement : ${_verriersStr}. Le PDF liste souvent plusieurs verriers (Essilor, Nikon, Zeiss, Seiko, BBGR…) — n'extrais QUE la/les grille(s) de : ${_verriersStr}. Ne mélange jamais leurs colonnes.
@@ -5649,16 +5655,25 @@ RÈGLES STRICTES :
 - "verres" : CLÉS = id EXACTS du catalogue (colonne id ci-dessus). seuil_complexe défaut 6.0.
 - Si plusieurs niveaux/contrats (Opti 2/3/4…), prends la grille du niveau le plus complet.`;
 
-    // Découpage en plusieurs passes : lit toute la convention sans dépasser la limite IA/minute
-    const chunks = _chunkText(fullText, 24000, 6);
+    // Découpage en plusieurs passes. Morceaux plus larges (Sonnet, contexte large) → grilles moins
+    // fragmentées entre passes, donc extraction plus fiable.
+    const chunks = _chunkText(fullText, 40000, 8);
     const parsed = { reseau: reseauLabel };
     for(let ci=0; ci<chunks.length; ci++){
       const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
       if(btn) btn.innerHTML = `<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Analyse${partInfo}…`;
-      const raw = await _aiCall(claudeKey, mkPrompt(chunks[ci], partInfo), { maxTokens:4096, onWait:(s)=>{
+      // Sonnet : extraction de grilles tarifaires complexes (Haiku se trompe sur materiau/surface/traitement).
+      const raw = await _aiCall(claudeKey, mkPrompt(chunks[ci], partInfo), { model:'claude-sonnet-4-6', maxTokens:5000, onWait:(s)=>{
         if(btn) btn.innerHTML = `<i class="ti ti-clock"></i> Pause ${s}s (limite IA)…`;
       }});
       _mergeConvParsed(parsed, _normalizeConvParsed(_extractJson(raw)));
+    }
+
+    // Contrôle final sur la grille FUSIONNÉE (les contrôles par morceau ne voient qu'une partie)
+    if(parsed.composants && parsed.composants.materiau){
+      const u=parsed.composants.materiau.unifocal, m=parsed.composants.materiau.multifocal;
+      if(u && m){ const ks=Object.keys(m); if(ks.length && ks.every(i=>u[i]!=null && Math.abs(parseFloat(u[i])-parseFloat(m[i]))<0.01)){
+        parsed._warn=(parsed._warn||[]); parsed._warn.push('Grille progressif identique à la grille unifocale — à vérifier (réanalyse conseillée).'); } }
     }
 
     // Stocker les données structurées (utilisées pour le calcul de prix dans showVerres)
@@ -5775,6 +5790,20 @@ function _normalizeConvParsed(raw){
     for(const k in C[g]){ const v = num(C[g][k]); if(v==null) delete C[g][k]; else C[g][k]=v; }
   });
   for(const t in C.materiau){ for(const i in C.materiau[t]){ const v=num(C.materiau[t][i]); if(v==null) delete C.materiau[t][i]; else C.materiau[t][i]=v; } }
+  // ── Garde-fous extraction (Haiku/Sonnet rangent parfois mal) ──
+  // 1) Antireflets qui ont fui dans "surface" → retirés (surface = designs uniquement).
+  const _normK = s => (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'');
+  const _isCoat = k => /seecoat|see\s*coat|pure\s*blue|blue\s*uv|\b(ecc|scc|hcc|armc|src|hmc|tgns)\b|crizal|duravision|cleancoat|smartcoat|antireflet|multicouche|phototint/i.test(k);
+  const traitNorm = new Set(Object.keys(C.traitement||{}).map(_normK));
+  for(const k in C.surface){ if(_isCoat(k) || traitNorm.has(_normK(k))) delete C.surface[k]; }
+  // 2) Multifocal recopié à l'identique de l'unifocal : on SIGNALE (sans supprimer, car certains
+  //    réseaux tarifent la base par indice seul, la différence uni/progressif venant du design).
+  if(C.materiau.unifocal && C.materiau.multifocal){
+    const u=C.materiau.unifocal, m=C.materiau.multifocal, ks=Object.keys(m);
+    if(ks.length && ks.every(i => u[i]!=null && Math.abs(parseFloat(u[i])-parseFloat(m[i]))<0.01)){
+      out._warn = (out._warn||[]); out._warn.push('Grille progressif identique à la grille unifocale — à vérifier (réanalyse conseillée).');
+    }
+  }
   out.composants = C;
   return out;
 }
@@ -6210,9 +6239,16 @@ function _convVerrePreview(mutId){
   const legend = nbIA>0
     ? `<span style="color:#059669;font-weight:600">${nbIA} prix issus du PDF (vert)</span>${rows.length?` · <span style="color:#94A3B8">gris = grille par défaut</span>`:''}`
     : `<span style="color:#D97706;font-weight:600">⚠ Aucun prix issu du PDF — l'IA n'a pas pu calculer, les prix gris viennent de la grille par défaut codée</span>`;
+  // Avertissements de l'extraction (ex: grille progressif suspecte)
+  const cp = _getConvParsedExact(mutId) || (mutId.includes('_') ? _getConvParsedExact(mutId.split('_')[0]) : null);
+  const warns = (cp && Array.isArray(cp._warn)) ? cp._warn : [];
+  const warnHtml = warns.length
+    ? `<div style="margin:0 14px 8px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:8px 10px;font-size:11px;color:#9A3412">⚠ ${warns.join(' · ')}</div>`
+    : '';
   return `<div class="conv-ai-result" style="margin-top:8px">
     <div class="conv-ai-res-hd"><i class="ti ti-list-check"></i> Prix de vente calculés par verre — vérification</div>
     <div style="font-size:11px;color:#64748B;padding:0 14px 6px">${legend}</div>
+    ${warnHtml}
     <div class="conv-ai-res-body" style="max-height:300px;overflow-y:auto">${rows.join('')}</div>
   </div>`;
 }
