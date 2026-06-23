@@ -5412,8 +5412,8 @@ RÈGLES STRICTES:
         'anthropic-dangerous-direct-browser-access':'true'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 4096,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 8000,
         messages:[{role:'user', content: prompt}]
       })
     });
@@ -6610,8 +6610,8 @@ RÈGLES:
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 4096,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 8000,
         messages: [{role: 'user', content: prompt}]
       })
     });
@@ -8916,7 +8916,7 @@ RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de
     for(let ci=0; ci<chunks.length; ci++){
       const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
       zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Claude IA analyse le PDF${partInfo}…</div>`;
-      const raw = await _aiCall(key, mkPrompt(chunks[ci], partInfo), { maxTokens:4096, onWait:(s)=>{
+      const raw = await _aiCall(key, mkPrompt(chunks[ci], partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, onWait:(s)=>{
         zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#92400E;font-weight:600"><i class="ti ti-clock"></i> Limite IA atteinte — pause ${s}s puis reprise${partInfo}…</div>`;
       }});
       _mergeCatVerres(merged.verres, _extractJson(raw).verres);
