@@ -5591,15 +5591,8 @@ PRÉCALIBRAGE : repère le supplément de précalibrage / détourage / usinage /
 
 ⚠️ DEUX FAÇONS DE TARIFER — CHOISIS LA BONNE SELON CE QUE MONTRE LE PDF :
 
-━━ CAS 1 — PRIX COMPLET (le plus fréquent : Itelis, Carte Blanche, Actil, Kalixia, Séveane, Optilys…). ━━
-Le PDF donne DIRECTEMENT le prix de vente TOTAL d'un verre, ligne par ligne, par catégorie (unifocal/progressif), souvent par gamme/classe (A/B/C, entrée/milieu/haut) ou par produit nommé, et par indice. RIEN à additionner.
-→ Pour CHAQUE verre du CATALOGUE ci-dessus, trouve dans le PDF la ligne qui lui correspond (selon son type, sa gamme, son traitement, son nom de produit) et donne son PRIX COMPLET par indice dans "verres" — clé = id EXACT du catalogue.
-→ Exemple : "verres": {"nk_h1": {"1.5":285,"1.6":308}, "sg1": {"1.5":101,"1.6":122}}
-→ Le prix d'un verre dans "verres" correspond à son traitement antireflet D'ORIGINE (celui indiqué dans le catalogue ci-dessus).
-→ ⚠️ MÊME EN CAS 1 : si le PDF chiffre les antireflets séparément (ex. supplément pour passer de ECC+UV à See Coat Next UV / See Coat Blue UV…), extrais AUSSI la grille des suppléments traitement dans "composants":{"traitement":{...}} — le logiciel l'utilise pour recalculer le prix quand l'opticien change l'antireflet d'un verre.
-
-━━ CAS 2 — MATRICE ADDITIVE (ex: Santéclair). ━━
-Le PDF présente PLUSIEURS grilles SÉPARÉES qu'il faut ADDITIONNER pour obtenir le prix d'un verre :
+━━ CAS 2 — MATRICE ADDITIVE = LE CAS NORMAL DES RÉSEAUX (Itelis, Actil, Séveane, Kalixia, Carte Blanche, Santéclair, Optilys…). ━━
+La quasi-totalité des conventions réseau sont des MATRICES : le PDF présente PLUSIEURS grilles SÉPARÉES (colonnes/tableaux distincts) qu'il faut ADDITIONNER. C'est TON CAS PAR DÉFAUT — extrais "composants" :
    • MATÉRIAU : prix de base par TYPE (Unifocal / Multifocal=progressif) et par INDICE (colonnes 1.5 / 1.59 / 1.6 / 1.67 / 1.74).
    • SURFACE / DESIGN : supplément selon le DESIGN nommé (ex: "Presio Touch", "Presio Clear P", "Presio Definition", "Presio Power", "SuperSee", "SeeMax AP", "Relaxsee", "Sphérique", "Asphérique"…).
    • TRAITEMENT : supplément du traitement antireflet (ex: "ECC+UV", "See Coat Plus UV", "See Coat Next UV", "See Coat Blue UV", "PureBlueUV").
@@ -5618,24 +5611,18 @@ Le PDF présente PLUSIEURS grilles SÉPARÉES qu'il faut ADDITIONNER pour obteni
 3. SURFACE = DESIGNS UNIQUEMENT : ne mets JAMAIS un antireflet/traitement (ECC+UV, SCC+UV, SeeCoat, Pure Blue, Blue UV…) dans "surface". Ces noms vont EXCLUSIVEMENT dans "traitement". "surface" ne contient QUE des noms de design/géométrie (Presio…, SuperSee, SeeMax, Relaxsee, Asphérique, Sphérique).
 4. NE PAS confondre prix de VENTE et REMBOURSEMENT (cf. plus haut).
 
-🔑 RÈGLE DE DÉCISION : si le PDF donne un prix COMPLET par catégorie/produit (le cas de la plupart des réseaux) → CAS 1 ("verres"). Réserve "composants" UNIQUEMENT aux PDF qui présentent des grilles de suppléments à additionner. Dans le doute → CAS 1.
+━━ CAS 1 — PRIX COMPLET (RARE). ━━ Seulement si le PDF donne UN SEUL prix de vente total par verre/catégorie, SANS aucune grille de suppléments à additionner. Alors mets ce prix complet par indice dans "verres" (clé = id EXACT du catalogue), ex: "verres":{"nk_h1":{"1.6":308}}. N'utilise CECI QUE si tu ne vois pas de grilles séparées. En cas de doute → MATRICE (composants).
+
+🔑 RÈGLE DE DÉCISION : vois-tu des grilles/colonnes SÉPARÉES (un tableau matériau par indice, un tableau de designs, un tableau d'antireflets) ? → OUI (le cas quasi général) = "composants". NON, juste un prix par ligne = "verres". Dans le doute → "composants".
 
 ⚠️ VERRIER : l'opticien monte uniquement : ${_verriersStr}. Le PDF liste souvent plusieurs verriers (Essilor, Nikon, Zeiss, Seiko, BBGR…) — n'extrais QUE la/les grille(s) de : ${_verriersStr}. Ne mélange jamais leurs colonnes.
 ⚠️ INDICE : garde les colonnes telles quelles ("1.5","1.59","1.6","1.67","1.74"). Le 1.59 (polycarbonate) ≠ 1.6.
 
-MISSION — pour CE morceau, sois EXHAUSTIF : mappe TOUS les verres du catalogue dont tu trouves le prix (CAS 1), ou extrais TOUTES les grilles de suppléments (CAS 2). N'omets aucun verre/élément. Renseigne aussi "precalibrage_max" (supplément précalibrage / Optislim / détourage / usinage) si présent.
+MISSION — pour CE morceau, sois EXHAUSTIF : extrais TOUTES les grilles de la matrice (matériau, surface/designs, traitement, photochromie) sans en omettre aucune. Renseigne aussi "precalibrage_max" (supplément précalibrage / Optislim / détourage / usinage) si présent.
 
 Réponds UNIQUEMENT avec ce JSON valide, AUCUN texte ni tableau autour.
 
-▶ EXEMPLE CAS 1 (prix complet — la plupart des réseaux : Itelis, Carte Blanche, Actil…) :
-{
-  "reseau": "${reseauLabel}",
-  "seuil_complexe": 6.0,
-  "precalibrage_max": 6,
-  "verres": {"nk_h1": {"1.5":285,"1.6":308}, "nk_h2": {"1.5":269,"1.6":302}, "sg1": {"1.5":101,"1.6":122}}
-}
-
-▶ EXEMPLE CAS 2 (matrice additive — Santéclair) :
+▶ EXEMPLE PAR DÉFAUT — MATRICE (composants) : le cas de presque toutes les conventions.
 {
   "reseau": "${reseauLabel}",
   "seuil_complexe": 6.0,
@@ -5648,11 +5635,14 @@ Réponds UNIQUEMENT avec ce JSON valide, AUCUN texte ni tableau autour.
   }
 }
 
+▶ EXEMPLE RARE — PRIX COMPLET (verres) : seulement si AUCUNE grille de suppléments séparée.
+{ "reseau": "${reseauLabel}", "seuil_complexe": 6.0, "precalibrage_max": 6, "verres": {"nk_h1": {"1.5":285,"1.6":308}} }
+
 RÈGLES STRICTES :
-- Format du PRIX DE BASE : "verres" (CAS 1) OU le couple "materiau"+"surface" de "composants" (CAS 2), pas les deux. Défaut = "verres". Tu PEUX cependant toujours ajouter "composants":{"traitement":{...}} (grille des suppléments antireflet) en plus de "verres", car elle sert au recalcul quand l'opticien change le traitement.
-- N'INVENTE AUCUN prix ni libellé : recopie exactement le PDF. N'inclus un verre dans "verres" QUE si tu trouves réellement son prix dans CE morceau.
+- PAR DÉFAUT = "composants" (matrice). N'utilise "verres" QUE si le PDF n'a aucune grille de suppléments séparée.
+- N'INVENTE AUCUN prix ni libellé : recopie exactement le PDF. N'extrais une grille que si elle est réellement présente dans CE morceau.
 - Verrier(s) ${_verriersStr} UNIQUEMENT (si présents). Ne mélange pas les colonnes des autres verriers.
-- "verres" : CLÉS = id EXACTS du catalogue (colonne id ci-dessus). seuil_complexe défaut 6.0.
+- "verres" (si utilisé) : CLÉS = id EXACTS du catalogue (colonne id ci-dessus). seuil_complexe défaut 6.0.
 - Si plusieurs niveaux/contrats (Opti 2/3/4…), prends la grille du niveau le plus complet.`;
 
     // Découpage en plusieurs passes. Morceaux plus larges (Sonnet, contexte large) → grilles moins
@@ -5663,7 +5653,8 @@ RÈGLES STRICTES :
       const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
       if(btn) btn.innerHTML = `<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Analyse${partInfo}…`;
       // Sonnet : extraction de grilles tarifaires complexes (Haiku se trompe sur materiau/surface/traitement).
-      const raw = await _aiCall(claudeKey, mkPrompt(chunks[ci], partInfo), { model:'claude-sonnet-4-6', maxTokens:5000, onWait:(s)=>{
+      // maxTokens élevé : les grosses grilles (Séveane ~100 designs) ne doivent pas être tronquées (JSON cassé).
+      const raw = await _aiCall(claudeKey, mkPrompt(chunks[ci], partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, onWait:(s)=>{
         if(btn) btn.innerHTML = `<i class="ti ti-clock"></i> Pause ${s}s (limite IA)…`;
       }});
       _mergeConvParsed(parsed, _normalizeConvParsed(_extractJson(raw)));
@@ -5676,19 +5667,30 @@ RÈGLES STRICTES :
         parsed._warn=(parsed._warn||[]); parsed._warn.push('Grille progressif identique à la grille unifocale — à vérifier (réanalyse conseillée).'); } }
     }
 
+    // Bilan de l'extraction
+    const _comp = parsed.composants || {};
+    const hasComposants = !!(Object.keys(_comp.materiau||{}).length || Object.keys(_comp.surface||{}).length || Object.keys(_comp.traitement||{}).length);
+    const nbVerres = parsed.verres ? Object.keys(parsed.verres).length : 0;
+    const nbVerriers = Object.keys(parsed.verriers||{}).length;
+
+    // GARDE-FOU : une analyse VIDE ne doit pas écraser une bonne extraction précédente.
+    if(!hasComposants && !nbVerres && !nbVerriers){
+      if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Réanalyser avec IA'; }
+      showToast(`${reseauLabel} : l'IA n'a rien pu extraire (données précédentes conservées). Réessaie dans un instant.`);
+      return;
+    }
+
     // Stocker les données structurées (utilisées pour le calcul de prix dans showVerres)
     localStorage.setItem('conv_parsed_' + id, JSON.stringify(parsed));
     _cloudPush('conv_parsed_' + id);  // synchronise la convention sur tous les appareils
     if(resEl) resEl.innerHTML = _renderConvAiCard(parsed, id);
     if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Réanalyser avec IA'; }
-    const nbVerres = parsed.verres ? Object.keys(parsed.verres).length : 0;
-    const nbVerriers = Object.keys(parsed.verriers||{}).length;
-    if(nbVerres > 0){
+    if(hasComposants){
+      showToast(`${reseauLabel} analysé — grille tarifaire extraite (matériau/surface/traitement). Prix appliqués.`);
+    } else if(nbVerres > 0){
       showToast(`${reseauLabel} analysé — ${nbVerres} verre(s) tarifé(s). Prix appliqués automatiquement.`);
-    } else if(nbVerriers > 0){
-      showToast(`${reseauLabel} analysé — ${nbVerriers} verrier(s) détecté(s).`);
     } else {
-      showToast(`${reseauLabel} analysé — aucun verre du catalogue reconnu dans ce PDF.`);
+      showToast(`${reseauLabel} analysé — ${nbVerriers} verrier(s) détecté(s).`);
     }
 
   } catch(e) {
