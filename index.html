@@ -5564,13 +5564,13 @@ async function analyzeConvPdfWithAI(id){
     const reseauInfo = _CONV_RESEAUX.find(r => r.id === id);
     const reseauLabel = reseauInfo ? reseauInfo.label : id;
 
-    // Catalogue opticien envoyé à l'IA → calcul/mapping prix négocié ↔ verre (id)
-    // Format enrichi : id|nom|type|traitement|[indices] pour permettre le calcul par composants
+    // Catalogue opticien envoyé à l'IA → mapping précis prix négocié ↔ verre (id), SANS devinette JS.
+    // Contexte riche par verre : type, gamme, design, antireflet d'origine, flag photochromique, indices.
     const _allVerres = [...catalogue, ...catalogue2e];
-    const _vType = v => (v.compatible||[]).some(c=>['progressif','degressif','interieur'].includes(c)) ? 'progressif' : 'unifocal';
-    const _vTrait = v => (v.traitements && v.traitements[0] && v.traitements[0].nom) ? v.traitements[0].nom : (v.tags||[]).join('+');
+    const _GAMME_LBL = {haut:'PREMIUM', milieu:'MILIEU', entree:'ENTREE'};
+    const _vType = v => (v.compatible||[]).some(c=>['progressif','degressif','interieur'].includes(c)) ? 'PROGRESSIF' : 'UNIFOCAL';
     const catCtx = _allVerres
-      .map(v => `${v.id}|${v.nom}|${_vType(v)}|${_vTrait(v)}|[${Object.keys(v.indices||{}).join(',')}]`)
+      .map(v => `${v.id} | ${v.nom} | ${_vType(v)} | gamme:${_GAMME_LBL[v.gamme]||v.gamme||'?'} | antireflet:${_verreDefaultTrait(v)}${(v.tags||[]).includes('tr')?' | PHOTOCHROMIQUE(Transitions)':''}${v.stock?' | STOCK':''} | indices:[${Object.keys(v.indices||{}).join(',')}]`)
       .join('\n');
     // Verriers réellement présents dans le catalogue (pour cibler la bonne page de la convention)
     const _verriers = _catalogueVerriers();
@@ -5622,6 +5622,8 @@ Donne le supplément € de CHAQUE antireflet (ECC+UV, SCC+UV NG, See Coat Next 
 2. PLUS CHER AVEC L'INDICE : 1.5 ≤ 1.6 ≤ 1.67 ≤ 1.74 pour un même verre.
 3. PRIX DE VENTE, PAS REMBOURSEMENT (cf. plus haut).
 4. ORDRE DE GRANDEUR : un progressif premium se vend cher (souvent > 150€). Un progressif premium sous 100€ = tu as raté une partie du prix (design/base) — relis.
+5. EXHAUSTIVITÉ : passe en revue CHAQUE ligne du catalogue ci-dessus, une par une. Pour CHAQUE verre dont le design/gamme apparaît dans CE morceau de PDF, donne un prix. N'omets aucun verre que le PDF permet de tarifer. Mieux vaut ne PAS mettre un verre que d'inventer, mais ne saute aucun verre réellement présent.
+6. COHÉRENCE PHOTO : tout verre marqué PHOTOCHROMIQUE(Transitions) doit être > à sa version claire (même design, même indice).
 
 ⚠️ VERRIER : l'opticien monte uniquement : ${_verriersStr}. Le PDF liste souvent plusieurs verriers (Essilor, Nikon, Zeiss, Seiko, BBGR…) — n'extrais QUE la/les grille(s) de : ${_verriersStr}. Ne mélange jamais leurs colonnes.
 ⚠️ INDICE : garde les colonnes telles quelles ("1.5","1.59","1.6","1.67","1.74"). Le 1.59 (polycarbonate) ≠ 1.6.
@@ -8903,7 +8905,11 @@ async function _catLaunchIA(type){
     zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Claude IA analyse le PDF…</div>`;
 
     const all = [...catalogue, ...catalogue2e];
-    const catCtx = all.map(v=>`${v.id}|${v.nom}|${v.marque}|${v.gamme}|[${Object.keys(v.indices||{}).join(',')}]${v.stock?'|STOCK':''}`).join('\n');
+    const _gl = {haut:'PREMIUM',milieu:'MILIEU',entree:'ENTREE'};
+    const catCtx = all.map(v=>{
+      const t=(v.compatible||[]).some(c=>['progressif','degressif','interieur'].includes(c))?'PROGRESSIF':'UNIFOCAL';
+      return `${v.id} | ${v.nom} | ${v.marque} | ${t} | gamme:${_gl[v.gamme]||v.gamme||'?'} | antireflet:${_verreDefaultTrait(v)}${(v.tags||[]).includes('tr')?' | PHOTOCHROMIQUE':''}${v.stock?' | STOCK':''} | indices:[${Object.keys(v.indices||{}).join(',')}]`;
+    }).join('\n');
 
     // Construit le prompt pour un morceau de texte du PDF
     const mkPrompt = (txt, partInfo) => {
