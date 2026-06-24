@@ -8908,7 +8908,9 @@ async function _catLaunchIA(type){
     const _gl = {haut:'PREMIUM',milieu:'MILIEU',entree:'ENTREE'};
     const catCtx = all.map(v=>{
       const t=(v.compatible||[]).some(c=>['progressif','degressif','interieur'].includes(c))?'PROGRESSIF':'UNIFOCAL';
-      return `${v.id} | ${v.nom} | ${v.marque} | ${t} | gamme:${_gl[v.gamme]||v.gamme||'?'} | antireflet:${_verreDefaultTrait(v)}${(v.tags||[]).includes('tr')?' | PHOTOCHROMIQUE':''}${v.stock?' | STOCK':''} | indices:[${Object.keys(v.indices||{}).join(',')}]`;
+      // vente actuelle par indice → borne haute pour l'achat (l'achat HT doit rester bien en-dessous)
+      const venteRef = Object.keys(v.indices||{}).filter(i=>v.indices[i]!=null).map(i=>`${i}:${v.indices[i]}€`).join(' ');
+      return `${v.id} | ${v.nom} | ${v.marque} | ${t} | gamme:${_gl[v.gamme]||v.gamme||'?'} | antireflet:${_verreDefaultTrait(v)}${(v.tags||[]).includes('tr')?' | PHOTOCHROMIQUE':''}${v.stock?' | STOCK':''} | vente_actuelle:[${venteRef}]`;
     }).join('\n');
 
     // Construit le prompt pour un morceau de texte du PDF
@@ -8916,7 +8918,7 @@ async function _catLaunchIA(type){
       if(type === 'catalogue'){
         return `Tu es un expert en optique ophtalmique. Analyse ce PDF catalogue verre fournisseur${partInfo}.
 
-CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
+CATALOGUE OPTICIEN — une ligne par verre, format « id | nom | marque | type | gamme | antireflet | flags | vente_actuelle[indice:prix] » :
 ${catCtx}
 
 TEXTE DU PDF :
@@ -8931,8 +8933,12 @@ Mots-clés stock: "stock", "de stock", "sphérique de stock", "non surfacé", "R
 - L'achat est TOUJOURS nettement INFÉRIEUR à la vente. Un progressif coûte plus cher qu'un unifocal, un indice élevé (1.67/1.74) plus cher qu'un 1.50. Si un "achat" dépasse une "vente" pour le même verre, tu as inversé les colonnes — corrige.
 - Un catalogue fournisseur ne donne souvent QUE l'achat : dans ce cas, remplis "achats" et laisse "ventes" vide.
 
-MISSION — sois EXHAUSTIF, n'omets aucun verre du catalogue présent dans CE morceau :
-1. Identifie les verres du catalogue ci-dessus présents dans CE morceau de texte (mappe sur l'id EXACT)
+⚠️ CONTRÔLE MARGE (la marge = vente − achat doit rester POSITIVE) :
+- "vente_actuelle" ci-dessus = prix de vente TTC pratiqué par l'opticien. L'achat HT que tu extrais doit être NETTEMENT EN-DESSOUS (typiquement 30 % à 55 % de la vente pour un verre surfacé, moins pour un verre de stock).
+- Si l'achat que tu lis est SUPÉRIEUR ou très proche de la vente_actuelle du même verre/indice, tu t'es trompé de colonne (TTC au lieu de HT, ou remise non appliquée) — relis.
+
+MISSION — sois EXHAUSTIF, passe en revue CHAQUE ligne du catalogue, n'omets aucun verre présent dans CE morceau :
+1. Identifie les verres du catalogue ci-dessus présents dans CE morceau de texte (mappe sur l'id EXACT, en t'aidant du type/gamme/antireflet)
 2. Extrais leurs prix d'ACHAT HT (et prix de vente conseillé seulement s'il est explicite)
 3. Détecte le traitement de chaque verre selon les appellations par verrier
 4. Détecte si le verre est de stock (stock:true)
@@ -8951,23 +8957,25 @@ RÈGLES: Ne pas inventer de prix ni de nom d'antireflet · stock:true si verre d
       // tarif → focus sur les prix d'achat
       return `Tu es un expert en optique ophtalmique. Analyse ce PDF de grille tarifaire fournisseur${partInfo}.
 
-CATALOGUE EXISTANT (id|nom|marque|gamme|indices|STOCK si verre de stock):
+CATALOGUE OPTICIEN — une ligne par verre, format « id | nom | marque | type | gamme | antireflet | flags | vente_actuelle[indice:prix] » :
 ${catCtx}
 
 TEXTE DU PDF :
 ${txt}
 
-MISSION: Extrait TOUS les prix d'achat HT opticien pour les verres du catalogue présents dans CE morceau. Les verres de stock ont des prix beaucoup plus bas que les verres surfacés.
+MISSION: Extrait TOUS les prix d'ACHAT HT opticien pour les verres du catalogue présents dans CE morceau. Sois EXHAUSTIF : passe en revue chaque ligne du catalogue, n'omets aucun verre présent. Mappe sur l'id EXACT en t'aidant du type/gamme/antireflet.
 
-VERRE DE STOCK = termes: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made" → stock:true
+VERRE DE STOCK = termes: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made" → stock:true (prix beaucoup plus bas que les verres surfacés).
+
+⚠️ CONTRÔLE MARGE : "vente_actuelle" = prix de vente TTC de l'opticien. L'achat HT que tu extrais doit être NETTEMENT EN-DESSOUS (≈ 30–55 % de la vente, moins en stock). Si l'achat lu est ≥ vente_actuelle, tu as pris la mauvaise colonne (TTC/remboursement) — relis.
 
 Réponds UNIQUEMENT JSON valide:
 {"verres":[{"id":"id_catalogue","nom":"nom PDF","stock":false,"achats":{"1.50":21.30,"1.60":31.00},"traitements":["ar"]}]}
 RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de stock · Si rien dans ce morceau: {"verres":[]}`;
     };
 
-    // Découpage en plusieurs passes : lit tout le PDF sans dépasser la limite IA/minute
-    const chunks = _chunkText(fullText, 24000, 6);
+    // Découpage en plusieurs passes (morceaux larges Sonnet → moins de fragmentation)
+    const chunks = _chunkText(fullText, 40000, 8);
     const merged = {verres:[]};
     for(let ci=0; ci<chunks.length; ci++){
       const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
@@ -9027,6 +9035,7 @@ function _catRenderIAResults(type, parsed, freshAnalysis){
   // Enrichir avec les données catalogue
   const enriched = verres.map(item=>({...item, _target: _catFindVerre(item)}));
 
+  let nbMargeNeg = 0;
   const lignes = enriched.map(item=>{
     const v = item._target;
     const stockBadge = item.stock ? `<span style="font-size:10px;font-weight:700;color:#15803D;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:20px;padding:2px 7px;margin-left:6px"><i class="ti ti-package" style="font-size:9px"></i> Stock</span>` : '';
@@ -9036,14 +9045,29 @@ function _catRenderIAResults(type, parsed, freshAnalysis){
     const venteStr = item.ventes && Object.keys(item.ventes||{}).length
       ? Object.entries(item.ventes).map(([i,p])=>`<span style="font-size:11px;background:#DBEAFE;border:1px solid #93C5FD;border-radius:6px;padding:2px 6px">Ind.${i}: <strong>${p}€</strong></span>`).join(' ')
       : '';
+    // Marge prévisionnelle = vente ACTUELLE du catalogue − achat extrait (par indice)
+    const margeStr = (item.achats ? Object.entries(item.achats) : []).map(([i,p])=>{
+      const vente = v.indices ? _pickByIndex(v.indices, i) : null;
+      const a = parseFloat(p);
+      if(vente==null || isNaN(a)) return null;
+      const m = Math.round((vente - a)*100)/100;
+      const taux = vente>0 ? Math.round(m/vente*100) : 0;
+      if(m<=0) nbMargeNeg++;
+      const col = m<=0 ? '#dc2626' : (taux>=45?'#16A34A':'#92400E');
+      return `<span style="font-size:11px;background:${m<=0?'#FEF2F2':'#F0FDF4'};border:1px solid ${m<=0?'#FECACA':'#BBF7D0'};border-radius:6px;padding:2px 6px;color:${col}">Ind.${i}: <strong>${m<=0?'⚠ ':''}${m}€ (${taux}%)</strong></span>`;
+    }).filter(Boolean).join(' ');
     const appelStr = item.appel ? `<div style="font-size:11px;color:#7C3AED;font-style:italic;margin-top:3px">↳ "${item.appel}"</div>` : '';
     return `<div class="cat-ia-verre">
       <div class="cat-ia-nom">${v.nom} <span style="font-size:11px;color:#aaa;font-weight:400">${v.marque}</span>${stockBadge}</div>
       ${appelStr}
       ${achatStr ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px"><span style="font-size:10px;color:#92400E;font-weight:700">Achat:</span>${achatStr}</div>` : ''}
       ${venteStr ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:3px"><span style="font-size:10px;color:#1D4ED8;font-weight:700">Vente:</span>${venteStr}</div>` : ''}
+      ${margeStr ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:3px"><span style="font-size:10px;color:#0F766E;font-weight:700">Marge:</span>${margeStr}</div>` : ''}
     </div>`;
   }).join('');
+  const margeWarn = nbMargeNeg>0
+    ? `<div style="margin:8px 0;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:8px 10px;font-size:11px;color:#991B1B">⚠ ${nbMargeNeg} prix d'achat ≥ prix de vente (marge nulle/négative) — l'IA a probablement lu une colonne TTC au lieu du HT. Vérifie avant d'appliquer.</div>`
+    : '';
 
   const freshNote = freshAnalysis
     ? `<i class="ti ti-cpu"></i> ${enriched.length} verre(s) détecté(s) — cliquez Appliquer`
@@ -9052,6 +9076,7 @@ function _catRenderIAResults(type, parsed, freshAnalysis){
   zone.innerHTML = `
     <div class="cat-ia-result">
       <div class="cat-ia-hdr">${freshNote}</div>
+      ${margeWarn}
       <div class="cat-ia-body">${lignes}</div>
     </div>
     <button class="cat-ia-apply" onclick="_catApplyIA('${type}')"><i class="ti ti-check"></i> Appliquer les prix et appellations au catalogue</button>`;
