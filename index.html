@@ -5576,6 +5576,18 @@ async function analyzeConvPdfWithAI(id){
     const _verriers = _catalogueVerriers();
     const _verriersStr = _verriers.length ? _verriers.join(', ') : 'le(s) verrier(s) du catalogue';
 
+    // Réseaux à NIVEAUX de contrat tarifés différemment (clés = suffixes des sous-contrats mutuelles).
+    const _NIVEAUX_TARIFAIRES = { itelis: ['opti2','opti3','opti4'] };
+    const _niveaux = _NIVEAUX_TARIFAIRES[id] || null;
+    const _niveauxInstr = _niveaux ? `
+
+━━ NIVEAUX DE CONTRAT (${reseauLabel} : ${_niveaux.join(' / ')}) — IMPORTANT ━━
+Ce réseau a PLUSIEURS niveaux de contrat avec des PRIX DIFFÉRENTS (souvent des colonnes "Opti 2", "Opti 3", "Opti 4"…). Pour CHAQUE niveau, donne le prix complet par verre dans "niveaux" (clés EXACTES : ${_niveaux.map(n=>'"'+n+'"').join(', ')}) :
+"niveaux": { ${_niveaux.map(n=>`"${n}": {"nk_h1":{"1.6":160}}`).join(', ')} }
+- Chaque "niveaux.<niv>" a la MÊME forme que "verres" (id catalogue → prix complet par indice).
+- Mets dans "verres" (racine) le niveau de BASE / sans option (le moins cher / Itelis classique).
+- Répète chaque verre dans CHAQUE niveau où il a un prix, même si identique. RESPECTE les écarts de prix entre niveaux.` : '';
+
     // Construit le prompt pour un morceau du texte de convention
     const mkPrompt = (txt, partInfo) => `Tu es un expert en conventionnement optique en France. On te donne (1) le CATALOGUE de verres de l'opticien et (2) un EXTRAIT${partInfo} du texte d'un document de conventionnement réseau (${reseauLabel}) qui liste les PRIX DE VENTE MAXIMA négociés (reste à charge zéro / "prix maxima" / "prix de vente max" / plafond verre).
 
@@ -5599,6 +5611,8 @@ Le prix dans "verres" inclut l'antireflet D'ORIGINE du verre (colonne traitement
 Exemple : "verres": {"nk_h1": {"1.5":210,"1.6":243}, "nk_e3": {"1.5":49,"1.6":69}}
 
 ⚠️ DIFFÉRENCIE LES DESIGNS : un Presio Master Z (premium) coûte BEAUCOUP plus cher qu'un Presio Touch ou un sphérique. Ne donne JAMAIS le même prix à tous les progressifs. Si le PDF distingue les designs/gammes, RESPECTE ces écarts verre par verre.
+
+⚠️ VERRES TRANSITIONS / PHOTOCHROMIQUES (nom contenant "Transitions", "Gen S", "Sensity", "Reactiv"…) : leur prix dans "verres" DOIT INCLURE la prime photochromique → il est TOUJOURS NETTEMENT SUPÉRIEUR à la version claire du même design. Si la convention chiffre la photochromie comme un supplément à part, ADDITIONNE-le au prix de base de ce verre. Un verre Transitions ne doit JAMAIS être au même prix (ni moins cher) que sa version claire.${_niveauxInstr}
 
 ━━ OUTPUT COMPLÉMENTAIRE OBLIGATOIRE : grille des suppléments antireflet ("composants":{"traitement":{...}}) ━━
 Donne le supplément € de CHAQUE antireflet (ECC+UV, SCC+UV NG, See Coat Next UV, See Coat Blue UV, Pure Blue UV…) → sert au recalcul quand l'opticien change le traitement d'un verre.
@@ -5665,9 +5679,10 @@ RÈGLES STRICTES :
     const hasComposants = !!(Object.keys(_comp.materiau||{}).length || Object.keys(_comp.surface||{}).length || Object.keys(_comp.traitement||{}).length);
     const nbVerres = parsed.verres ? Object.keys(parsed.verres).length : 0;
     const nbVerriers = Object.keys(parsed.verriers||{}).length;
+    const nbNiveaux = parsed.niveaux ? Object.keys(parsed.niveaux).length : 0;
 
     // GARDE-FOU : une analyse VIDE ne doit pas écraser une bonne extraction précédente.
-    if(!hasComposants && !nbVerres && !nbVerriers){
+    if(!hasComposants && !nbVerres && !nbVerriers && !nbNiveaux){
       if(btn){ btn.disabled = false; btn.innerHTML = '<i class="ti ti-cpu"></i> Réanalyser avec IA'; }
       showToast(`${reseauLabel} : l'IA n'a rien pu extraire (données précédentes conservées). Réessaie dans un instant.`);
       return;
@@ -5752,6 +5767,8 @@ function _normalizeConvParsed(raw){
   if(!raw || typeof raw!=='object') return raw||{};
   const out = { reseau: raw.reseau, seuil_complexe: raw.seuil_complexe, precalibrage_max: raw.precalibrage_max,
                 verres: raw.verres, verriers: raw.verriers };
+  // Niveaux de contrat (Itelis Opti 2/3/4…) : map niveau → {id verre: {indice: prix}}. Conservé tel quel.
+  if(raw.niveaux && typeof raw.niveaux==='object') out.niveaux = raw.niveaux;
   // Récupère tous les blocs "composants" : top-level + dans grilles[] (Verres essentiels + spéciaux…)
   const blocs = [];
   if(raw.composants) blocs.push(raw.composants);
@@ -5817,6 +5834,15 @@ function _mergeConvParsed(into, part){
   if(part.verres && typeof part.verres==='object'){
     into.verres = into.verres || {};
     for(const id in part.verres) into.verres[id] = Object.assign(into.verres[id]||{}, part.verres[id]);
+  }
+  // Niveaux de contrat (Itelis Opti 2/3/4…) : fusion par niveau puis par verre.
+  if(part.niveaux && typeof part.niveaux==='object'){
+    into.niveaux = into.niveaux || {};
+    for(const niv in part.niveaux){
+      const src = part.niveaux[niv]; if(!src || typeof src!=='object') continue;
+      const dst = into.niveaux[niv] = into.niveaux[niv] || {};
+      for(const id in src) dst[id] = Object.assign(dst[id]||{}, src[id]);
+    }
   }
   if(part.verriers && typeof part.verriers==='object'){
     into.verriers = into.verriers || {};
@@ -6042,10 +6068,14 @@ const _ANTIREFLETS_DEFAUT = [
   {nom:'See Coat Blue UV', tag:'lb', icon:'ti-device-desktop'},
   {nom:'Pure Blue UV',     tag:'lb', icon:'ti-device-desktop'}
 ];
-// Antireflet "d'origine" d'un verre = 1er traitement antireflet de son catalogue.
+// Antireflet "d'origine" d'un verre = 1er traitement ANTIREFLET de son catalogue.
+// On EXCLUT la photochromie (Transitions, Sensity, Reactiv…) qui est une dimension distincte.
+const _isPhotoName = n => /transition|photochrom|sensity|reactiv|photofusion|colormatic|xtractive|gen\s*s|polaris|teinte/i.test(n||'');
 function _verreDefaultTrait(v){
-  const t=(v.traitements||[]).map(x=>x&&x.nom).find(n=>n && /uv|coat|ecc|scc|hcc|antireflet|crizal|duravision|reflet|blue/i.test(n));
-  return t || ((v.traitements||[])[0]&&v.traitements[0].nom) || 'ECC+UV';
+  const noms=(v.traitements||[]).map(x=>x&&x.nom).filter(Boolean);
+  const ar = noms.find(n=> !_isPhotoName(n) && /uv|coat|ecc|scc|hcc|antireflet|crizal|duravision|reflet|blue/i.test(n));
+  // Repli propre = ECC+UV (antireflet standard Nikon), pas un nom de design/surfaçage.
+  return ar || 'ECC+UV';
 }
 // Liste des antireflets sélectionnables pour un verre :
 //   1) v.antireflets (extraits du catalogue PDF) si présents, sinon gamme par défaut filtrée par tags
@@ -6058,7 +6088,8 @@ function _verreAntireflets(v, convParsed){
   if(def && !noms.some(n=>n.toLowerCase()===def.toLowerCase())) noms.unshift(def);
   const grid = convParsed && convParsed.composants && convParsed.composants.traitement;
   if(grid) Object.keys(grid).forEach(k=>{ if(!noms.some(n=>n.toLowerCase()===k.toLowerCase())) noms.push(k); });
-  return [...new Set(noms)];
+  // La photochromie (Transitions, Sensity…) n'est PAS un antireflet → exclue du sélecteur.
+  return [...new Set(noms)].filter(n=> !_isPhotoName(n));
 }
 // Sélection utilisateur du traitement par verre (persistée + synchronisée).
 let _traitChoisi = {};
@@ -6111,8 +6142,11 @@ function _calcConvComposants(v, ind, eqSph, parsed){
       if(m){ traitement=m.prix; traitLbl=m.key; }
     }
     let photo=0, photoLbl='';
-    if((v.tags||[]).includes('tr') && c.photochromie){
-      const m=_convBestMatch((v.nom||'')+' transitions photochromique', c.photochromie, 1);
+    if((v.tags||[]).includes('tr') && c.photochromie && Object.keys(c.photochromie).length){
+      let m=_convBestMatch((v.nom||'')+' transitions gen s photochromique', c.photochromie, 1);
+      // Cross-marque : la convention chiffre la photochromie sous d'autres noms (Sensity, Cameleon…).
+      // Si pas de match par nom, on prend la valeur la PLUS ÉLEVÉE de la grille (prime photochromique max).
+      if(!m){ const e=Object.entries(c.photochromie).map(([k,val])=>[k,parseFloat(val)||0]).sort((a,b)=>b[1]-a[1]); if(e.length){ m={key:e[0][0], prix:e[0][1]}; } }
       if(m){ photo=m.prix; photoLbl=m.key; }
     }
     const venteConv=Math.round((base+surface+traitement+photo)*100)/100;
@@ -6200,15 +6234,31 @@ function _resolveReseauPrix(v, ind, eqSph, visionId, mutId){
     return (cd && cd.venteConv>0) ? cd : null;
   };
   const isSub = mutId.includes('_');
-  // 1) convention exacte
+  // 1) convention exacte de ce mutId
   let cd = calc(_getConvParsedExact(mutId));
   if(cd) return {prix:cd.venteConv, convData:cd, source:'IA'};
-  // 2) tarif niveau spécifique (sous-contrat) prime sur la conv parente
-  if(isSub && v.tarifsReseau && v.tarifsReseau[mutId] && v.tarifsReseau[mutId][ind]!=null)
-    return {prix:v.tarifsReseau[mutId][ind], convData:null, source:'grille'};
-  // 3) convention parente (repli sous-contrat)
-  if(isSub){ cd = calc(_getConvParsedExact(mutId.split('_')[0])); if(cd) return {prix:cd.venteConv, convData:cd, source:'IA'}; }
-  // 4) grille hard-codée du mutId
+  if(isSub){
+    const parentId = mutId.split('_')[0];
+    const niveau   = mutId.split('_').slice(1).join('_'); // 'opti2', 'oxantis'…
+    const parentConv = _getConvParsedExact(parentId);
+    if(parentConv){
+      // 2) NIVEAU spécifique extrait du PDF (Itelis Opti 2/3/4…) — le plus précis
+      const nivVerres = parentConv.niveaux && parentConv.niveaux[niveau];
+      if(nivVerres){
+        cd = calc({ verres:nivVerres, composants:parentConv.composants, precalibrage_max:parentConv.precalibrage_max });
+        if(cd) return {prix:cd.venteConv, convData:cd, source:'IA'};
+      }
+      // 3) tarif niveau codé en dur (prime sur la base parente générique)
+      if(v.tarifsReseau && v.tarifsReseau[mutId] && v.tarifsReseau[mutId][ind]!=null)
+        return {prix:v.tarifsReseau[mutId][ind], convData:null, source:'grille'};
+      // 4) base de la convention parente
+      cd = calc(parentConv);
+      if(cd) return {prix:cd.venteConv, convData:cd, source:'IA'};
+    } else if(v.tarifsReseau && v.tarifsReseau[mutId] && v.tarifsReseau[mutId][ind]!=null){
+      return {prix:v.tarifsReseau[mutId][ind], convData:null, source:'grille'};
+    }
+  }
+  // 5) grille hard-codée du mutId
   if(v.tarifsReseau && v.tarifsReseau[mutId] && v.tarifsReseau[mutId][ind]!=null)
     return {prix:v.tarifsReseau[mutId][ind], convData:null, source:'grille'};
   return null;
