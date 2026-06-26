@@ -1130,6 +1130,11 @@ select option{background:#fff;color:var(--txt-primary)}
         </div>
         <div id="claude-key-status" style="font-size:11px;color:var(--txt-muted);display:flex;align-items:center;gap:5px;margin-bottom:4px"></div>
         <div id="cloud-sync-status" style="font-size:11px;display:flex;align-items:center;gap:5px;margin-bottom:4px"></div>
+        <div style="display:flex;gap:8px;align-items:center;margin:6px 0">
+          <button onclick="_cloudResync(this)" style="background:#0f766e;color:#fff;border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap"><i class="ti ti-cloud-upload"></i> Forcer la synchronisation</button>
+          <span style="font-size:11px;color:var(--txt-muted)">Envoie conventions + prix vers le cloud (à faire depuis le PC à jour)</span>
+        </div>
+        <div id="cloud-resync-result" style="font-size:11px;margin-bottom:4px"></div>
         <div style="font-size:11px;color:var(--txt-muted)">Obtenez votre clé sur <strong>console.anthropic.com</strong> · ~0,01 € par PDF analysé</div>
       </div>
       <!-- ── SECTION LOGS DE L'APPLICATION — Superhôte uniquement ── -->
@@ -4223,6 +4228,37 @@ async function _cloudLoadAll(){
     _cloudSyncOK = true;
     return n;
   }catch(e){ return -1; }
+}
+// Toutes les clés sync présentes en localStorage (exactes + préfixées).
+function _allLocalSyncKeys(){
+  const out=[];
+  for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && _isSyncKey(k)) out.push(k); }
+  return out;
+}
+// Diagnostic + resync manuel : teste la table app_config, puis pousse TOUTES les clés locales.
+async function _cloudResync(btn){
+  const res=document.getElementById('cloud-resync-result');
+  const setRes=(html)=>{ if(res) res.innerHTML=html; };
+  if(btn){ btn.disabled=true; btn.dataset._t=btn.innerHTML; btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Synchronisation…'; }
+  // 1) test écriture + lecture
+  let tableOK=false;
+  try{
+    await sbFetch('/rest/v1/app_config?on_conflict=id',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:'__synctest__',value:'ok',updated_at:new Date().toISOString()})});
+    const r=await sbFetch('/rest/v1/app_config?id=eq.__synctest__&select=value');
+    tableOK = Array.isArray(r) && r.length>0 && r[0].value==='ok';
+  }catch(e){ tableOK=false; }
+  if(!tableOK){
+    _cloudSyncOK=false; _refreshClaudeKeyStatus();
+    setRes(`<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:8px 10px;color:#991B1B"><strong>⚠ Table cloud absente.</strong> Crée-la une fois dans Supabase (SQL Editor) puis reclique :<br><code style="display:block;background:#1e1e1e;color:#9cdcfe;padding:8px;border-radius:6px;margin-top:6px;font-size:10px;white-space:pre-wrap">create table if not exists app_config (id text primary key, value text, updated_at timestamptz default now());\nalter table app_config disable row level security;</code></div>`);
+    if(btn){ btn.disabled=false; btn.innerHTML=btn.dataset._t; }
+    return;
+  }
+  // 2) pousser toutes les clés locales
+  const keys=_allLocalSyncKeys(); let ok=0;
+  for(const k of keys){ try{ await _cloudUpsert(k, localStorage.getItem(k)); ok++; }catch(e){} }
+  _cloudSyncOK=true; _refreshClaudeKeyStatus();
+  setRes(`<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 10px;color:#166534"><strong>✓ Synchronisé.</strong> ${ok} élément(s) envoyé(s) vers le cloud (conventions, prix, traitements…). Sur l'autre PC : déconnecte-toi puis reconnecte-toi pour récupérer ces données.</div>`);
+  if(btn){ btn.disabled=false; btn.innerHTML=btn.dataset._t; }
 }
 
 // ─── SUPERHOTE ─────────────────────────────────────────────────
