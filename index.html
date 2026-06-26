@@ -5648,7 +5648,9 @@ Exemple : "verres": {"nk_h1": {"1.5":210,"1.6":243}, "nk_e3": {"1.5":49,"1.6":69
 
 ⚠️ DIFFÉRENCIE LES DESIGNS : un Presio Master Z (premium) coûte BEAUCOUP plus cher qu'un Presio Touch ou un sphérique. Ne donne JAMAIS le même prix à tous les progressifs. Si le PDF distingue les designs/gammes, RESPECTE ces écarts verre par verre.
 
-⚠️ VERRES TRANSITIONS / PHOTOCHROMIQUES (nom contenant "Transitions", "Gen S", "Sensity", "Reactiv"…) : leur prix dans "verres" DOIT INCLURE la prime photochromique → il est TOUJOURS NETTEMENT SUPÉRIEUR à la version claire du même design. Si la convention chiffre la photochromie comme un supplément à part, ADDITIONNE-le au prix de base de ce verre. Un verre Transitions ne doit JAMAIS être au même prix (ni moins cher) que sa version claire.${_niveauxInstr}
+⚠️ VERRES TRANSITIONS / PHOTOCHROMIQUES (nom contenant "Transitions", "Gen S", "Sensity", "Reactiv"…) : leur prix dans "verres" DOIT INCLURE la prime photochromique → il est TOUJOURS NETTEMENT SUPÉRIEUR à la version claire du même design. Si la convention chiffre la photochromie comme un supplément à part, ADDITIONNE-le au prix de base de ce verre. Un verre Transitions ne doit JAMAIS être au même prix (ni moins cher) que sa version claire.
+
+⚠️ VERRES LUMIÈRE BLEUE (marqués antireflet:"Pure Blue UV"/"SeeCoat Blue UV"/"Blue UV"…) : leur antireflet anti-lumière-bleue est PLUS CHER qu'un antireflet standard (ECC+UV). Leur prix dans "verres" doit refléter ce supplément → toujours SUPÉRIEUR au même verre en antireflet standard. N'utilise jamais le prix de l'antireflet le moins cher pour un verre lumière bleue.${_niveauxInstr}
 
 ━━ OUTPUT COMPLÉMENTAIRE OBLIGATOIRE : grille des suppléments antireflet ("composants":{"traitement":{...}}) ━━
 Donne le supplément € de CHAQUE antireflet (ECC+UV, SCC+UV NG, See Coat Next UV, See Coat Blue UV, Pure Blue UV…) → sert au recalcul quand l'opticien change le traitement d'un verre.
@@ -6112,8 +6114,10 @@ const _isPhotoName = n => /transition|photochrom|sensity|reactiv|photofusion|col
 function _verreDefaultTrait(v){
   const noms=(v.traitements||[]).map(x=>x&&x.nom).filter(Boolean);
   const ar = noms.find(n=> !_isPhotoName(n) && /uv|coat|ecc|scc|hcc|antireflet|crizal|duravision|reflet|blue/i.test(n));
+  // Nettoie le libellé : retire les parenthèses « (SCB UV) » et suffixes « intégré » qui cassent le matching.
+  const clean = n => (n||'').replace(/\s*\([^)]*\)\s*/g,' ').replace(/\b(intégré|integre|disponible)\b/ig,'').replace(/\s+/g,' ').trim();
   // Repli propre = ECC+UV (antireflet standard Nikon), pas un nom de design/surfaçage.
-  return ar || 'ECC+UV';
+  return ar ? (clean(ar) || ar) : 'ECC+UV';
 }
 // Liste des antireflets sélectionnables pour un verre :
 //   1) v.antireflets (extraits du catalogue PDF) si présents, sinon gamme par défaut filtrée par tags
@@ -6150,6 +6154,21 @@ function _convTraitSupp(name, grid){
   const m=_convBestMatch(name, grid, 1);
   return m ? m.prix : null;
 }
+// Supplément de l'antireflet D'ORIGINE d'un verre dans la grille convention.
+// - Verre LUMIÈRE BLEUE (tag lb) : prend le supplément antireflet BLEU le plus élevé (premium),
+//   car ces verres ont un achat élevé et un nom ambigu ("Pure Blue UV" ≈ "SeeCoat Blue UV").
+// - Sinon : antireflet d'origine NETTOYÉ (sans parenthèses), match exact puis flou.
+function _convVerreOrigSupp(v, grid){
+  if(!grid || typeof grid!=='object') return null;
+  if((v.tags||[]).includes('lb')){
+    const blues=Object.entries(grid).filter(([k])=>/blue|bleu/i.test(k)).map(([k,val])=>[k,parseFloat(val)||0]).filter(e=>!isNaN(e[1])).sort((a,b)=>b[1]-a[1]);
+    if(blues.length) return {key:blues[0][0], prix:blues[0][1]};
+  }
+  const def=_verreDefaultTrait(v);
+  if(grid[def]!=null){ const n=parseFloat(grid[def]); if(!isNaN(n)) return {key:def, prix:n}; }
+  const m=_convBestMatch(def, grid, 1);
+  return m ? {prix:m.prix, key:m.key} : null;
+}
 
 function _calcConvComposants(v, ind, eqSph, parsed){
   const c = parsed && parsed.composants;
@@ -6171,12 +6190,15 @@ function _calcConvComposants(v, ind, eqSph, parsed){
     }
     let traitement=0, traitLbl='';
     if(c.traitement){
-      // Traitement CHOISI par l'utilisateur (menu) prioritaire, sinon antireflet d'origine du verre.
-      const sel=_getTraitChoisi(v);
+      // Choix EXPLICITE de l'utilisateur (menu) prioritaire ; sinon antireflet d'origine alias-expansé
+      // (évite de matcher un "Pure Blue UV" bon marché au lieu du "SeeCoat Blue UV" premium réel du verre).
+      const explicit=_traitChoisi[v.id];
       let m=null;
-      if(sel && c.traitement[sel]!=null) m={key:sel, prix:parseFloat(c.traitement[sel])||0};
-      if(!m && sel) m=_convBestMatch(sel, c.traitement, 1);
-      if(!m) m=_convBestMatch(_convCoatingText(v), c.traitement, 1);
+      if(explicit){
+        if(c.traitement[explicit]!=null) m={key:explicit, prix:parseFloat(c.traitement[explicit])||0};
+        else m=_convBestMatch(explicit, c.traitement, 1);
+      }
+      if(!m){ const o=_convVerreOrigSupp(v, c.traitement); if(o) m={key:o.key, prix:o.prix}; }
       if(m){ traitement=m.prix; traitLbl=m.key; }
     }
     let photo=0, photoLbl='';
@@ -6260,7 +6282,8 @@ function _resolveReseauPrix(v, ind, eqSph, visionId, mutId){
       if(grid){
         const sel=_getTraitChoisi(v), def=_verreDefaultTrait(v);
         if(sel && def && sel.toLowerCase()!==def.toLowerCase()){
-          const sSel=_convTraitSupp(sel, grid), sDef=_convTraitSupp(def, grid);
+          const sSel=_convTraitSupp(sel, grid);
+          const oDef=_convVerreOrigSupp(v, grid); const sDef=oDef?oDef.prix:null; // origine alias-expansée
           if(sSel!=null && sDef!=null){ p=Math.round((p - sDef + sSel)*100)/100; traitLbl=sel; traitDetail.push('Traitement '+sel+' ('+(sSel>=sDef?'+':'−')+Math.abs(sSel-sDef)+'€ vs '+def+')'); }
         }
       }
