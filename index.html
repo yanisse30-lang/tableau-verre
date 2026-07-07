@@ -5685,6 +5685,7 @@ RÈGLES STRICTES :
 - N'INVENTE AUCUN prix : si tu ne trouves pas le prix d'un verre dans CE morceau, ne le mets pas. N'invente aucun supplément.
 - Verrier(s) ${_verriersStr} UNIQUEMENT. Ne mélange pas les colonnes des autres verriers.
 - "composants":{"traitement"} = supplément € par antireflet (pour le recalcul si l'opticien change le traitement).
+- NE renvoie PAS de grille "materiau" ni "surface" : c'est TOI qui additionnes et donnes le prix TOTAL par verre dans "verres". Uniquement "verres" + "composants":{"traitement","photochromie"} (+ "niveaux" si contrats multiples).
 - seuil_complexe défaut 6.0. Si plusieurs niveaux/contrats (Opti 2/3/4…), prends le niveau le plus complet.`;
 
     // ── Localise les pages du verrier + rend en IMAGE (vision) : lecture de tableaux fiable ──
