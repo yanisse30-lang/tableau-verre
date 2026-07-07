@@ -5590,12 +5590,6 @@ async function analyzeConvPdfWithAI(id){
 
     pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS + '/pdf.worker.min.js';
     const pdf = await pdfjsLib.getDocument({data: bytes.buffer}).promise;
-    let fullText = '';
-    for(let i = 1; i <= Math.min(pdf.numPages, 60); i++){
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      fullText += content.items.map(s => s.str).join(' ') + '\n';
-    }
 
     const reseauInfo = _CONV_RESEAUX.find(r => r.id === id);
     const reseauLabel = reseauInfo ? reseauInfo.label : id;
@@ -5625,13 +5619,14 @@ Ce réseau a PLUSIEURS niveaux de contrat avec des PRIX DIFFÉRENTS (souvent des
 - Répète chaque verre dans CHAQUE niveau où il a un prix, même si identique. RESPECTE les écarts de prix entre niveaux.` : '';
 
     // Construit le prompt pour un morceau du texte de convention
-    const mkPrompt = (txt, partInfo) => `Tu es un expert en conventionnement optique en France. On te donne (1) le CATALOGUE de verres de l'opticien et (2) un EXTRAIT${partInfo} du texte d'un document de conventionnement réseau (${reseauLabel}) qui liste les PRIX DE VENTE MAXIMA négociés (reste à charge zéro / "prix maxima" / "prix de vente max" / plafond verre).
+    // sourceBlock = soit le texte extrait, soit une note "images" (mode vision)
+    const mkPrompt = (sourceBlock, partInfo) => `Tu es un expert en conventionnement optique en France. On te donne (1) le CATALOGUE de verres de l'opticien et (2) un document de conventionnement réseau (${reseauLabel})${partInfo} qui liste les PRIX DE VENTE MAXIMA négociés (reste à charge zéro / "prix maxima" / "prix de vente max" / plafond verre).
 
 CATALOGUE OPTICIEN — une ligne par verre, format « id | nom | type | traitement | [indices disponibles] » :
 ${catCtx}
 
-TEXTE DE LA CONVENTION ${reseauLabel}${partInfo} :
-${txt}
+CONVENTION ${reseauLabel}${partInfo} :
+${sourceBlock}
 
 ⚠️ VALEUR À EXTRAIRE — TRÈS IMPORTANT :
 - Extrais le PRIX DE VENTE de l'opticien (= prix facturé au client / "prix de vente" / "prix verre" / "tarif opticien" / "prix net réseau" / "prix maxima" / "PVP").
@@ -5692,19 +5687,39 @@ RÈGLES STRICTES :
 - "composants":{"traitement"} = supplément € par antireflet (pour le recalcul si l'opticien change le traitement).
 - seuil_complexe défaut 6.0. Si plusieurs niveaux/contrats (Opti 2/3/4…), prends le niveau le plus complet.`;
 
-    // Découpage en plusieurs passes. Morceaux plus larges (Sonnet, contexte large) → grilles moins
-    // fragmentées entre passes, donc extraction plus fiable.
-    const chunks = _chunkText(fullText, 40000, 8);
+    // ── Localise les pages du verrier + rend en IMAGE (vision) : lecture de tableaux fiable ──
+    if(btn) btn.innerHTML = `<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Repérage des pages…`;
+    const { pages, textByPage } = await _pdfFindVerrierPages(pdf, _verriers, 12);
+    let fullText = pages.map(p=>textByPage[p]||'').join('\n');
+    if(!fullText.trim()) fullText = Object.values(textByPage).join('\n');
+    let images = [];
+    try{
+      if(btn) btn.innerHTML = `<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Rendu des pages (vision)…`;
+      images = await _pdfRenderPages(pdf, pages, 2.0);
+    }catch(e){ images = []; }
+
     const parsed = { reseau: reseauLabel };
-    for(let ci=0; ci<chunks.length; ci++){
-      const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
-      if(btn) btn.innerHTML = `<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Analyse${partInfo}…`;
-      // Sonnet : extraction de grilles tarifaires complexes (Haiku se trompe sur materiau/surface/traitement).
-      // maxTokens élevé : les grosses grilles (Séveane ~100 designs) ne doivent pas être tronquées (JSON cassé).
-      const raw = await _aiCall(claudeKey, mkPrompt(chunks[ci], partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, onWait:(s)=>{
-        if(btn) btn.innerHTML = `<i class="ti ti-clock"></i> Pause ${s}s (limite IA)…`;
-      }});
-      _mergeConvParsed(parsed, _normalizeConvParsed(_extractJson(raw)));
+    const _onWait = (s)=>{ if(btn) btn.innerHTML = `<i class="ti ti-clock"></i> Pause ${s}s (limite IA)…`; };
+    if(images.length){
+      // VISION : envoie les pages en images, par lots (4 pages/appel)
+      const bs = 4, nB = Math.ceil(images.length/bs);
+      const sourceNote = `Les pages de la convention te sont fournies en IMAGES ci-jointes. LIS DIRECTEMENT les tableaux (colonnes/lignes alignées) — c'est fiable, ne devine pas.`;
+      for(let b=0; b<nB; b++){
+        const partInfo = nB>1 ? ` (lot ${b+1}/${nB})` : '';
+        if(btn) btn.innerHTML = `<i class="ti ti-cpu" style="animation:spin 1s linear infinite"></i> Lecture vision${partInfo}…`;
+        const batch = images.slice(b*bs, (b+1)*bs);
+        const raw = await _aiCall(claudeKey, mkPrompt(sourceNote, partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, images:batch, onWait:_onWait });
+        _mergeConvParsed(parsed, _normalizeConvParsed(_extractJson(raw)));
+      }
+    } else {
+      // REPLI TEXTE (si le rendu image échoue) : découpage en passes
+      const chunks = _chunkText(fullText, 40000, 8);
+      for(let ci=0; ci<chunks.length; ci++){
+        const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
+        if(btn) btn.innerHTML = `<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Analyse texte${partInfo}…`;
+        const raw = await _aiCall(claudeKey, mkPrompt(chunks[ci], partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, onWait:_onWait });
+        _mergeConvParsed(parsed, _normalizeConvParsed(_extractJson(raw)));
+      }
     }
 
     // Contrôle final sur la grille FUSIONNÉE (les contrôles par morceau ne voient qu'une partie)
@@ -5762,15 +5777,24 @@ function _catalogueVerriers(){
 }
 
 // Appel API Claude avec retry automatique sur 429 (rate limit). onWait(sec) notifie l'attente.
+// opts.images = tableau de PNG base64 (sans préfixe data:) → analyse en VISION (lecture de tableaux fiable).
 async function _aiCall(key, prompt, opts){
   opts = opts || {};
   const model = opts.model || 'claude-haiku-4-5';
   const maxTokens = opts.maxTokens || 4096;
+  // Contenu : soit texte simple, soit images + texte (vision)
+  let content;
+  if(opts.images && opts.images.length){
+    content = opts.images.map(b64 => ({type:'image', source:{type:'base64', media_type:'image/png', data:b64}}));
+    content.push({type:'text', text: prompt});
+  } else {
+    content = prompt;
+  }
   for(let attempt=0; attempt<5; attempt++){
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'x-api-key':key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model, max_tokens:maxTokens, messages:[{role:'user', content:prompt}]})
+      body:JSON.stringify({model, max_tokens:maxTokens, messages:[{role:'user', content}]})
     });
     if(resp.status===429 && attempt<4){
       let ra = parseInt(resp.headers.get('retry-after')||'', 10);
@@ -5784,6 +5808,55 @@ async function _aiCall(key, prompt, opts){
     return data.content?.[0]?.text || '';
   }
   throw new Error('rate_limit_error — limite atteinte après plusieurs essais');
+}
+
+// ─── LECTURE PDF EN VISION ───────────────────────────────────────
+// Rend des pages PDF en PNG base64 (canvas pdf.js) pour envoyer à Claude en vision.
+// La lecture d'image conserve l'alignement des tableaux → extraction bien plus fiable que le texte aplati.
+async function _pdfRenderPages(pdf, pageNums, scale){
+  scale = scale || 2.0;
+  const out = [];
+  for(const p of pageNums){
+    try{
+      const page = await pdf.getPage(p);
+      let viewport = page.getViewport({scale});
+      // Bride la dimension max (~1600px) : Claude redimensionne au-delà, inutile d'alourdir.
+      const maxPx = 1600;
+      const big = Math.max(viewport.width, viewport.height);
+      if(big > maxPx){ viewport = page.getViewport({scale: scale * (maxPx/big)}); }
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.ceil(viewport.width); canvas.height = Math.ceil(viewport.height);
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      await page.render({canvasContext: ctx, viewport}).promise;
+      const dataUrl = canvas.toDataURL('image/png');
+      out.push(dataUrl.split(',')[1]); // base64 sans préfixe
+    }catch(e){ /* page illisible → ignorée */ }
+  }
+  return out;
+}
+// Trouve les pages qui mentionnent un des verriers cibles (via le texte, peu coûteux).
+// Renvoie {pages:[...], textByPage:{n:txt}}. Si aucune, renvoie les premières pages.
+async function _pdfFindVerrierPages(pdf, verriers, maxPages){
+  maxPages = maxPages || 12;
+  const nP = Math.min(pdf.numPages, 60);
+  const rx = verriers && verriers.length
+    ? new RegExp(verriers.map(v=>v.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'), 'i')
+    : null;
+  const hits = []; const textByPage = {};
+  for(let i=1;i<=nP;i++){
+    try{
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const txt = content.items.map(s=>s.str).join(' ');
+      textByPage[i] = txt;
+      if(rx && rx.test(txt)) hits.push(i);
+    }catch(e){}
+  }
+  let pages = hits;
+  if(!pages.length){ pages = []; for(let i=1;i<=Math.min(nP,maxPages);i++) pages.push(i); } // repli : premières pages
+  if(pages.length > maxPages) pages = pages.slice(0, maxPages);
+  return { pages, textByPage };
 }
 
 // Découpe un texte en morceaux d'environ "size" caractères (max "maxChunks" morceaux)
@@ -8953,15 +9026,6 @@ async function _catLaunchIA(type){
     }
     pdfjsLib.GlobalWorkerOptions.workerSrc = _PDFJS+'/pdf.worker.min.js';
     const pdf = await pdfjsLib.getDocument({data:buf}).promise;
-    let fullText = '';
-    for(let i=1;i<=Math.min(pdf.numPages,60);i++){
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      fullText += content.items.map(s=>s.str).join(' ')+'\n';
-      zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Extraction — page ${i}/${pdf.numPages}…</div>`;
-    }
-
-    zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Claude IA analyse le PDF…</div>`;
 
     const all = [...catalogue, ...catalogue2e];
     const _gl = {haut:'PREMIUM',milieu:'MILIEU',entree:'ENTREE'};
@@ -8973,15 +9037,15 @@ async function _catLaunchIA(type){
     }).join('\n');
 
     // Construit le prompt pour un morceau de texte du PDF
-    const mkPrompt = (txt, partInfo) => {
+    const mkPrompt = (sourceBlock, partInfo) => {
       if(type === 'catalogue'){
         return `Tu es un expert en optique ophtalmique. Analyse ce PDF catalogue verre fournisseur${partInfo}.
 
 CATALOGUE OPTICIEN — une ligne par verre, format « id | nom | marque | type | gamme | antireflet | flags | vente_actuelle[indice:prix] » :
 ${catCtx}
 
-TEXTE DU PDF :
-${txt}
+SOURCE (texte extrait OU images ci-jointes — si images, lis directement les tableaux) :
+${sourceBlock}
 
 VERRE DE STOCK = verre sphérique pré-fabriqué, livraison J+1, prix catalogue fixe.
 Mots-clés stock: "stock", "de stock", "sphérique de stock", "non surfacé", "Ready-Made", "de série".
@@ -9019,8 +9083,8 @@ RÈGLES: Ne pas inventer de prix ni de nom d'antireflet · stock:true si verre d
 CATALOGUE OPTICIEN — une ligne par verre, format « id | nom | marque | type | gamme | antireflet | flags | vente_actuelle[indice:prix] » :
 ${catCtx}
 
-TEXTE DU PDF :
-${txt}
+SOURCE (texte extrait OU images ci-jointes — si images, lis directement les tableaux) :
+${sourceBlock}
 
 MISSION: Extrait TOUS les prix d'ACHAT HT opticien pour les verres du catalogue présents dans CE morceau. Sois EXHAUSTIF : passe en revue chaque ligne du catalogue, n'omets aucun verre présent. Mappe sur l'id EXACT en t'aidant du type/gamme/antireflet.
 
@@ -9033,16 +9097,36 @@ Réponds UNIQUEMENT JSON valide:
 RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de stock · Si rien dans ce morceau: {"verres":[]}`;
     };
 
-    // Découpage en plusieurs passes (morceaux larges Sonnet → moins de fragmentation)
-    const chunks = _chunkText(fullText, 40000, 8);
+    // ── Localise les pages du/des verrier(s) + rend en IMAGE (vision) ──
+    const _catVerriers = _catalogueVerriers();
+    const _prog = (t)=>{ zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> ${t}</div>`; };
+    _prog('Repérage des pages…');
+    const { pages, textByPage } = await _pdfFindVerrierPages(pdf, _catVerriers, 12);
+    let fullText = pages.map(p=>textByPage[p]||'').join('\n');
+    if(!fullText.trim()) fullText = Object.values(textByPage).join('\n');
+    let images = [];
+    try{ _prog('Rendu des pages (vision)…'); images = await _pdfRenderPages(pdf, pages, 2.0); }catch(e){ images=[]; }
+
     const merged = {verres:[]};
-    for(let ci=0; ci<chunks.length; ci++){
-      const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
-      zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#5B21B6;font-weight:600"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Claude IA analyse le PDF${partInfo}…</div>`;
-      const raw = await _aiCall(key, mkPrompt(chunks[ci], partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, onWait:(s)=>{
-        zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#92400E;font-weight:600"><i class="ti ti-clock"></i> Limite IA atteinte — pause ${s}s puis reprise${partInfo}…</div>`;
-      }});
-      _mergeCatVerres(merged.verres, _extractJson(raw).verres);
+    const _wait=(s)=>{ zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#92400E;font-weight:600"><i class="ti ti-clock"></i> Limite IA — pause ${s}s puis reprise…</div>`; };
+    if(images.length){
+      const bs=4, nB=Math.ceil(images.length/bs);
+      const sourceNote = `Les pages du catalogue te sont fournies en IMAGES ci-jointes. LIS DIRECTEMENT les tableaux (colonnes alignées) — ne devine pas.`;
+      for(let b=0;b<nB;b++){
+        const partInfo = nB>1 ? ` (lot ${b+1}/${nB})` : '';
+        _prog(`Lecture vision${partInfo}…`);
+        const batch = images.slice(b*bs,(b+1)*bs);
+        const raw = await _aiCall(key, mkPrompt(sourceNote, partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, images:batch, onWait:_wait });
+        _mergeCatVerres(merged.verres, _extractJson(raw).verres);
+      }
+    } else {
+      const chunks = _chunkText(fullText, 40000, 8);
+      for(let ci=0; ci<chunks.length; ci++){
+        const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
+        _prog(`Analyse texte${partInfo}…`);
+        const raw = await _aiCall(key, mkPrompt(chunks[ci], partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, onWait:_wait });
+        _mergeCatVerres(merged.verres, _extractJson(raw).verres);
+      }
     }
 
     // Sauvegarder le résultat fusionné en cache
