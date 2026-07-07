@@ -5729,6 +5729,20 @@ RÈGLES STRICTES :
         parsed._warn=(parsed._warn||[]); parsed._warn.push('Grille progressif identique à la grille unifocale — à vérifier (réanalyse conseillée).'); } }
     }
 
+    // ── VALIDATION + AUTO-CORRECTION : l'IA se relit sur les incohérences (marge négative, indice décroissant) ──
+    let _issues = _validateConvParsed(parsed);
+    if(_issues.length && images.length){
+      if(btn) btn.innerHTML = `<i class="ti ti-cpu" style="animation:spin 1s linear infinite"></i> Auto-correction (${_issues.length} incohérence(s))…`;
+      try{
+        const rawFix = await _aiCall(claudeKey, _mkCorrectionPrompt(parsed, _issues, reseauLabel),
+          { model:'claude-sonnet-4-6', maxTokens:8000, images:images.slice(0,8), onWait:_onWait });
+        const fix = _normalizeConvParsed(_extractJson(rawFix));
+        if(fix.verres) _mergeConvParsed(parsed, {verres: fix.verres});
+        const _after = _validateConvParsed(parsed);
+        if(_after.length){ parsed._warn=(parsed._warn||[]); parsed._warn.push(`${_after.length} prix restent incohérents après auto-correction — à vérifier manuellement.`); }
+      }catch(e){ /* correction best-effort */ }
+    }
+
     // Bilan de l'extraction
     const _comp = parsed.composants || {};
     const hasComposants = !!(Object.keys(_comp.materiau||{}).length || Object.keys(_comp.surface||{}).length || Object.keys(_comp.traitement||{}).length);
@@ -5857,6 +5871,48 @@ async function _pdfFindVerrierPages(pdf, verriers, maxPages){
   if(!pages.length){ pages = []; for(let i=1;i<=Math.min(nP,maxPages);i++) pages.push(i); } // repli : premières pages
   if(pages.length > maxPages) pages = pages.slice(0, maxPages);
   return { pages, textByPage };
+}
+
+// ─── VALIDATION DE L'EXTRACTION (règles dures) ───────────────────
+// Renvoie la liste des incohérences détectées dans parsed.verres (+ niveaux) :
+// marge négative (prix < achat), prix décroissant avec l'indice, Transitions ≤ version claire.
+function _validateConvParsed(parsed){
+  const issues=[];
+  const all=[...catalogue, ...catalogue2e];
+  const check = (verresMap, label)=>{
+    for(const id in (verresMap||{})){
+      const v = all.find(x=>x.id===id); if(!v) continue;
+      const prices = verresMap[id]; if(!prices || typeof prices!=='object') continue;
+      // 1) marge négative (prix sous le coût d'achat)
+      for(const ind in prices){
+        const p=parseFloat(prices[ind]); if(isNaN(p)) continue;
+        const achat = v.achats ? _pickByIndex(v.achats, ind) : null;
+        if(achat!=null && p < parseFloat(achat)) issues.push(`${label}${id} (${v.nom}) ind ${ind}: prix ${p}€ < achat ${achat}€ → marge négative`);
+      }
+      // 2) monotonie indice (le prix ne doit pas baisser quand l'indice monte)
+      const inds=Object.keys(prices).map(k=>({k,n:parseFloat(String(k).replace(',','.')),p:parseFloat(prices[k])})).filter(x=>!isNaN(x.n)&&!isNaN(x.p)).sort((a,b)=>a.n-b.n);
+      for(let i=1;i<inds.length;i++){ if(inds[i].p < inds[i-1].p-0.01){ issues.push(`${label}${id} (${v.nom}): prix décroissant (${inds[i-1].k}=${inds[i-1].p}€ > ${inds[i].k}=${inds[i].p}€)`); break; } }
+    }
+  };
+  check(parsed.verres, '');
+  if(parsed.niveaux) for(const niv in parsed.niveaux) check(parsed.niveaux[niv], niv+' · ');
+  return issues;
+}
+// Prompt de CORRECTION : renvoie les prix problématiques à l'IA pour qu'elle se relise (sur les mêmes images).
+function _mkCorrectionPrompt(parsed, issues, reseauLabel){
+  return `Tu as extrait des PRIX DE VENTE réseau (${reseauLabel}) depuis les images ci-jointes, mais des INCOHÉRENCES ont été détectées :
+${issues.slice(0,40).map((s,i)=>`${i+1}. ${s}`).join('\n')}
+
+Prix actuellement extraits (JSON) :
+${JSON.stringify(parsed.verres||{}).slice(0,6000)}
+
+RELIS les images et CORRIGE uniquement les verres cités. Rappels :
+- Le prix de vente est TOUJOURS supérieur au coût d'achat (jamais de marge négative).
+- Le prix AUGMENTE avec l'indice (1.5 ≤ 1.6 ≤ 1.67 ≤ 1.74).
+- Un progressif coûte plus cher qu'un unifocal ; un Transitions plus cher que sa version claire.
+- Si une incohérence vient d'une mauvaise colonne lue (remboursement au lieu de prix de vente), reprends la bonne colonne.
+
+Réponds UNIQUEMENT le JSON des verres CORRIGÉS : {"verres":{"id":{"1.6":prix,...}, ...}} (uniquement les verres à corriger).`;
 }
 
 // Découpe un texte en morceaux d'environ "size" caractères (max "maxChunks" morceaux)
