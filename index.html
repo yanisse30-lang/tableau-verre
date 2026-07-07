@@ -5699,24 +5699,28 @@ RÈGLES STRICTES :
     let images = [];
     try{
       if(btn) btn.innerHTML = `<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Rendu des pages (vision)…`;
-      images = await _pdfRenderPages(pdf, pages, 2.0);
+      images = await _pdfRenderPages(pdf, pages, 1.6); // résolution modérée → requêtes plus légères
     }catch(e){ images = []; }
 
     const parsed = { reseau: reseauLabel };
     const _onWait = (s)=>{ if(btn) btn.innerHTML = `<i class="ti ti-clock"></i> Pause ${s}s (limite IA)…`; };
+    let _visionErr = null;
     if(images.length){
-      // VISION : envoie les pages en images, par lots (4 pages/appel)
-      const bs = 4, nB = Math.ceil(images.length/bs);
+      // VISION : pages en images, par petits lots (2/appel → requêtes légères). Un lot en échec n'annule pas les autres.
+      const bs = 2, nB = Math.ceil(images.length/bs);
       const sourceNote = `Les pages de la convention te sont fournies en IMAGES ci-jointes. LIS DIRECTEMENT les tableaux (colonnes/lignes alignées) — c'est fiable, ne devine pas.`;
       for(let b=0; b<nB; b++){
         const partInfo = nB>1 ? ` (lot ${b+1}/${nB})` : '';
         if(btn) btn.innerHTML = `<i class="ti ti-cpu" style="animation:spin 1s linear infinite"></i> Lecture vision${partInfo}…`;
         const batch = images.slice(b*bs, (b+1)*bs);
-        const raw = await _aiCall(claudeKey, mkPrompt(sourceNote, partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, images:batch, onWait:_onWait });
-        _mergeConvParsed(parsed, _normalizeConvParsed(_extractJson(raw)));
+        try{
+          const raw = await _aiCall(claudeKey, mkPrompt(sourceNote, partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, images:batch, onWait:_onWait });
+          _mergeConvParsed(parsed, _normalizeConvParsed(_extractJson(raw)));
+        }catch(e){ _visionErr = e.message; console.warn('Vision lot '+(b+1)+' échec:', e.message); }
       }
-    } else {
-      // REPLI TEXTE (si le rendu image échoue) : découpage en passes
+    }
+    // REPLI TEXTE : si le rendu image a échoué OU si la vision n'a rien produit d'exploitable.
+    if(!_hasConvData(parsed)){
       const chunks = _chunkText(fullText, 40000, 8);
       for(let ci=0; ci<chunks.length; ci++){
         const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
@@ -5917,6 +5921,15 @@ RELIS les images et CORRIGE uniquement les verres cités. Rappels :
 - Si une incohérence vient d'une mauvaise colonne lue (remboursement au lieu de prix de vente), reprends la bonne colonne.
 
 Réponds UNIQUEMENT le JSON des verres CORRIGÉS : {"verres":{"id":{"1.6":prix,...}, ...}} (uniquement les verres à corriger).`;
+}
+
+// Vrai si l'extraction contient des données exploitables (verres / niveaux / composants).
+function _hasConvData(p){
+  if(!p) return false;
+  if(p.verres && Object.keys(p.verres).length) return true;
+  if(p.niveaux && Object.keys(p.niveaux).length) return true;
+  const c=p.composants||{};
+  return !!(Object.keys(c.traitement||{}).length || Object.keys(c.materiau||{}).length || Object.keys(c.surface||{}).length);
 }
 
 // Découpe un texte en morceaux d'environ "size" caractères (max "maxChunks" morceaux)
@@ -9200,21 +9213,25 @@ RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de
     let fullText = pages.map(p=>textByPage[p]||'').join('\n');
     if(!fullText.trim()) fullText = Object.values(textByPage).join('\n');
     let images = [];
-    try{ _prog('Rendu des pages (vision)…'); images = await _pdfRenderPages(pdf, pages, 2.0); }catch(e){ images=[]; }
+    try{ _prog('Rendu des pages (vision)…'); images = await _pdfRenderPages(pdf, pages, 1.6); }catch(e){ images=[]; }
 
     const merged = {verres:[]};
     const _wait=(s)=>{ zone.innerHTML = `<div style="display:flex;align-items:center;gap:8px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:10px 14px;margin-top:10px;font-size:13px;color:#92400E;font-weight:600"><i class="ti ti-clock"></i> Limite IA — pause ${s}s puis reprise…</div>`; };
     if(images.length){
-      const bs=4, nB=Math.ceil(images.length/bs);
+      const bs=2, nB=Math.ceil(images.length/bs);
       const sourceNote = `Les pages du catalogue te sont fournies en IMAGES ci-jointes. LIS DIRECTEMENT les tableaux (colonnes alignées) — ne devine pas.`;
       for(let b=0;b<nB;b++){
         const partInfo = nB>1 ? ` (lot ${b+1}/${nB})` : '';
         _prog(`Lecture vision${partInfo}…`);
         const batch = images.slice(b*bs,(b+1)*bs);
-        const raw = await _aiCall(key, mkPrompt(sourceNote, partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, images:batch, onWait:_wait });
-        _mergeCatVerres(merged.verres, _extractJson(raw).verres);
+        try{
+          const raw = await _aiCall(key, mkPrompt(sourceNote, partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, images:batch, onWait:_wait });
+          _mergeCatVerres(merged.verres, _extractJson(raw).verres);
+        }catch(e){ console.warn('Vision catalogue lot '+(b+1)+' échec:', e.message); }
       }
-    } else {
+    }
+    // Repli texte si la vision n'a rien donné
+    if(!merged.verres.length){
       const chunks = _chunkText(fullText, 40000, 8);
       for(let ci=0; ci<chunks.length; ci++){
         const partInfo = chunks.length>1 ? ` (partie ${ci+1}/${chunks.length})` : '';
