@@ -4191,7 +4191,7 @@ let currentUser = null;
 
 // ─── SYNC CLOUD (clé API, conventions, prix) — partagé entre appareils ──
 // Table Supabase requise : app_config(id text primary key, value text, updated_at timestamptz)
-const _SYNC_PREFIXES = ['conv_parsed_','cat_ia_result_'];
+const _SYNC_PREFIXES = ['conv_parsed_','cat_ia_result_','conv_price_override_'];
 const _SYNC_EXACT = ['maneo_claude_key','maneo_prix','maneo_appel','maneo_tags','maneo_stock','maneo_accords','maneo_trait_choisi','maneo_antireflets'];
 function _isSyncKey(k){ return _SYNC_EXACT.includes(k) || _SYNC_PREFIXES.some(p=>k.startsWith(p)); }
 let _cloudSyncOK = false; // passe à true si la table app_config répond
@@ -6299,6 +6299,33 @@ function _convVerreOrigSupp(v, grid){
   return m ? {prix:m.prix, key:m.key} : null;
 }
 
+// ─── CORRECTION MANUELLE DES PRIX (prime sur l'IA, persistée + synchronisée) ───
+// Stockage : conv_price_override_<mutId> = { verreId: { indice: prix } }.
+function _priceOverride(mutId, vId, ind){
+  if(!mutId) return null;
+  const read = k => { try{ const o=JSON.parse(localStorage.getItem('conv_price_override_'+k)||'{}'); return (o[vId]!=null) ? _pickByIndex(o[vId], ind) : null; }catch(e){ return null; } };
+  let p = read(mutId);
+  if(p==null && mutId.includes('_')) p = read(mutId.split('_')[0]); // sous-contrat → repli parent
+  const n = parseFloat(p);
+  return (p!=null && !isNaN(n)) ? Math.round(n*100)/100 : null;
+}
+function _setPriceOverride(mutId, vId, ind, price){
+  const key='conv_price_override_'+mutId;
+  let o; try{ o=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){ o={}; }
+  const n = parseFloat(price);
+  if(price==null || price==='' || isNaN(n)){ if(o[vId]){ delete o[vId][ind]; if(!Object.keys(o[vId]).length) delete o[vId]; } }
+  else { o[vId]=o[vId]||{}; o[vId][ind]=Math.round(n*100)/100; }
+  localStorage.setItem(key, JSON.stringify(o));
+  if(typeof _cloudPush==='function') _cloudPush(key);
+}
+// Appelé depuis l'input du tableau de vérification.
+function _convEditPrice(mutId, vId, ind, val){
+  _setPriceOverride(mutId, vId, ind, val);
+  const el = document.getElementById('conv-ai-res-'+mutId) || document.getElementById('conv-body-'+mutId);
+  if(el){ const data=_getConvParsedExact(mutId); if(data) el.innerHTML = _renderConvAiCard(data, mutId); }
+  showToast('Prix corrigé — il prime sur l\'IA et est synchronisé sur tes appareils.');
+}
+
 function _calcConvComposants(v, ind, eqSph, parsed){
   const c = parsed && parsed.composants;
   if(!c) return null;
@@ -6398,6 +6425,9 @@ function _calcConvComposants(v, ind, eqSph, parsed){
 // Renvoie {prix, convData, source} ou null si aucun prix réseau pour cet indice.
 function _resolveReseauPrix(v, ind, eqSph, visionId, mutId){
   if(!mutId || !v.indices || v.indices[ind]==null) return null;
+  // 0) Correction manuelle de l'opticien = priorité absolue (prime sur l'IA).
+  const _ov = _priceOverride(mutId, v.id, ind);
+  if(_ov!=null) return {prix:_ov, convData:{venteConv:_ov, base:_ov, verreType:'produit', produitNom:v.id, verrieurKey:(v.marque||''), amincissement:0, precalibrage_max:null, photochromique_supp:null, traitDetail:['✎ Prix corrigé manuellement']}, source:'manuel'};
   const calc = parsed => {
     if(!parsed) return null;
     // Lookup tolérant à l'indice : catalogue = "1.60", l'IA renvoie souvent "1.6" → match numérique.
@@ -6477,15 +6507,20 @@ function _convVerrePreview(mutId){
       const achat=v.achats?.[i];
       const sousCout = (achat!=null && r.prix < achat);
       if(sousCout) nbSousCout++;
-      const col=sousCout?'#dc2626':(r.source==='IA'?'#059669':'#94A3B8');
-      return `<span style="white-space:nowrap">${i}: <strong style="color:${col}">${r.prix}€</strong>${sousCout?' <i class="ti ti-alert-triangle" style="font-size:10px;color:#dc2626" title="sous le coût d\'achat"></i>':''}</span>`;
+      const manuel = r.source==='manuel';
+      const col=sousCout?'#dc2626':(manuel?'#7C3AED':(r.source==='IA'?'#059669':'#94A3B8'));
+      // Prix ÉDITABLE : l'opticien peut corriger, la valeur prime sur l'IA et est synchronisée.
+      return `<span style="white-space:nowrap;display:inline-flex;align-items:center;gap:2px">${i}: <input type="number" step="0.01" value="${r.prix}" title="Corriger ce prix (prime sur l'IA, synchronisé)"
+        onchange="_convEditPrice('${mutId}','${v.id}','${i}',this.value)" onclick="event.stopPropagation()"
+        style="width:58px;text-align:right;font-weight:700;color:${col};background:${manuel?'#F5F3FF':'transparent'};border:1px solid ${sousCout?'#FCA5A5':(manuel?'#C4B5FD':'#E2E8F0')};border-radius:5px;padding:1px 4px;font-family:inherit;font-size:11px">€${sousCout?' <i class="ti ti-alert-triangle" style="font-size:10px;color:#dc2626" title="sous le coût d\'achat"></i>':''}${manuel?' <i class="ti ti-pencil" style="font-size:9px;color:#7C3AED" title="corrigé manuellement"></i>':''}</span>`;
     }).filter(Boolean);
     if(cells.length) rows.push(`<div class="conv-ai-row"><span class="conv-ai-lbl" style="font-size:11px">${v.nom}</span><span class="conv-ai-val" style="font-size:11px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">${cells.join('')}</span></div>`);
   });
   if(!rows.length) return '';
-  const legend = nbIA>0
+  const legend = (nbIA>0
     ? `<span style="color:#059669;font-weight:600">${nbIA} prix issus du PDF (vert)</span>${rows.length?` · <span style="color:#94A3B8">gris = grille par défaut</span>`:''}`
-    : `<span style="color:#D97706;font-weight:600">⚠ Aucun prix issu du PDF — l'IA n'a pas pu calculer, les prix gris viennent de la grille par défaut codée</span>`;
+    : `<span style="color:#D97706;font-weight:600">⚠ Aucun prix issu du PDF — l'IA n'a pas pu calculer, les prix gris viennent de la grille par défaut codée</span>`)
+    + ` · <span style="color:#7C3AED"><i class="ti ti-pencil" style="font-size:10px"></i> clique un prix pour le corriger (violet = corrigé, prioritaire, synchronisé)</span>`;
   // Avertissements de l'extraction (ex: grille progressif suspecte)
   const cp = _getConvParsedExact(mutId) || (mutId.includes('_') ? _getConvParsedExact(mutId.split('_')[0]) : null);
   const warns = (cp && Array.isArray(cp._warn)) ? cp._warn.slice() : [];
