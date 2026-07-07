@@ -4169,15 +4169,18 @@ const SB_URL = 'https://uvslxsmjzmyaoxxugjtn.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2c2x4c21qem15YW94eHVnanRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODQ1OTEsImV4cCI6MjA5NjE2MDU5MX0.f2A-am6gw1XK5Qm9IF6H7fW--T60x88XfhaH8w1bMks';
 
 async function sbFetch(path, options={}){
+  // IMPORTANT : on extrait options.headers AVANT le spread, sinon "...rest" ré-écraserait
+  // l'objet headers (avec apikey/Authorization) par les headers custom → "No API key found".
+  const { headers: optHeaders, ...rest } = options;
   const res = await fetch(SB_URL + path, {
+    ...rest,
     headers: {
       'apikey': SB_KEY,
       'Authorization': 'Bearer ' + SB_KEY,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation',
-      ...( options.headers || {})
-    },
-    ...options
+      ...(optHeaders || {})
+    }
   });
   if(!res.ok){
     const err = await res.text();
