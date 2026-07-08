@@ -9291,6 +9291,15 @@ RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de
       }
     }
 
+    // GARDE-FOU : une analyse VIDE ne doit pas écraser une bonne extraction précédente.
+    const _mappe = (merged.verres||[]).filter(it => !!_catFindVerre(it)).length;
+    if(!_mappe){
+      const prev = localStorage.getItem('cat_ia_result_'+type);
+      if(zone) zone.innerHTML = `<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400E"><strong>Aucun verre du catalogue identifié</strong><br><span style="font-size:12px">${prev?'Données précédentes conservées. ':''}Le PDF est peut-être un scan illisible, ou ne correspond pas à tes verriers (Nikon, Sign…). Réessaie.</span></div>`;
+      if(prev){ try{ _catRenderIAResults(type, JSON.parse(prev), false); }catch(e){} }
+      return;
+    }
+
     // Sauvegarder le résultat fusionné en cache
     localStorage.setItem('cat_ia_result_'+type, JSON.stringify(merged));
     _cloudPush('cat_ia_result_'+type);  // synchronise sur tous les appareils
