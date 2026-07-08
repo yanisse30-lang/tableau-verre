@@ -5908,6 +5908,19 @@ function _validateConvParsed(parsed){
   if(parsed.niveaux) for(const niv in parsed.niveaux) check(parsed.niveaux[niv], niv+' · ');
   return issues;
 }
+// Incohérences d'ACHAT du catalogue : achat ≥ prix de vente du verre (mauvaise colonne lue).
+function _catAchatIssues(verres){
+  const issues=[];
+  (verres||[]).forEach(item=>{
+    const v=_catFindVerre(item); if(!v || !item.achats) return;
+    for(const ind in item.achats){
+      const a=parseFloat(item.achats[ind]);
+      const vente = v.indices ? _pickByIndex(v.indices, ind) : null;
+      if(!isNaN(a) && vente!=null && a>=parseFloat(vente)) issues.push(`${v.id} (${v.nom}) ind ${ind}: achat ${a}€ ≥ vente ${vente}€`);
+    }
+  });
+  return issues;
+}
 // Prompt de CORRECTION : renvoie les prix problématiques à l'IA pour qu'elle se relise (sur les mêmes images).
 function _mkCorrectionPrompt(parsed, issues, reseauLabel){
   return `Tu as extrait des PRIX DE VENTE réseau (${reseauLabel}) depuis les images ci-jointes, mais des INCOHÉRENCES ont été détectées :
@@ -9288,6 +9301,20 @@ RÈGLES: Ne pas inventer · id = id catalogue existant · stock:true si verre de
           const raw = await _aiCall(key, mkPrompt(chunks[ci], partInfo), { model:'claude-sonnet-4-6', maxTokens:8000, onWait:_wait });
           _mergeCatVerres(merged.verres, _extractJson(raw).verres);
         }catch(e){ console.warn('Analyse catalogue texte partie '+(ci+1)+' échec:', e.message); }
+      }
+    }
+
+    // ── AUTO-CORRECTION : achat ≥ vente = mauvaise colonne lue (TTC/public au lieu du HT). L'IA relit. ──
+    if(type==='catalogue' || type==='tarif'){
+      const _catIssues = _catAchatIssues(merged.verres);
+      if(_catIssues.length && images.length){
+        _prog(`Auto-correction (${_catIssues.length} achat(s) incohérent(s))…`);
+        try{
+          const badJson = JSON.stringify((merged.verres||[]).filter(it=>{ const v=_catFindVerre(it); return v && it.achats && Object.keys(it.achats).some(ind=>{const a=parseFloat(it.achats[ind]),vt=v.indices?_pickByIndex(v.indices,ind):null; return !isNaN(a)&&vt!=null&&a>=parseFloat(vt);}); }).map(it=>({id:_catFindVerre(it).id, achats:it.achats}))).slice(0,4000);
+          const fixPrompt = `Tu as extrait des PRIX D'ACHAT HT depuis les images ci-jointes, mais ces valeurs sont ≥ au prix de VENTE du verre — impossible pour un achat (l'achat HT est toujours BIEN en-dessous de la vente). Tu as lu la mauvaise colonne (prix public / PVC / TTC) au lieu du prix NET opticien HT.\n\nIncohérences :\n${_catIssues.slice(0,40).join('\n')}\n\nAchats actuels (faux) :\n${badJson}\n\nRELIS les images et donne le VRAI prix d'ACHAT HT (colonne "prix net"/"tarif opticien"/"HT"/"PA") pour CES verres. Réponds UNIQUEMENT : {"verres":[{"id":"id_catalogue","achats":{"1.50":..}}]}`;
+          const rawFix = await _aiCall(key, fixPrompt, { model:'claude-sonnet-4-6', maxTokens:8000, images:images.slice(0,8), onWait:_wait });
+          _mergeCatVerres(merged.verres, _extractJson(rawFix).verres);
+        }catch(e){ console.warn('Auto-correction catalogue échec:', e.message); }
       }
     }
 
