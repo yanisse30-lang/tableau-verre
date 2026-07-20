@@ -1135,6 +1135,11 @@ select option{background:#fff;color:var(--txt-primary)}
           <span style="font-size:11px;color:var(--txt-muted)">Envoie conventions + prix vers le cloud (à faire depuis le PC à jour)</span>
         </div>
         <div id="cloud-resync-result" style="font-size:11px;margin-bottom:4px"></div>
+        <div style="display:flex;gap:8px;align-items:center;margin:6px 0">
+          <button onclick="_migrerAnciensPrix(this)" style="background:#7C3AED;color:#fff;border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap"><i class="ti ti-download"></i> Récupérer les anciens prix dans mon groupe</button>
+          <span style="font-size:11px;color:var(--txt-muted)">Une seule fois : importe les prix/conventions d'avant la mise à jour dans VOTRE groupe</span>
+        </div>
+        <div id="cloud-migrate-result" style="font-size:11px;margin-bottom:4px"></div>
         <div style="font-size:11px;color:var(--txt-muted)">Obtenez votre clé sur <strong>console.anthropic.com</strong> · ~0,01 € par PDF analysé</div>
       </div>
       <!-- ── SECTION LOGS DE L'APPLICATION — Superhôte uniquement ── -->
@@ -4191,46 +4196,72 @@ async function sbFetch(path, options={}){
 }
 
 let currentUser = null;
+// ─── ISOLATION PAR GROUPE (tenant) ─────────────────────────────
+// tenant = propriétaire des données de catalogue/prix.
+//  • admin ou superhôte → leur propre username (groupe indépendant, jamais d'héritage)
+//  • collaborateur      → owner (l'admin qui l'a créé) → hérite des prix de son admin
+// Les données du superhôte ne sont donc partagées avec personne.
+let currentTenant = null;
+function _computeTenant(u){
+  if(!u) return null;
+  const isSuper = (u.superhote === true || u.username === _SUPERHOTE_USER);
+  if(u.admin || isSuper) return u.username;      // groupe indépendant
+  return u.owner || u.username;                  // collaborateur → son admin
+}
 
-// ─── SYNC CLOUD (clé API, conventions, prix) — partagé entre appareils ──
+// ─── SYNC CLOUD (clé API, conventions, prix) — partagé DANS UN GROUPE ──
 // Table Supabase requise : app_config(id text primary key, value text, updated_at timestamptz)
+// Les id sont préfixés par le tenant : "<tenant>::<clé>" → isolation entre groupes.
 const _SYNC_PREFIXES = ['conv_parsed_','cat_ia_result_','conv_price_override_'];
 const _SYNC_EXACT = ['maneo_claude_key','maneo_prix','maneo_appel','maneo_tags','maneo_stock','maneo_accords','maneo_trait_choisi','maneo_antireflets'];
 function _isSyncKey(k){ return _SYNC_EXACT.includes(k) || _SYNC_PREFIXES.some(p=>k.startsWith(p)); }
 let _cloudSyncOK = false; // passe à true si la table app_config répond
+
+// Préfixe l'id cloud par le tenant courant → "<tenant>::<clé>". Isolation entre groupes.
+function _cloudId(key){ return (currentTenant || '_anon') + '::' + key; }
 
 async function _cloudUpsert(key, val){
   try{
     await sbFetch('/rest/v1/app_config?on_conflict=id', {
       method:'POST',
       headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-      body: JSON.stringify({ id:key, value: (val==null?'':String(val)), updated_at:new Date().toISOString() })
+      body: JSON.stringify({ id:_cloudId(key), value: (val==null?'':String(val)), updated_at:new Date().toISOString() })
     });
     _cloudSyncOK = true;
   }catch(e){ /* table absente / hors-ligne → silencieux */ }
 }
 async function _cloudDelete(key){
-  try{ await sbFetch('/rest/v1/app_config?id=eq.'+encodeURIComponent(key), {method:'DELETE', headers:{'Prefer':'return=minimal'}}); }catch(e){}
+  try{ await sbFetch('/rest/v1/app_config?id=eq.'+encodeURIComponent(_cloudId(key)), {method:'DELETE', headers:{'Prefer':'return=minimal'}}); }catch(e){}
 }
 // Pousse la valeur localStorage actuelle d'une clé vers le cloud (ou la supprime si absente)
 function _cloudPush(key){
   const v = localStorage.getItem(key);
   if(v==null) _cloudDelete(key); else _cloudUpsert(key, v);
 }
-// Récupère toute la config cloud et l'écrit en localStorage. Retourne le nb de clés, ou -1 si indisponible.
+// Récupère la config cloud DU GROUPE COURANT et l'écrit en localStorage (clés nues).
+// Ne charge que les lignes préfixées "<tenant>::". Retourne le nb de clés, ou -1 si indisponible.
 async function _cloudLoadAll(){
   try{
     const rows = await sbFetch('/rest/v1/app_config?select=id,value');
+    const pref = (currentTenant || '_anon') + '::';
     let n=0;
     (rows||[]).forEach(r=>{
-      if(!r || !r.id || !_isSyncKey(r.id)) return;
-      if(r.value==null || r.value==='') localStorage.removeItem(r.id);
-      else localStorage.setItem(r.id, r.value);
+      if(!r || !r.id || r.id.indexOf(pref) !== 0) return;   // autre groupe → ignoré
+      const bareKey = r.id.slice(pref.length);
+      if(!_isSyncKey(bareKey)) return;
+      if(r.value==null || r.value==='') localStorage.removeItem(bareKey);
+      else localStorage.setItem(bareKey, r.value);
       n++;
     });
     _cloudSyncOK = true;
     return n;
   }catch(e){ return -1; }
+}
+// Purge du localStorage toutes les clés de synchro (au login/logout) → pas de fuite entre comptes.
+function _purgeLocalSyncKeys(){
+  const keys=[];
+  for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && _isSyncKey(k)) keys.push(k); }
+  keys.forEach(k=>localStorage.removeItem(k));
 }
 // Toutes les clés sync présentes en localStorage (exactes + préfixées).
 function _allLocalSyncKeys(){
@@ -4262,6 +4293,34 @@ async function _cloudResync(btn){
   _cloudSyncOK=true; _refreshClaudeKeyStatus();
   setRes(`<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 10px;color:#166534"><strong>✓ Synchronisé.</strong> ${ok} élément(s) envoyé(s) vers le cloud (conventions, prix, traitements…). Sur l'autre PC : déconnecte-toi puis reconnecte-toi pour récupérer ces données.</div>`);
   if(btn){ btn.disabled=false; btn.innerHTML=btn.dataset._t; }
+}
+
+// Migration opt-in : importe les anciennes données GLOBALES (id sans préfixe "::", d'avant
+// l'isolation par groupe) dans le groupe de l'admin courant. Ne supprime jamais l'ancien.
+async function _migrerAnciensPrix(btn){
+  const res=document.getElementById('cloud-migrate-result');
+  const setRes=(html)=>{ if(res) res.innerHTML=html; };
+  if(!currentUser || !currentUser.admin){ setRes('<div style="color:#991B1B">Réservé aux administrateurs.</div>'); return; }
+  if(btn){ btn.disabled=true; btn.dataset._t=btn.innerHTML; btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Import…'; }
+  try{
+    const rows = await sbFetch('/rest/v1/app_config?select=id,value');
+    let ok=0;
+    for(const r of (rows||[])){
+      if(!r || !r.id || r.id.indexOf('::') !== -1) continue;   // ignorer les données déjà par-groupe
+      if(!_isSyncKey(r.id)) continue;                           // ne garder que prix/conventions/tags…
+      localStorage.setItem(r.id, r.value==null?'':r.value);     // écrit la clé nue en local
+      await _cloudUpsert(r.id, r.value);                        // repousse sous "<monTenant>::clé"
+      ok++;
+    }
+    try{ loadSavedPrix(); }catch(e){}
+    try{ renderVerresEdit(); }catch(e){}
+    if(ok>0) setRes(`<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 10px;color:#166534"><strong>✓ ${ok} élément(s) importé(s)</strong> dans votre groupe (prix, conventions, traitements). Ils sont maintenant privés à votre compte.</div>`);
+    else setRes(`<div style="background:#FEF9C3;border:1px solid #FDE68A;border-radius:8px;padding:8px 10px;color:#854D0E">Aucune ancienne donnée globale à importer (déjà migré, ou rien à récupérer).</div>`);
+  }catch(e){
+    setRes(`<div style="color:#991B1B">Erreur : ${e.message}</div>`);
+  }finally{
+    if(btn){ btn.disabled=false; btn.innerHTML=btn.dataset._t; }
+  }
 }
 
 // ─── SUPERHOTE ─────────────────────────────────────────────────
@@ -4780,7 +4839,9 @@ async function doLogin(){
     const data = await sbFetch(`/rest/v1/comptes?username=eq.${encodeURIComponent(u)}&password=eq.${encodeURIComponent(p)}&select=*`);
     if(data && data.length > 0){
       currentUser = data[0];
-      // Récupère la config partagée (clé API, conventions, prix) depuis le cloud → tous les appareils alignés
+      currentTenant = _computeTenant(currentUser);   // groupe = admin propriétaire (collab hérite)
+      _purgeLocalSyncKeys();                          // repart propre : aucune donnée d'un autre compte
+      // Récupère la config du GROUPE (clé API, conventions, prix) depuis le cloud → appareils alignés
       const _nSync = await _cloudLoadAll();
       if(_nSync > 0){ try{ loadSavedPrix(); }catch(e){} }
       btn.innerHTML = '<i class="ti ti-check"></i> Connecté !';
@@ -4900,6 +4961,15 @@ async function addCompte(){
   if(!u||!n||!p){ showAdminMsg('Remplissez tous les champs.','err'); return; }
   if(p.length<6){ showAdminMsg('Mot de passe trop court (6 caractères min).','err'); return; }
   const isAdmin = _newRole === 'admin';
+  // Le superhôte ne crée que des comptes ADMIN : un collaborateur du superhôte hériterait
+  // de ses données, ce qui est interdit (groupe superhôte totalement isolé).
+  if(isSuperhote() && !isAdmin){
+    showAdminMsg('Le superhôte ne peut créer que des comptes administrateur. Un administrateur crée ensuite ses propres collaborateurs.','err');
+    return;
+  }
+  // owner = propriétaire du groupe de données du nouveau compte :
+  //  • collaborateur → l'admin qui le crée (héritage des prix)  • admin → lui-même (groupe indépendant)
+  const owner = isAdmin ? u : currentUser.username;
   const btn = document.querySelector('.btn-admin-add');
   btn.disabled=true;
   btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Création...';
@@ -4907,7 +4977,7 @@ async function addCompte(){
     // POST avec Prefer:return=representation → récupère l'id Supabase
     const created = await sbFetch('/rest/v1/comptes', {
       method:'POST',
-      body: JSON.stringify({username:u, password:p, nom:n, admin:isAdmin})
+      body: JSON.stringify({username:u, password:p, nom:n, admin:isAdmin, owner:owner})
     });
     const supabaseId = Array.isArray(created) ? (created[0]?.id||null) : (created?.id||null);
 
@@ -4980,7 +5050,9 @@ function doLogout(){
   const cnBell = document.getElementById('cn-bell');
   if(cnBell) cnBell.style.display='none';
   closeCompteNotifPanel();
+  _purgeLocalSyncKeys();          // ne pas laisser les données du groupe au compte suivant
   currentUser = null;
+  currentTenant = null;
   _shFirstLoad = true;
   _shSeenIds.clear();
   document.getElementById('login-user').value='';
