@@ -4927,16 +4927,60 @@ async function renderAdminListe(){
   liste.innerHTML='<div style="text-align:center;padding:16px;color:#aaa"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite;font-size:20px"></i></div>';
   try{
     const comptes = await sbFetch('/rest/v1/comptes?select=*&order=created_at.asc');
-    liste.innerHTML = comptes.map(c=>`
+    const admins = comptes.filter(c=>c.admin);
+    const sh = isSuperhote();
+    liste.innerHTML = comptes.map(c=>{
+      // Rattachement collaborateur → admin : menu réservé au superhôte, sur les collaborateurs.
+      let ownerUI = '';
+      if(!c.admin){
+        if(sh){
+          const opts = admins.map(a=>`<option value="${a.username}" ${c.owner===a.username?'selected':''}>${a.nom} (${a.username})</option>`).join('');
+          ownerUI = `<div style="margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--txt-muted)"><i class="ti ti-link" style="font-size:11px"></i> Rattaché à :</span>
+            <select onchange="_setOwner('${c.username}', this.value, this)" style="font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--bdr-light);font-family:inherit;background:#fff">
+              <option value="" ${!c.owner?'selected':''}>— aucun (voit Nikon par défaut) —</option>
+              ${opts}
+            </select>
+            <span class="owner-save-state" style="font-size:11px"></span>
+          </div>`;
+        } else if(c.owner){
+          ownerUI = `<div style="margin-top:4px;font-size:11px;color:var(--txt-muted)">Groupe : ${c.owner}</div>`;
+        }
+      }
+      return `
       <div class="admin-compte">
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="admin-compte-info"><i class="ti ti-user" style="font-size:13px;margin-right:4px"></i>${c.nom} <span style="color:#aaa;font-weight:400">(${c.username})</span></div>
           <div class="admin-compte-role">${c.admin?'<span style="color:#7C3AED;font-weight:700">👑 Administrateur</span>':'<span style="color:#185FA5;font-weight:600">👤 Collaborateur</span>'}</div>
+          ${ownerUI}
         </div>
-        ${isSuperhote()?`<button class="btn-del" onclick="delCompte('${c.id}','${c.username}')" title="Supprimer"><i class="ti ti-trash"></i> Supprimer</button>`:''}
-      </div>`).join('');
+        ${sh?`<button class="btn-del" onclick="delCompte('${c.id}','${c.username}')" title="Supprimer"><i class="ti ti-trash"></i> Supprimer</button>`:''}
+      </div>`;
+    }).join('');
   } catch(e) {
     liste.innerHTML='<div style="color:#ff8080;font-size:13px;padding:10px">Erreur de chargement.</div>';
+  }
+}
+
+// Rattache un collaborateur à un admin (colonne owner). Réservé au superhôte.
+async function _setOwner(username, owner, sel){
+  if(!isSuperhote()) return;
+  const stateEl = sel && sel.parentElement ? sel.parentElement.querySelector('.owner-save-state') : null;
+  const setState = (html)=>{ if(stateEl) stateEl.innerHTML = html; };
+  setState('<i class="ti ti-loader-2" style="animation:spin 1s linear infinite;color:#7C3AED"></i>');
+  try{
+    await sbFetch('/rest/v1/comptes?username=eq.'+encodeURIComponent(username), {
+      method:'PATCH',
+      headers:{'Prefer':'return=minimal'},
+      body: JSON.stringify({ owner: owner || null })
+    });
+    setState('<span style="color:#166534">✓ enregistré</span>');
+    showToast(owner
+      ? `"${username}" rattaché à "${owner}". Le collaborateur héritera de ses prix à sa prochaine connexion.`
+      : `"${username}" détaché — il verra le catalogue Nikon par défaut.`, 4500, true);
+  }catch(e){
+    setState('<span style="color:#991B1B">échec</span>');
+    showToast('Erreur : '+e.message, 5000);
   }
 }
 
